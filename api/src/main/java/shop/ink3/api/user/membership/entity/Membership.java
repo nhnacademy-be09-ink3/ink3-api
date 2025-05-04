@@ -38,4 +38,18 @@ public class Membership {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public void update(String name, Integer conditionAmount, Integer pointRate) {
+        this.name = name;
+        this.conditionAmount = conditionAmount;
+        this.pointRate = pointRate;
+    }
+
+    public void activate() {
+        this.isActive = true;
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+    }
 }
