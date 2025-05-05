@@ -2,6 +2,7 @@ package shop.ink3.api.user.membership.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ import shop.ink3.api.user.membership.dto.MembershipCreateRequest;
 import shop.ink3.api.user.membership.dto.MembershipResponse;
 import shop.ink3.api.user.membership.dto.MembershipUpdateRequest;
 import shop.ink3.api.user.membership.entity.Membership;
+import shop.ink3.api.user.membership.exception.DefaultMembershipNotFoundException;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
 
@@ -41,6 +43,7 @@ class MembershipServiceTest {
                 "test",
                 1,
                 1,
+                true,
                 true,
                 LocalDateTime.now()
         );
@@ -65,6 +68,7 @@ class MembershipServiceTest {
                         1,
                         1,
                         true,
+                        true,
                         LocalDateTime.now()
                 ),
                 new Membership(
@@ -73,10 +77,10 @@ class MembershipServiceTest {
                         1,
                         1,
                         true,
+                        false,
                         LocalDateTime.now()
                 )
         );
-
         Pageable pageable = PageRequest.of(0, 2);
         Page<Membership> page = new PageImpl<>(membershipList, pageable, membershipList.size());
 
@@ -92,15 +96,43 @@ class MembershipServiceTest {
     }
 
     @Test
-    void createMembership() {
+    void getDefaultMembership() {
+        Membership membership = new Membership(
+                1L,
+                "test",
+                1,
+                1,
+                true,
+                true,
+                LocalDateTime.now()
+        );
+        when(membershipRepository.findByIsDefault(true)).thenReturn(Optional.of(membership));
+        MembershipResponse response = membershipService.getDefaultMembership();
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(MembershipResponse.from(membership), response);
+    }
+
+    @Test
+    void getDefaultMembershipWithNotFound() {
+        when(membershipRepository.findByIsDefault(true)).thenReturn(Optional.empty());
+        Assertions.assertThrows(
+                DefaultMembershipNotFoundException.class,
+                () -> membershipService.getDefaultMembership()
+        );
+    }
+
+    @Test
+    void createMembershipWithDefaultMembership() {
         Membership membership = new Membership(
                 1L,
                 "test",
                 1,
                 1,
                 false,
+                false,
                 LocalDateTime.now()
         );
+        when(membershipRepository.existsByIsDefault(true)).thenReturn(true);
         when(membershipRepository.save(any())).thenReturn(membership);
         MembershipResponse membershipResponse = membershipService.createMembership(
                 new MembershipCreateRequest(
@@ -114,12 +146,41 @@ class MembershipServiceTest {
     }
 
     @Test
+    void createMembershipWithoutDefaultMembership() {
+        Membership membership = new Membership(
+                1L,
+                "test",
+                1,
+                1,
+                false,
+                false,
+                LocalDateTime.now()
+        );
+        when(membershipRepository.existsByIsDefault(true)).thenReturn(false);
+        when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        MembershipResponse membershipResponse = membershipService.createMembership(
+                new MembershipCreateRequest(
+                        "test",
+                        1,
+                        1
+                )
+        );
+        Assertions.assertNotNull(membershipResponse);
+        Assertions.assertEquals(membership.getName(), membershipResponse.name());
+        Assertions.assertEquals(membership.getConditionAmount(), membershipResponse.conditionAmount());
+        Assertions.assertEquals(membership.getPointRate(), membershipResponse.pointRate());
+        Assertions.assertEquals(true, membershipResponse.isActive());
+        Assertions.assertEquals(true, membershipResponse.isDefault());
+    }
+
+    @Test
     void updateMembership() {
         Membership membership = new Membership(
                 1L,
                 "test",
                 1,
                 1,
+                true,
                 true,
                 LocalDateTime.now()
         );
@@ -164,6 +225,7 @@ class MembershipServiceTest {
                 1,
                 1,
                 false,
+                false,
                 LocalDateTime.now()
         );
 
@@ -189,6 +251,7 @@ class MembershipServiceTest {
                 1,
                 1,
                 true,
+                false,
                 LocalDateTime.now()
         );
 
@@ -201,9 +264,97 @@ class MembershipServiceTest {
     }
 
     @Test
+    void deactivateDefaultMembership() {
+        Membership membership = new Membership(
+                1L,
+                "test",
+                1,
+                1,
+                true,
+                true,
+                LocalDateTime.now()
+        );
+
+        when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
+
+        Assertions.assertThrows(IllegalStateException.class, () -> membershipService.deactivateMembership(1L));
+    }
+
+    @Test
     void deactivateMembershipWithNotFound() {
         when(membershipRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(MembershipNotFoundException.class, () -> membershipService.deactivateMembership(1L));
+    }
+
+    @Test
+    void setDefaultMembershipWithDefaultMembership() {
+        Membership defaultMembership = new Membership(
+                1L,
+                "test",
+                1,
+                1,
+                true,
+                true,
+                LocalDateTime.now()
+        );
+        Membership membership = new Membership(
+                2L,
+                "test",
+                1,
+                1,
+                true,
+                false,
+                LocalDateTime.now()
+        );
+        when(membershipRepository.findById(2L)).thenReturn(Optional.of(membership));
+        when(membershipRepository.findByIsDefault(true)).thenReturn(Optional.of(defaultMembership));
+        membershipService.setDefaultMembership(2L);
+        Assertions.assertFalse(defaultMembership.getIsDefault());
+        Assertions.assertTrue(membership.getIsDefault());
+    }
+
+    @Test
+    void setDefaultMembershipWithoutDefaultMembership() {
+        Membership membership = new Membership(
+                1L,
+                "test",
+                1,
+                1,
+                true,
+                false,
+                LocalDateTime.now()
+        );
+        when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
+        when(membershipRepository.findByIsDefault(true)).thenReturn(Optional.empty());
+        membershipService.setDefaultMembership(1L);
+        Assertions.assertTrue(membership.getIsDefault());
+    }
+
+    @Test
+    void setDefaultMembershipWithDefaultMembershipEqualTargetMembership() {
+        Membership membership = new Membership(
+                1L,
+                "test",
+                1,
+                1,
+                true,
+                true,
+                LocalDateTime.now()
+        );
+
+        when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
+        when(membershipRepository.findByIsDefault(true)).thenReturn(Optional.of(membership));
+
+        membershipService.setDefaultMembership(1L);
+
+        Assertions.assertTrue(membership.getIsDefault());
+        verify(membershipRepository, times(1)).save(membership);
+    }
+
+    @Test
+    void setDefaultMembershipWithNotFound() {
+        when(membershipRepository.findById(1L)).thenReturn(Optional.empty());
+        Assertions.assertThrows(MembershipNotFoundException.class, () -> membershipService.setDefaultMembership(1L));
     }
 
     @Test
@@ -212,6 +363,13 @@ class MembershipServiceTest {
         when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
         membershipService.deleteMembership(1L);
         verify(membershipRepository).delete(membership);
+    }
+
+    @Test
+    void deleteDefaultMembership() {
+        Membership membership = Membership.builder().id(1L).isDefault(true).build();
+        when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
+        Assertions.assertThrows(IllegalStateException.class, () -> membershipService.deleteMembership(1L));
     }
 
     @Test

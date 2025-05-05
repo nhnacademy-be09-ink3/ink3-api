@@ -71,4 +71,40 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public void update(String password, String name, String email, String phone, LocalDate birthday) {
+        this.password = password;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.birthday = birthday;
+    }
+
+    public void activate() {
+        this.status = UserStatus.ACTIVE;
+    }
+
+    public void markAsDormant() {
+        this.status = UserStatus.DORMANT;
+    }
+
+    public void withdraw() {
+        this.status = UserStatus.WITHDRAWN;
+    }
+
+    public void earnPoint(int amount) {
+        this.point += amount;
+    }
+
+    public void usePoint(int amount) {
+        this.point -= amount;
+    }
+
+    public void updateMembership(Membership membership) {
+        this.membership = membership;
+    }
+
+    public void updateLastLoginAt(LocalDateTime time) {
+        this.lastLoginAt = time;
+    }
 }

@@ -1,7 +1,9 @@
 package shop.ink3.api.user.user.exception;
 
-public class UserNotFoundException extends RuntimeException {
+import shop.ink3.api.common.exception.NotFoundException;
+
+public class UserNotFoundException extends NotFoundException {
     public UserNotFoundException(long userId) {
-        super("User Not Found: %d".formatted(userId));
+        super("User not found. ID: %d".formatted(userId));
     }
 }

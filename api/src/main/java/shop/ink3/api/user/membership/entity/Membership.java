@@ -34,7 +34,12 @@ public class Membership {
     private Integer pointRate;
 
     @Column(nullable = false)
-    private Boolean isActive;
+    @Builder.Default
+    private Boolean isActive = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isDefault = false;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -51,5 +56,13 @@ public class Membership {
 
     public void deactivate() {
         this.isActive = false;
+    }
+
+    public void markAsDefault() {
+        this.isDefault = true;
+    }
+
+    public void unmarkAsDefault() {
+        this.isDefault = false;
     }
 }

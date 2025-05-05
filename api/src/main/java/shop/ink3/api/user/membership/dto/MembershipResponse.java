@@ -9,6 +9,7 @@ public record MembershipResponse(
         Integer conditionAmount,
         Integer pointRate,
         Boolean isActive,
+        Boolean isDefault,
         LocalDateTime createdAt
 ) {
     public static MembershipResponse from(Membership membership) {
@@ -18,6 +19,7 @@ public record MembershipResponse(
                 membership.getConditionAmount(),
                 membership.getPointRate(),
                 membership.getIsActive(),
+                membership.getIsDefault(),
                 membership.getCreatedAt()
         );
     }

@@ -30,6 +30,7 @@ import shop.ink3.api.user.membership.dto.MembershipCreateRequest;
 import shop.ink3.api.user.membership.dto.MembershipResponse;
 import shop.ink3.api.user.membership.dto.MembershipUpdateRequest;
 import shop.ink3.api.user.membership.entity.Membership;
+import shop.ink3.api.user.membership.exception.DefaultMembershipNotFoundException;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.service.MembershipService;
 
@@ -52,6 +53,7 @@ class MembershipControllerTest {
                 .conditionAmount(1)
                 .pointRate(1)
                 .isActive(true)
+                .isDefault(true)
                 .createdAt(LocalDateTime.now())
                 .build();
         MembershipResponse response = MembershipResponse.from(membership);
@@ -67,6 +69,7 @@ class MembershipControllerTest {
                 .andExpect(jsonPath("$.data.conditionAmount").value(1))
                 .andExpect(jsonPath("$.data.pointRate").value(1))
                 .andExpect(jsonPath("$.data.isActive").value(true))
+                .andExpect(jsonPath("$.data.isDefault").value(true))
                 .andDo(print());
     }
 
@@ -87,8 +90,8 @@ class MembershipControllerTest {
     void getMemberships() throws Exception {
         PageResponse<MembershipResponse> pageResponse = new PageResponse<>(
                 List.of(
-                        new MembershipResponse(1L, "test1", 1, 1, true, LocalDateTime.now()),
-                        new MembershipResponse(2L, "test2", 2, 2, false, LocalDateTime.now())
+                        new MembershipResponse(1L, "test1", 1, 1, true, true, LocalDateTime.now()),
+                        new MembershipResponse(2L, "test2", 2, 2, false, false, LocalDateTime.now())
                 ),
                 0, 2, 2L, 1, false, false
         );
@@ -110,6 +113,47 @@ class MembershipControllerTest {
     }
 
     @Test
+    void getDefaultMembership() throws Exception {
+        Membership membership = Membership.builder()
+                .id(1L)
+                .name("test")
+                .conditionAmount(1)
+                .pointRate(1)
+                .isActive(true)
+                .isDefault(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        MembershipResponse response = MembershipResponse.from(membership);
+        when(membershipService.getDefaultMembership()).thenReturn(response);
+        mockMvc.perform(get("/memberships/default"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data.id").value(1L))
+                .andExpect(jsonPath("$.data.name").value("test"))
+                .andExpect(jsonPath("$.data.conditionAmount").value(1))
+                .andExpect(jsonPath("$.data.pointRate").value(1))
+                .andExpect(jsonPath("$.data.isActive").value(true))
+                .andExpect(jsonPath("$.data.isDefault").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    void getDefaultMembershipWithNotFound() throws Exception {
+        when(membershipService.getDefaultMembership()).thenThrow(new DefaultMembershipNotFoundException());
+        mockMvc.perform(get("/memberships/default"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andDo(print());
+    }
+
+    @Test
     void createMembership() throws Exception {
         MembershipCreateRequest request = new MembershipCreateRequest("test", 1, 1);
         Membership membership = Membership.builder()
@@ -118,6 +162,7 @@ class MembershipControllerTest {
                 .conditionAmount(1)
                 .pointRate(1)
                 .isActive(false)
+                .isDefault(false)
                 .createdAt(LocalDateTime.now())
                 .build();
         MembershipResponse response = MembershipResponse.from(membership);
@@ -135,6 +180,7 @@ class MembershipControllerTest {
                 .andExpect(jsonPath("$.data.conditionAmount").value(1))
                 .andExpect(jsonPath("$.data.pointRate").value(1))
                 .andExpect(jsonPath("$.data.isActive").value(false))
+                .andExpect(jsonPath("$.data.isDefault").value(false))
                 .andDo(print());
     }
 
@@ -187,12 +233,7 @@ class MembershipControllerTest {
     void activateMembership() throws Exception {
         doNothing().when(membershipService).activateMembership(1L);
         mockMvc.perform(patch("/memberships/1/activate"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andExpect(status().isNoContent())
                 .andDo(print());
     }
 
@@ -211,10 +252,20 @@ class MembershipControllerTest {
 
     @Test
     void deactivateMembership() throws Exception {
+        doNothing().when(membershipService).deactivateMembership(1L);
         mockMvc.perform(patch("/memberships/1/deactivate"))
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
+                .andDo(print());
+    }
+
+    @Test
+    void deactivateDefaultMembership() throws Exception {
+        doThrow(new IllegalStateException("Default membership cannot be deactivated.")).when(membershipService)
+                .deactivateMembership(1L);
+        mockMvc.perform(patch("/memberships/1/deactivate"))
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
@@ -239,8 +290,17 @@ class MembershipControllerTest {
         doNothing().when(membershipService).deleteMembership(1L);
         mockMvc.perform(delete("/memberships/1"))
                 .andExpect(status().isNoContent())
+                .andDo(print());
+    }
+
+    @Test
+    void deleteDefaultMembership() throws Exception {
+        doThrow(new IllegalStateException("Default membership cannot be deleted.")).when(membershipService)
+                .deleteMembership(1L);
+        mockMvc.perform(delete("/memberships/1"))
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.NO_CONTENT.value()))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.data").value(Matchers.nullValue()))

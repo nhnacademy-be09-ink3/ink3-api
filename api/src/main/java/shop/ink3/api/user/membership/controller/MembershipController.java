@@ -28,16 +28,17 @@ public class MembershipController {
 
     @GetMapping("/{membershipId}")
     public ResponseEntity<CommonResponse<MembershipResponse>> getMembership(@PathVariable long membershipId) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(CommonResponse.success(membershipService.getMembership(membershipId)));
+        return ResponseEntity.ok(CommonResponse.success(membershipService.getMembership(membershipId)));
     }
 
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<MembershipResponse>>> getMemberships(Pageable pageable) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(CommonResponse.success(membershipService.getMemberships(pageable)));
+        return ResponseEntity.ok(CommonResponse.success(membershipService.getMemberships(pageable)));
+    }
+
+    @GetMapping("/default")
+    public ResponseEntity<CommonResponse<MembershipResponse>> getDefaultMembership() {
+        return ResponseEntity.ok(CommonResponse.success(membershipService.getDefaultMembership()));
     }
 
     @PostMapping
@@ -53,26 +54,30 @@ public class MembershipController {
             @PathVariable long membershipId,
             @RequestBody MembershipUpdateRequest request
     ) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(CommonResponse.update(membershipService.updateMembership(membershipId, request)));
+        return ResponseEntity.ok(CommonResponse.update(membershipService.updateMembership(membershipId, request)));
     }
 
     @PatchMapping("/{membershipId}/activate")
-    public ResponseEntity<CommonResponse<Void>> activateMembership(@PathVariable long membershipId) {
+    public ResponseEntity<Void> activateMembership(@PathVariable long membershipId) {
         membershipService.activateMembership(membershipId);
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success(null));
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{membershipId}/deactivate")
-    public ResponseEntity<CommonResponse<Void>> deactivateMembership(@PathVariable long membershipId) {
+    public ResponseEntity<Void> deactivateMembership(@PathVariable long membershipId) {
         membershipService.deactivateMembership(membershipId);
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success(null));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{membershipId}/default")
+    public ResponseEntity<Void> setDefaultMembership(@PathVariable long membershipId) {
+        membershipService.setDefaultMembership(membershipId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{membershipId}")
-    public ResponseEntity<CommonResponse<Void>> deleteMembership(@PathVariable long membershipId) {
+    public ResponseEntity<Void> deleteMembership(@PathVariable long membershipId) {
         membershipService.deleteMembership(membershipId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.delete(null));
+        return ResponseEntity.noContent().build();
     }
 }

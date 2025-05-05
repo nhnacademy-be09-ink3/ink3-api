@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ResponseMessage {
     SUCCESS("Request processed successfully."),
     CREATED("Resource created successfully."),
-    UPDATED("Resource updated successfully."),
-    DELETED("Resource deleted successfully.");
+    UPDATED("Resource updated successfully.");
 
     private final String message;
 }
