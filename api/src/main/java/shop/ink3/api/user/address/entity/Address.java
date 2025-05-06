@@ -48,4 +48,26 @@ public class Address {
 
     @Column(nullable = false)
     private Boolean isDefault;
+
+    public void update(
+            String name,
+            String postalCode,
+            String defaultAddress,
+            String detailAddress,
+            String extraAddress
+    ) {
+        this.name = name;
+        this.postalCode = postalCode;
+        this.defaultAddress = defaultAddress;
+        this.detailAddress = detailAddress;
+        this.extraAddress = extraAddress;
+    }
+
+    public void markAsDefault() {
+        this.isDefault = true;
+    }
+
+    public void unmarkAsDefault() {
+        this.isDefault = false;
+    }
 }
