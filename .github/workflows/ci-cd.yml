@@ -61,16 +61,16 @@ jobs:
       # 4. 백그라운드로 애플리케이션 실행
       - name: Run application in background
         run: |
-          nohup java -jar target/ink3-eureka-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+          nohup java -jar target/api-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
           echo $! > app.pid
 
       # 5. 기동 대기
       - name: Wait for application to start
-        run: sleep 30
+        run: sleep 15
 
       # 6. 헬스 체크 엔드포인트 호출
       - name: Check health endpoint
-        run: curl --fail http://localhost:8080/actuator/health
+        run: curl --fail http://localhost:10260/actuator/health
 
       # 7. 애플리케이션 종료
       - name: Stop application
@@ -108,7 +108,7 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
           source: "target/*.jar"
-          target: "~/eureka/"
+          target: "~/api/"
 
       - name: Run deploy.sh on server
         uses: appleboy/ssh-action@v0.1.7
@@ -118,6 +118,6 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/eureka
+            cd ~/api
             nohup ./deploy.sh > deploy.log 2>&1 &
             exit 0
