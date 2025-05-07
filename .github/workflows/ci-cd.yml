@@ -75,7 +75,6 @@ jobs:
 
 
 
-
   deploy:
     name: Deploy to Linux Server
     runs-on: ubuntu-latest
@@ -94,8 +93,13 @@ jobs:
       - name: Build JAR (skip tests)
         run: mvn package -DskipTests=true -B
 
-      - name: Verify JAR file
-        run: ls -lh api/target/*.jar
+      - name: Prepare common target directory
+        run: |
+          mkdir -p ./target
+          cp api/target/*.jar ./target/
+
+      - name: Verify JAR in common target
+        run: ls -lh ./target/*.jar
 
       - name: Copy JAR to server
         uses: appleboy/scp-action@v0.1.4
@@ -104,7 +108,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
-          source: "api/target/*.jar"
+          source: "target/*.jar"
           target: "~/api/"
 
       - name: Run deploy.sh on server
@@ -118,4 +122,3 @@ jobs:
             cd ~/api
             nohup ./deploy.sh > deploy.log 2>&1 &
             exit 0
-
