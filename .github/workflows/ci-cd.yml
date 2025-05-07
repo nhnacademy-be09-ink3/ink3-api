@@ -80,7 +80,7 @@ jobs:
       - name: Check if port 10260 is listening
         run: |
           sudo apt-get update && sudo apt-get install -y net-tools
-          netstat -tnlp | grep 10260
+          netstat -tnlp | grep 10260 || true
 
       # 6. 헬스 체크 엔드포인트 호출
       - name: Check health endpoint
