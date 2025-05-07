@@ -67,10 +67,13 @@ jobs:
       - name: Run application in background  
         run: |
           nohup java -jar target/api-0.0.1-SNAPSHOT.jar \
+            --spring.main.allow-bean-definition-overriding=true \
+            --spring.config.additional-location=classpath:/application.yml \
             --server.port=10260 \
             --eureka.client.register-with-eureka=false \
             --eureka.client.fetch-registry=false > app.log 2>&1 &
           echo $! > app.pid
+
 
       # 5. 기동 대기
       - name: Wait for application to start
