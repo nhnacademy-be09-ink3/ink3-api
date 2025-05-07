@@ -65,7 +65,7 @@ jobs:
 
       # 5. 기동 대기
       - name: Wait for application to start
-        run: sleep 15
+        run: sleep 30
 
       # 6. 헬스 체크 엔드포인트 호출
       - name: Check health endpoint
