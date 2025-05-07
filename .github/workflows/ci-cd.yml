@@ -79,7 +79,7 @@ jobs:
       - name: Move JAR to root for upload
         run: cp api/target/*.jar .
 
-      # JAR 업로드 (서버의 ~/deploy/target/ 에 복사)
+      # JAR 업로드 (서버의 ~/api/target/ 에 복사)
       - name: Copy JAR to server
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -87,8 +87,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
-          source: "*.jar"
-          target: "~/api/target/"
+          source: "target/*.jar"
+          target: "~/api/"
 
       # 서버에서 deploy.sh 실행
       - name: Run deploy.sh on server
