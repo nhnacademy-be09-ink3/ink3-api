@@ -93,23 +93,23 @@ jobs:
       - name: Build JAR (skip tests)
         run: mvn package -DskipTests=true -B
 
-      - name: Prepare deployable JAR
+      - name: Prepare JAR for server
         run: |
-          mkdir -p target
-          cp api/target/*.jar target/
+          mkdir -p deploy/target
+          cp api/target/*.jar deploy/target/
 
-      - name: Verify JAR in common target
-        run: ls -lh target/*.jar
+      - name: Verify deploy directory
+        run: ls -lh deploy/target/*.jar
 
-      - name: Copy JAR to server's ~/target directory
+      - name: Copy JAR to server
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_IP }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
-          source: "target/*.jar"
-          target: "~/target/"
+          source: "deploy/target/*.jar"
+          target: "~/deploy/target/"
 
       - name: Run deploy.sh on server
         uses: appleboy/ssh-action@v0.1.7
@@ -119,6 +119,6 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~
+            cd ~/deploy
             nohup ./deploy.sh > deploy.log 2>&1 &
             exit 0
