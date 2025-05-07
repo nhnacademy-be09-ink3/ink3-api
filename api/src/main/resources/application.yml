@@ -13,3 +13,11 @@ eureka:
     register-with-eureka: true
   instance:
     prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    show-details: always
