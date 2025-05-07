@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+
+# 로그 디렉토리
+LOG_DIR=../logs
+mkdir -p "${LOG_DIR}"
+
+cd target
+
+# 1) 10260 포트 프로세스 재시작
+if pid=$(ss -ltnp | grep ':10260' | awk '{print $6}' | cut -d',' -f2 | cut -d'=' -f2); then
+  echo "Killing old process on 10260 (PID $pid)..."
+  kill "$pid"
+fi
+
+echo "Starting service on port 10260..."
+nohup /usr/local/java/java21/bin/java -jar ink3-eureka-0.0.1-SNAPSHOT.jar --server.port=10260 \
+  > "${LOG_DIR}/ink3-eureka-10260.log" 2>&1 &
+
+# 2) 헬스체크가 UP 될 때까지 대기 (최대 2분)
+echo -n "Waiting for http://localhost:10260/actuator/health to be UP"
+for i in {1..24}; do
+  status=$(curl -s http://localhost:10260/actuator/health | grep -Po '"status"\s*:\s*"\K[^"]+')
+  if [[ "$status" == "UP" ]]; then
+    echo -e "\n→ Service is UP!"
+    break
+  fi
+  echo -n "."
+  sleep 5
+  if [[ $i -eq 24 ]]; then
+    echo -e "\n✖ Health check timed out."
+    exit 1
+  fi
+done
+
+# 3) 10261 포트 프로세스 재시작
+if pid=$(ss -ltnp | grep ':10261' | awk '{print $6}' | cut -d',' -f2 | cut -d'=' -f2); then
+  echo "Killing old process on 10261 (PID $pid)..."
+  kill "$pid"
+fi
+
+echo "Starting service on port 10261..."
+/usr/local/java/java21/bin/java -jar ink3-eureka-0.0.1-SNAPSHOT.jar --server.port=10261 \
+  > "${LOG_DIR}/ink3-eureka-10261.log" 2>&1 &
