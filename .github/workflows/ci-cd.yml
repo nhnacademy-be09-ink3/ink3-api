@@ -36,7 +36,8 @@ jobs:
         
       - name: List target directory
         run: ls -alh target/
-
+      - name: Show full Maven output
+        run: mvn clean install -X
 
   #실행테스트
   test:
