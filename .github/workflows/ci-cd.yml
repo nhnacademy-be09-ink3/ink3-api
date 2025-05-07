@@ -78,6 +78,7 @@ jobs:
       - name: Run unit tests
         run: mvn test -B
 
+
   deploy:
     name: Deploy to Linux Server
     runs-on: ubuntu-latest
