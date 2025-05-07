@@ -31,39 +31,38 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      - name: Build with Maven
-        run: mvn clean install -B
-        
-      - name: List target directory
-        run: ls -alh target/
-      - name: Show full Maven output
-        run: mvn clean install -X
+      - name: Build all modules with Maven
+        run: mvn clean install -DskipTests=true -B
 
-  #실행테스트
+        
   test:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      # 3. 패키징
-      - name: Package application
-        run: mvn package -DskipTests -B
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # 4. 백그라운드로 애플리케이션 실행
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Package application (skip tests)
+        run: mvn package -DskipTests=true -B
+
       - name: Run application in background
         run: |
-          nohup java -jar target/api-0.0.1-SNAPSHOT.jar --server.port=10260 > app.log 2>&1 &
+          nohup java -jar api/target/api-0.0.1-SNAPSHOT.jar --server.port=10260 > app.log 2>&1 &
           echo $! > app.pid
 
-      # 5. 기동 대기
       - name: Wait for application to start
         run: sleep 15
 
-      # 6. 헬스 체크 엔드포인트 호출
       - name: Check health endpoint
         run: curl --fail http://localhost:10260/actuator/health
 
-      # 7. 애플리케이션 종료
       - name: Stop application
         run: kill $(cat app.pid)
 
@@ -76,17 +75,27 @@ jobs:
 
 
 
+
   deploy:
     name: Deploy to Linux Server
     runs-on: ubuntu-latest
     needs: test
 
     steps:
-      - name: Package JAR
-        run: mvn package -DskipTests -B
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build JAR (skip tests)
+        run: mvn package -DskipTests=true -B
 
       - name: Verify JAR file
-        run: ls -lh target/*.jar
+        run: ls -lh api/target/*.jar
 
       - name: Copy JAR to server
         uses: appleboy/scp-action@v0.1.4
@@ -95,7 +104,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
-          source: "target/*.jar"
+          source: "api/target/*.jar"
           target: "~/api/"
 
       - name: Run deploy.sh on server
@@ -109,3 +118,4 @@ jobs:
             cd ~/api
             nohup ./deploy.sh > deploy.log 2>&1 &
             exit 0
+
