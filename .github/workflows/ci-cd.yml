@@ -101,7 +101,12 @@ jobs:
       - name: Verify JAR in common target
         run: ls -lh ./target/*.jar
 
-      - name: Copy JAR to server
+      - name: Prepare deployable JAR
+        run: |
+          mkdir -p ./target
+          cp api/target/*.jar ./target/
+
+      - name: Copy JAR to server's target directory
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_IP }}
@@ -109,7 +114,7 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
           source: "target/*.jar"
-          target: "~/api/"
+          target: "~/target/"
 
       - name: Run deploy.sh on server
         uses: appleboy/ssh-action@v0.1.7
