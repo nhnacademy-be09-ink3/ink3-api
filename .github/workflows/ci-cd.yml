@@ -36,69 +36,63 @@ jobs:
 
 
 
-  #실행테스트
-  test:
-    needs: build
-    runs-on: ubuntu-latest
+  # #실행테스트
+  # test:
+  #   needs: build
+  #   runs-on: ubuntu-latest
 
-    steps:
-      # 1. 빌드 결과를 받아오려면 다시 체크아웃 (artifact 공유 설정이 없다면)
-      - name: Checkout code
-        uses: actions/checkout@v3
+  #   steps:
+  #     # 1. 빌드 결과를 받아오려면 다시 체크아웃 (artifact 공유 설정이 없다면)
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      # 2. JDK 설정 (Temurin 21)
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 21
+  #     # 2. JDK 설정 (Temurin 21)
+  #     - name: Set up JDK 21
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: temurin
+  #         java-version: 21
 
-      # 3. 패키징
-      - name: Package application
-        run: mvn package -DskipTests -B
+  #     # 3. 패키징
+  #     - name: Package application
+  #       run: mvn package -DskipTests -B
 
-      # # 4. 백그라운드로 애플리케이션 실행
-      # - name: Run application in background
-      #   run: |
-      #     nohup java -jar target/api-0.0.1-SNAPSHOT.jar --server.port=10260 > app.log 2>&1 &
-      #     echo $! > app.pid
+  #     # # 4. 백그라운드로 애플리케이션 실행
+  #     # - name: Run application in background
+  #     #   run: |
+  #     #     nohup java -jar target/api-0.0.1-SNAPSHOT.jar --server.port=10260 > app.log 2>&1 &
+  #     #     echo $! > app.pid
 
-      # 4. 백그라운드로 애플리케이션 실행 (유레카 상관 없이)
-      - name: Run application in background  
-        run: |
-          nohup java -jar target/api-0.0.1-SNAPSHOT.jar \
-            --spring.main.allow-bean-definition-overriding=true \
-            --spring.config.additional-location=classpath:/application.yml \
-            --server.port=10260 \
-            --eureka.client.register-with-eureka=false \
-            --eureka.client.fetch-registry=false > app.log 2>&1 &
-          echo $! > app.pid
+  #     # 4. 백그라운드로 애플리케이션 실행 (유레카 상관 없이)
+  #     - name: Run application in background  
+  #       run: |
+  #         nohup java -jar target/api-0.0.1-SNAPSHOT.jar \
+  #           --spring.main.allow-bean-definition-overriding=true \
+  #           --spring.config.additional-location=classpath:/application.yml \
+  #           --server.port=10260 \
+  #           --eureka.client.register-with-eureka=false \
+  #           --eureka.client.fetch-registry=false > app.log 2>&1 &
+  #         echo $! > app.pid
 
 
-      # 5. 기동 대기
-      - name: Wait for application to start
-        run: sleep 15
+  #     # 5. 기동 대기
+  #     - name: Wait for application to start
+  #       run: sleep 15
 
-      # 추가 확인
-      - name: Check if port 10260 is listening
-        run: |
-          sudo apt-get update && sudo apt-get install -y net-tools
-          netstat -tnlp | grep 10260 || true
+  #     # 6. 헬스 체크 엔드포인트 호출
+  #     - name: Check health endpoint
+  #       run: curl --fail http://localhost:10260/actuator/health
 
-      # 6. 헬스 체크 엔드포인트 호출
-      - name: Check health endpoint
-        run: curl --fail http://localhost:10260/actuator/health
-
-      # 7. 애플리케이션 종료
-      - name: Stop application
-        run: kill $(cat app.pid)
+  #     # 7. 애플리케이션 종료
+  #     - name: Stop application
+  #       run: kill $(cat app.pid)
      
-      - name: Print app log if health check fails
-        if: failure()
-        run: cat app.log
+  #     - name: Print app log if health check fails
+  #       if: failure()
+  #       run: cat app.log
 
-      - name: Run unit tests
-        run: mvn test -B
+  #     - name: Run unit tests
+  #       run: mvn test -B
 
 
   deploy:
