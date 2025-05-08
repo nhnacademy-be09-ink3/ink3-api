@@ -128,5 +128,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ~/ink3-server/api
+            chmod +x deploy.sh
             nohup ./deploy.sh "$VERSION" > deploy.log 2>&1 &
             exit 0
