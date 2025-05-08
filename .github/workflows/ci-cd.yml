@@ -42,6 +42,9 @@ jobs:
 
       - name: Build all modules with Maven
         run: mvn clean install -DskipTests=true -B
+        
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
 
 
   test:
@@ -87,6 +90,8 @@ jobs:
     name: Deploy to Linux Server
     runs-on: ubuntu-latest
     needs: test
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -123,5 +128,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ~/ink3-server/api
-            nohup ./deploy.sh > deploy.log 2>&1 &
+            nohup ./deploy.sh "$VERSION" > deploy.log 2>&1 &
             exit 0
