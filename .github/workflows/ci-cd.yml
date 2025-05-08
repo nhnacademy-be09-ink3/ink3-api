@@ -56,13 +56,22 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          
+      - name: Extract version from POM
+        id: extract_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 추출된 버전 확인
+        run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
       - name: Package application (skip tests)
         run: mvn package -DskipTests=true -B
 
       - name: Run application in background
         run: |
-          nohup java -jar api/target/api-0.0.1-SNAPSHOT.jar --server.port=10260 > app.log 2>&1 &
+          nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar --server.port=10260 > app.log 2>&1 &
           echo $! > app.pid
 
       - name: Wait for application to start
@@ -88,11 +97,14 @@ jobs:
     needs: test
 
     steps:
-      - name: Extract project version
-        id: get_version  
+      - name: Extract version from POM
+        id: extract_version
         run: |
-          RAW=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "VERSION=$RAW" >> "$GITHUB_OUTPUT"
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 추출된 버전 확인
+        run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -129,5 +141,5 @@ jobs:
           script: |
             cd ~/ink3-server/api
             chmod +x deploy.sh
-            nohup ./deploy.sh "${{ steps.get_version.outputs.VERSION }}" > deploy.log 2>&1 &
+            nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
