@@ -87,13 +87,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
 
-    steps:
+     steps:
       - name: Extract project version
-        id: get version
+        id: get_version                # ❌ 공백 제거
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          
+          RAW=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$RAW" >> "$GITHUB_OUTPUT"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -129,5 +129,5 @@ jobs:
           script: |
             cd ~/ink3-server/api
             chmod +x deploy.sh
-            nohup ./deploy.sh "$VERSION" > deploy.log 2>&1 &
+            nohup ./deploy.sh "${{ steps.get_version.outputs.VERSION }}" > deploy.log 2>&1 &
             exit 0
