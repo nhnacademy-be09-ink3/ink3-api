@@ -30,7 +30,7 @@ public class Books {
     String description;
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "publisher_id")  // FK 컬럼명
+    @JoinColumn(name = "publisher_id")
     Publishers publishers;
     @NotNull
     LocalDateTime publishedDate;
