@@ -87,9 +87,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
 
-     steps:
+    steps:
       - name: Extract project version
-        id: get_version                # ❌ 공백 제거
+        id: get_version  
         run: |
           RAW=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$RAW" >> "$GITHUB_OUTPUT"
