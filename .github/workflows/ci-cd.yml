@@ -17,14 +17,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: 부모 POM 버전만 추출 (grep+sed)
+      - name: 부모 POM 버전만 추출 
         id: extract_parent_version
         run: |
-          version=$(grep -m1 '<version>' pom.xml | sed -n 's:.*<version>\(.*\)</version>.*:\1:')
+          version=$(
+            awk '/<parent>/,/<\/parent>/ {
+                    if (/<version>/) {
+                      sub(/.*<version>/,"");
+                      sub(/<\/version>.*/,"");
+                      print;
+                      exit
+                    }
+                  }' pom.xml
+          )
           echo "parent_version=$version" >> $GITHUB_OUTPUT
-    
+
       - name: 추출된 버전 확인
-        run: echo "부모 POM 버전은 ${{ steps.extract_parent_version.outputs.parent_version }} 입니다."
+        run: echo "부모 POM 버전은 '${{ steps.extract_parent_version.outputs.parent_version }}' 입니다."
 
       - name: Set up JDK 21
         uses: actions/setup-java@v3
