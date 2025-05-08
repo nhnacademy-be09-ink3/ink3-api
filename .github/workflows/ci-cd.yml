@@ -111,7 +111,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
-          source: "api/target/api-${{ steps.extract_version.outputs.version }}.jar"
+          source: "api/target/*.jar"
           target: "~/ink3-server/api"
 
       - name: Run deploy.sh on server
