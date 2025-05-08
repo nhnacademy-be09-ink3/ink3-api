@@ -17,23 +17,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: 부모 POM 버전만 추출 
-        id: extract_parent_version
+      - name: Extract version from POM
+        id: extract_version
         run: |
-          version=$(
-            awk '/<parent>/,/<\/parent>/ {
-                    if (/<version>/) {
-                      sub(/.*<version>/,"");
-                      sub(/<\/version>.*/,"");
-                      print;
-                      exit
-                    }
-                  }' pom.xml
-          )
-          echo "parent_version=$version" >> $GITHUB_OUTPUT
+          # -q: 로깅 최소화, -DforceStdout: 순수 값만 출력
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: 추출된 버전 확인
-        run: echo "부모 POM 버전은 '${{ steps.extract_parent_version.outputs.parent_version }}' 입니다."
+        run: echo "부모 POM 버전은 '${{ steps.extract_version.outputs.version }} ' 입니다."
 
       - name: Set up JDK 21
         uses: actions/setup-java@v3
