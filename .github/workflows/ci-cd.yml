@@ -17,13 +17,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: xmlstarlet 설치
-        run: sudo apt-get update && sudo apt-get install -y xmlstarlet
-
-      - name: 부모 버전 추출 (xmlstarlet)
+      - name: 부모 버전 추출 (grep+sed)
         id: extract_version
         run: |
-          version=$(xmlstarlet sel -t -v "//project/parent/version" pom.xml)
+          version=$(grep -oPz '(?s)(?<=<parent>).*?<version>\K[^<]+' pom.xml)
           echo "parent_version=$version" >> $GITHUB_OUTPUT
 
       - name: 추출된 버전 확인
