@@ -97,15 +97,6 @@ jobs:
     needs: test
 
     steps:
-      - name: Extract version from POM
-        id: extract_version
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: 추출된 버전 확인
-        run: echo "${{ steps.extract_version.outputs.version }} 입니다."
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -120,6 +111,15 @@ jobs:
 
       - name: Verify JAR file
         run: ls -lh api/target/*.jar
+
+      - name: Extract version from POM
+        id: extract_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 추출된 버전 확인
+        run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
       - name: Copy JAR to server
         uses: appleboy/scp-action@v0.1.4
