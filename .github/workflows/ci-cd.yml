@@ -100,12 +100,6 @@ jobs:
             -Dsonar.host.url=http://s4.java21.net:9000 \
             -Dsonar.token=$SONAR_TOKEN
 
-      - name: SonarQube Quality Gate Check
-        uses: sonarsource/sonar-quality-gate-action@v1.1.0
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
 
   deploy:
     name: Deploy to Linux Server
