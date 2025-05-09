@@ -15,29 +15,32 @@ import shop.ink3.api.user.membership.exception.DefaultMembershipNotFoundExceptio
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class MembershipService {
     private final MembershipRepository membershipRepository;
 
+    @Transactional(readOnly = true)
     public MembershipResponse getMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
         return MembershipResponse.from(membership);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<MembershipResponse> getMemberships(Pageable pageable) {
         Page<Membership> page = membershipRepository.findAll(pageable);
         return PageResponse.from(page.map(MembershipResponse::from));
     }
 
+    @Transactional(readOnly = true)
     public MembershipResponse getDefaultMembership() {
         Membership membership = membershipRepository.findByIsDefault(true)
                 .orElseThrow(DefaultMembershipNotFoundException::new);
         return MembershipResponse.from(membership);
     }
 
-    @Transactional
     public MembershipResponse createMembership(MembershipCreateRequest request) {
         boolean hasDefault = membershipRepository.existsByIsDefault(true);
         Membership membership = Membership.builder()
@@ -51,7 +54,6 @@ public class MembershipService {
         return MembershipResponse.from(membershipRepository.save(membership));
     }
 
-    @Transactional
     public MembershipResponse updateMembership(long membershipId, MembershipUpdateRequest request) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
@@ -59,7 +61,6 @@ public class MembershipService {
         return MembershipResponse.from(membershipRepository.save(membership));
     }
 
-    @Transactional
     public void activateMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
@@ -67,7 +68,6 @@ public class MembershipService {
         membershipRepository.save(membership);
     }
 
-    @Transactional
     public void deactivateMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
@@ -78,7 +78,6 @@ public class MembershipService {
         membershipRepository.save(membership);
     }
 
-    @Transactional
     public void setDefaultMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
@@ -92,7 +91,6 @@ public class MembershipService {
         membershipRepository.save(membership);
     }
 
-    @Transactional
     public void deleteMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));

@@ -1,0 +1,107 @@
+package shop.ink3.api.user.admin.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.user.admin.dto.AdminAuthResponse;
+import shop.ink3.api.user.admin.dto.AdminCreatedRequest;
+import shop.ink3.api.user.admin.dto.AdminPasswordUpdateRequest;
+import shop.ink3.api.user.admin.dto.AdminResponse;
+import shop.ink3.api.user.admin.dto.AdminUpdateRequest;
+import shop.ink3.api.user.admin.service.AdminService;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/admins")
+public class AdminController {
+    private final AdminService adminService;
+
+    @GetMapping("/check")
+    public ResponseEntity<CommonResponse<Map<String, Boolean>>> checkAdminIdentifierAvailability(
+            @RequestParam String loginId
+    ) {
+        Map<String, Boolean> result = new HashMap<>();
+        if (Objects.nonNull(loginId)) {
+            result.put("loginIdAvailable", adminService.isLoginIdAvailable(loginId));
+        }
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+    @GetMapping("/{adminId}")
+    public ResponseEntity<CommonResponse<AdminResponse>> getAdmin(@PathVariable long adminId) {
+        return ResponseEntity.ok(CommonResponse.success(adminService.getAdmin(adminId)));
+    }
+
+    @GetMapping("/auth/{loginId}")
+    public ResponseEntity<CommonResponse<AdminAuthResponse>> getAdminAuth(@PathVariable String loginId) {
+        return ResponseEntity.ok(CommonResponse.success(adminService.getAdminAuth(loginId)));
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonResponse<AdminResponse>> createAdmin(@RequestBody AdminCreatedRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(CommonResponse.create(adminService.createAdmin(request)));
+    }
+
+    @PutMapping("/{adminId}")
+    public ResponseEntity<CommonResponse<AdminResponse>> updateAdmin(
+            @PathVariable long adminId,
+            @RequestBody AdminUpdateRequest request
+    ) {
+        return ResponseEntity.ok(CommonResponse.update(adminService.updateAdmin(adminId, request)));
+    }
+
+    @PatchMapping("/{adminId}/password")
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable long adminId,
+            @RequestBody AdminPasswordUpdateRequest request
+    ) {
+        adminService.updateAdminPassword(adminId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{adminId}/activate")
+    public ResponseEntity<Void> activateUser(@PathVariable long adminId) {
+        adminService.activateAdmin(adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{adminId}/dormant")
+    public ResponseEntity<Void> dormantUser(@PathVariable long adminId) {
+        adminService.markAsDormantAdmin(adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{adminId}/withdraw")
+    public ResponseEntity<Void> withdrawUser(@PathVariable long adminId) {
+        adminService.withdrawAdmin(adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{adminId}/last-login")
+    public ResponseEntity<Void> lastLoginUser(@PathVariable long adminId) {
+        adminService.updateLastLogin(adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{adminId}")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable long adminId) {
+        adminService.deleteAdmin(adminId);
+        return ResponseEntity.noContent().build();
+    }
+}

@@ -30,6 +30,7 @@ import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
+import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
@@ -255,7 +256,6 @@ class UserControllerTest {
     void updateUser() throws Exception {
         UserUpdateRequest request = new UserUpdateRequest(
                 "new",
-                "new",
                 "new@new.com",
                 "010-5150-5150",
                 LocalDate.of(2025, 1, 2)
@@ -289,13 +289,39 @@ class UserControllerTest {
     void updateUserWithNotFound() throws Exception {
         UserUpdateRequest request = new UserUpdateRequest(
                 "new",
-                "new",
                 "new@new.com",
                 "010-5150-5150",
                 LocalDate.of(2025, 1, 2)
         );
         when(userService.updateUser(1L, request)).thenThrow(new UserNotFoundException(1L));
         mockMvc.perform(put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andDo(print());
+    }
+
+    @Test
+    void updateUserPassword() throws Exception {
+        UserPasswordUpdateRequest request = new UserPasswordUpdateRequest("old", "new");
+        doNothing().when(userService).updateUserPassword(1L, request);
+        mockMvc.perform(patch("/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent())
+                .andDo(print());
+    }
+
+    @Test
+    void updateUserPasswordWithNotFound() throws Exception {
+        UserPasswordUpdateRequest request = new UserPasswordUpdateRequest("old", "new");
+        doThrow(new UserNotFoundException(1L)).when(userService).updateUserPassword(1L, request);
+        mockMvc.perform(patch("/users/1/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -330,7 +356,7 @@ class UserControllerTest {
 
     @Test
     void dormantUser() throws Exception {
-        doNothing().when(userService).markAsDormant(1L);
+        doNothing().when(userService).markAsDormantUser(1L);
         mockMvc.perform(patch("/users/1/dormant"))
                 .andExpect(status().isNoContent())
                 .andDo(print());
@@ -338,7 +364,7 @@ class UserControllerTest {
 
     @Test
     void dormantUserWithNotFound() throws Exception {
-        doThrow(new UserNotFoundException(1L)).when(userService).markAsDormant(1L);
+        doThrow(new UserNotFoundException(1L)).when(userService).markAsDormantUser(1L);
         mockMvc.perform(patch("/users/1/dormant"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -351,7 +377,7 @@ class UserControllerTest {
 
     @Test
     void withdrawUser() throws Exception {
-        doNothing().when(userService).withdraw(1L);
+        doNothing().when(userService).withdrawUser(1L);
         mockMvc.perform(patch("/users/1/withdraw"))
                 .andExpect(status().isNoContent())
                 .andDo(print());
@@ -359,7 +385,7 @@ class UserControllerTest {
 
     @Test
     void withdrawUserWithNotFound() throws Exception {
-        doThrow(new UserNotFoundException(1L)).when(userService).withdraw(1L);
+        doThrow(new UserNotFoundException(1L)).when(userService).withdrawUser(1L);
         mockMvc.perform(patch("/users/1/withdraw"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

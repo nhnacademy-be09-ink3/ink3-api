@@ -72,12 +72,15 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public void update(String password, String name, String email, String phone, LocalDate birthday) {
-        this.password = password;
+    public void update(String name, String email, String phone, LocalDate birthday) {
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.birthday = birthday;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
     public void activate() {
@@ -104,7 +107,7 @@ public class User {
         this.membership = membership;
     }
 
-    public void updateLastLoginAt(LocalDateTime time) {
-        this.lastLoginAt = time;
+    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 }

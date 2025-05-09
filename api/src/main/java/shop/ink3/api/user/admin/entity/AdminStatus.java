@@ -1,11 +1,11 @@
-package shop.ink3.api.user.user.entity;
+package shop.ink3.api.user.admin.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum UserStatus {
+public enum AdminStatus {
     ACTIVE,
     DORMANT,
     WITHDRAWN

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.address.dto.AddressCreateRequest;
 import shop.ink3.api.user.address.dto.AddressResponse;
@@ -32,6 +33,7 @@ public class AddressService {
         return PageResponse.from(addresses.map(AddressResponse::from));
     }
 
+    @Transactional
     public AddressResponse createAddress(long userId, AddressCreateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Address address = Address.builder()
@@ -46,6 +48,7 @@ public class AddressService {
         return AddressResponse.from(addressRepository.save(address));
     }
 
+    @Transactional
     public AddressResponse updateAddress(long userId, long addressId, AddressUpdateRequest request) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));
@@ -59,6 +62,7 @@ public class AddressService {
         return AddressResponse.from(addressRepository.save(address));
     }
 
+    @Transactional
     public void setDefaultAddress(long userId, long addressId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));
@@ -72,6 +76,7 @@ public class AddressService {
         addressRepository.save(address);
     }
 
+    @Transactional
     public void deleteAddress(long userId, long addressId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));

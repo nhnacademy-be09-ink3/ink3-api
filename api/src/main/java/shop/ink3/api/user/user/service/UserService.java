@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.user.common.exception.DormantException;
+import shop.ink3.api.user.common.exception.InvalidPasswordException;
+import shop.ink3.api.user.common.exception.WithdrawnException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
@@ -15,6 +18,7 @@ import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
+import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
@@ -25,6 +29,7 @@ import shop.ink3.api.user.user.exception.UserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -33,14 +38,17 @@ public class UserService {
     private final PointHistoryRepository pointHistoryRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     public boolean isLoginIdAvailable(String loginId) {
         return !userRepository.existsByLoginId(loginId);
     }
 
+    @Transactional(readOnly = true)
     public boolean isEmailAvailable(String email) {
         return !userRepository.existsByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         return UserResponse.from(user);
@@ -52,12 +60,18 @@ public class UserService {
         return UserDetailResponse.from(user);
     }
 
+    @Transactional(readOnly = true)
     public UserAuthResponse getUserAuth(String loginId) {
         User user = userRepository.findByLoginId(loginId).orElseThrow(() -> new UserAuthNotFoundException(loginId));
+        if (user.getStatus() == UserStatus.DORMANT) {
+            throw new DormantException(loginId);
+        }
+        if (user.getStatus() == UserStatus.WITHDRAWN) {
+            throw new WithdrawnException(loginId);
+        }
         return UserAuthResponse.from(user);
     }
 
-    @Transactional
     public UserResponse createUser(UserCreateRequest request) {
         Membership defaultMembership = membershipRepository.findByIsDefault(true)
                 .orElseThrow(() -> new IllegalStateException("Default membership is not configured."));
@@ -76,35 +90,39 @@ public class UserService {
         return UserResponse.from(userRepository.save(user));
     }
 
-    @Transactional
     public UserResponse updateUser(long userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        user.update(request.password(), request.name(), request.email(), request.phone(), request.birthday());
+        user.update(request.name(), request.email(), request.phone(), request.birthday());
         return UserResponse.from(userRepository.save(user));
     }
 
-    @Transactional
+    public void updateUserPassword(long userId, UserPasswordUpdateRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+        user.updatePassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+    }
+
     public void activateUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.activate();
         userRepository.save(user);
     }
 
-    @Transactional
-    public void markAsDormant(long userId) {
+    public void markAsDormantUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.markAsDormant();
         userRepository.save(user);
     }
 
-    @Transactional
-    public void withdraw(long userId) {
+    public void withdrawUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.withdraw();
         userRepository.save(user);
     }
 
-    @Transactional
     public void earnPoint(long userId, UserPointRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.earnPoint(request.amount());
@@ -119,7 +137,6 @@ public class UserService {
         );
     }
 
-    @Transactional
     public void usePoint(long userId, UserPointRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (user.getPoint() < request.amount()) {
@@ -137,7 +154,6 @@ public class UserService {
         );
     }
 
-    @Transactional
     public void updateMembership(long userId, UserMembershipUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Membership membership = membershipRepository.findById(request.membershipId())
@@ -146,14 +162,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional
     public void updateLastLoginAt(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.updateLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
-    @Transactional
     public void deleteUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         userRepository.delete(user);
