@@ -90,6 +90,23 @@ jobs:
         if: failure()
         run: cat app.log
 
+      - name: SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn verify sonar:sonar \
+            -Dsonar.projectKey=ink3-api \
+            -Dsonar.projectName="Ink3 API Service" \
+            -Dsonar.host.url=http://s4.java21.net:9000/
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
+
+      - name: SonarQube Quality Gate Check
+        uses: sonarsource/sonar-quality-gate-action@v1.1.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
   deploy:
     name: Deploy to Linux Server
