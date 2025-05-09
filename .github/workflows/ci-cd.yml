@@ -102,7 +102,7 @@ jobs:
             -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
 
       - name: SonarQube Quality Gate Check
-        uses: sonarsource/sonar-quality-gate-action@v1.1.0
+        uses: sonarsource/sonar-quality-gate-action@v1
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
