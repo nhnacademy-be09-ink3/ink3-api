@@ -68,7 +68,7 @@ jobs:
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
             -Dsonar.token=$SONAR_TOKEN
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
 
 
       - name: Check coverage threshold
