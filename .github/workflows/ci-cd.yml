@@ -40,10 +40,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
+      - name: Build all modules with Maven
+        run: mvn clean install -DskipTests=true -B
+
       - name: Build with coverage
         run: mvn clean verify -B
-
-
+  
   sonar-analysis:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
