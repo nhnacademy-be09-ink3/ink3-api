@@ -40,8 +40,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      - name: Build with coverage
-        run: mvn clean verify -B
+      - name: Build all modules with Maven
+        run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.EUREKA_URL }} -B
 
 
   sonar-analysis:
@@ -63,7 +63,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify sonar:sonar \
+          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.EUREKA_URL }} sonar:sonar \
             -Dsonar.projectKey=ink3_api_server \
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
@@ -112,7 +112,10 @@ jobs:
 
       - name: Run application in background
         run: |
-          nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar --server.port=10260 > app.log 2>&1 &
+          nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
+            --server.port=10260 \
+            --spring.profiles.active=test \
+            --eureka.client.service-url.defaultZone=${{ secrets.EUREKA_URL }} > app.log 2>&1 &
           echo $! > app.pid
 
       - name: Wait for application to start
@@ -125,13 +128,11 @@ jobs:
         run: kill $(cat app.pid)
 
       - name: Run unit tests
-        run: mvn test -B
+        run: mvn test -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.EUREKA_URL }} -B
 
       - name: Print app log if health check fails
         if: failure()
         run: cat app.log
-
-
 
   deploy:
     name: Deploy to Linux Server
