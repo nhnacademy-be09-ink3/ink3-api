@@ -1,6 +1,6 @@
 spring:
   application:
-    name: api-service
+    name: shop-service
 
 server:
   port: 10260
