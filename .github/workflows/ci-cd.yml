@@ -94,12 +94,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn verify sonar:sonar \
-            -Dsonar.projectKey=ink3-api \
-            -Dsonar.projectName="Ink3 API Service" \
-            -Dsonar.host.url=http://s4.java21.net:9000/
-            -Dsonar.login=$SONAR_TOKEN \
-            -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=ink3_api_server \
+            -Dsonar.projectName='ink3_api_server' \
+            -Dsonar.host.url=http://s4.java21.net:9000 \
+            -Dsonar.token=$SONAR_TOKEN
 
       - name: SonarQube Quality Gate Check
         uses: sonarsource/sonar-quality-gate-action@v1
