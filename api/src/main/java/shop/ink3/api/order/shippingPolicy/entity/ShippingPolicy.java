@@ -26,19 +26,19 @@ public class ShippingPolicy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(name = "threshold", nullable = false)
+    @Column(nullable = false)
     private Integer threshold;
 
-    @Column(name = "fee", nullable = false)
+    @Column(nullable = false)
     private Integer fee;
 
-    @Column(name = "is_available", nullable = false)
+    @Column(nullable = false)
     private Boolean isAvailable;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public void deactivate() {

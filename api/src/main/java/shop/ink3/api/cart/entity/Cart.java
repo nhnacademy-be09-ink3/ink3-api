@@ -11,7 +11,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.books.books.entity.Books;
+import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.user.user.entity.User;
 
 @Entity
@@ -25,18 +25,18 @@ public class Cart {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "users_id", nullable = false)
-    private User users;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
-    @JoinColumn(name = "books_id", nullable = false)
-    private Books books;
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
     private int quantity;
 
-    public Cart(User users, Books books, int quantity) {
-        this.users = users;
-        this.books = books;
+    public Cart(User user, Book book, int quantity) {
+        this.user = user;
+        this.book = book;
         this.quantity = quantity;
     }
 

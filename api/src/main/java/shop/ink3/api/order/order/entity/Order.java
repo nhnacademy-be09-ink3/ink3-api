@@ -32,23 +32,23 @@ public class Order {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "users_id", nullable = true)
-    private User users;
+    @JoinColumn(name = "user_id", nullable = true)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     private OrderStatus status;
 
-    @Column(name = "ordered_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime orderedAt;
 
-    @Column(name = "orderer_name", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String ordererName;
 
-    @Column(name = "orderer_phone", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String ordererPhone;
 }

@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.books.books.entity.Books;
+import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.packaging.entity.Packaging;
@@ -25,7 +25,7 @@ import shop.ink3.api.review.entity.Review;
 @Getter
 @Builder
 @Entity
-@Table(name = "orders")
+@Table(name = "order_books")
 public class OrderBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class OrderBook {
 
     @ManyToOne
     @JoinColumn(name = "book_id")
-    private Books books;
+    private Book book;
 
     @ManyToOne
     @JoinColumn(name = "packaging_id", nullable = true)

@@ -1,4 +1,4 @@
-package shop.ink3.api.books.books.entity;
+package shop.ink3.api.book.book.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,20 +15,23 @@ import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.books.bookAuthors.entity.BookAuthors;
-import shop.ink3.api.books.bookCategories.entity.BookCategories;
-import shop.ink3.api.books.publishers.entity.Publishers;
+import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.cart.entity.Cart;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-public class Books {
+@Table(name = "books")
+public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,7 +50,7 @@ public class Books {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "publisher_id", nullable = false)
-    private Publishers publishers;
+    private Publisher publisher;
 
     @Column(nullable = false)
     private LocalDate publishedAt;
@@ -74,18 +77,18 @@ public class Books {
     @Column(nullable = false)
     private String thumbnailUrl;
 
-    @OneToMany(mappedBy = "books")
+    @OneToMany(mappedBy = "book")
     private List<Cart> carts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "books",
+    @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookCategories> bookCategories;
+    private List<BookCategory> bookCategories;
 
-    @OneToMany(mappedBy = "books",
+    @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookAuthors> bookAuthors;
+    private List<BookAuthor> bookAuthors;
 
     public void setDiscountRate() {
         this.discountRate = (salePrice / originalPrice) * 100;

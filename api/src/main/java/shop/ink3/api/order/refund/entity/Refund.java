@@ -30,10 +30,10 @@ public class Refund {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "reason", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String reason;
 
-    @Column(name = "details", nullable = false, length = 255)
+    @Column(nullable = false, length = 255)
     private String details;
 
     public void update(Refund refund) {

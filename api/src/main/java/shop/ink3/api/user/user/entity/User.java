@@ -74,10 +74,10 @@ public class User {
     @JoinColumn(name = "membership_id", nullable = false)
     private Membership membership;
 
-    @OneToMany(mappedBy = "users")
+    @OneToMany(mappedBy = "user")
     private List<Cart> carts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "users")
+    @OneToMany(mappedBy = "user")
     private List<Review> reviews = new ArrayList<>();
 
     private LocalDateTime lastLoginAt;

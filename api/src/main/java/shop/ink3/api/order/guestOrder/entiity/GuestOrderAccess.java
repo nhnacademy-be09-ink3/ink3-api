@@ -29,9 +29,9 @@ public class GuestOrderAccess {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "email", nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String password;
 }

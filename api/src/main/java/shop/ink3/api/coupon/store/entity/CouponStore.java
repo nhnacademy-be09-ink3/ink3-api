@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.books.books.entity.Books;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.user.user.entity.User;
 
@@ -27,11 +26,11 @@ import shop.ink3.api.user.user.entity.User;
 public class CouponStore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long coupon_store_id;
+    private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "users_id", nullable = false)
-    private User users;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "coupon_id", nullable = false)

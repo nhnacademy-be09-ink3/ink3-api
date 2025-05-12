@@ -28,8 +28,8 @@ public class Review {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "users_id", nullable = false)
-    private User users;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @OneToOne
     @JoinColumn(name = "order_book_id")
@@ -41,8 +41,8 @@ public class Review {
 
     private LocalDateTime createdAt;
 
-    public Review(User users, OrderBook orderBook, String title, String content, int rating) {
-        this.users = users;
+    public Review(User user, OrderBook orderBook, String title, String content, int rating, LocalDateTime createdAt) {
+        this.user = user;
         this.orderBook = orderBook;
         this.title = title;
         this.content = content;

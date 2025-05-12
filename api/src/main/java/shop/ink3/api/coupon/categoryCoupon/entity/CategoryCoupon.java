@@ -11,10 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.books.books.entity.Books;
-import shop.ink3.api.books.categories.entity.Categories;
+import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
-import shop.ink3.api.order.order.entity.Order;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,10 +26,10 @@ public class CategoryCoupon {
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "category_coupon_id")
+    @JoinColumn(name = "coupon_id")
     private Coupon coupon;
 
     @OneToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Categories categories;
+    private Category category;
 }

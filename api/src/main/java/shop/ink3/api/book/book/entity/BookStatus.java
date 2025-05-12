@@ -1,4 +1,4 @@
-package shop.ink3.api.books.books.entity;
+package shop.ink3.api.book.book.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

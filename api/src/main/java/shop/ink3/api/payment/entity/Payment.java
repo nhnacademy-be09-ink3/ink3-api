@@ -1,4 +1,4 @@
-package shop.ink3.api.payments.entity;
+package shop.ink3.api.payment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,9 +29,9 @@ public class Payment {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "payment_key", nullable = false)
+    @Column(nullable = false)
     private String paymentKey;
 
-    @Column(name = "payment_amount", nullable = false)
+    @Column(nullable = false)
     private int paymentAmount;
 }

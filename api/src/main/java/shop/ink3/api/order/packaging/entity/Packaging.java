@@ -24,13 +24,13 @@ public class Packaging {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(name = "price", nullable = false)
+    @Column(nullable = false)
     private Integer price;
 
-    @Column(name = "is_available", nullable = false)
+    @Column(nullable = false)
     private Boolean isAvailable;
 
     public void activate() {

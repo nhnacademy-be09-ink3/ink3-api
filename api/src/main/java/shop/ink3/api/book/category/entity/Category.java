@@ -1,10 +1,12 @@
-package shop.ink3.api.books.tags.entity;
+package shop.ink3.api.book.category.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +19,8 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder
 @Getter
-public class Tags {
+@Table(name = "categories")
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,4 +28,7 @@ public class Tags {
     @Column(nullable = false)
     @Length(max=20)
     private String name;
+
+    @OneToOne
+    private Category category;
 }

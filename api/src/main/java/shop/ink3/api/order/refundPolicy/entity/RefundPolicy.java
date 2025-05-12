@@ -26,19 +26,19 @@ public class RefundPolicy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(name = "return_deadline", nullable = false)
+    @Column(nullable = false)
     private Integer returnDeadLine;
 
-    @Column(name = "defect_return_deadline", nullable = false)
+    @Column(nullable = false)
     private Integer defectReturnDeadLine;
 
-    @Column(name = "is_available", nullable = false)
+    @Column(nullable = false)
     private Boolean isAvailable;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public void deactivate() {
