@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
@@ -48,6 +49,14 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserAuth(loginId)));
     }
 
+    @GetMapping("/auth/social/{provider}/{providerUserId}")
+    public ResponseEntity<CommonResponse<UserAuthResponse>> getSocialUserAuth(
+            @PathVariable String provider,
+            @PathVariable String providerUserId
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getSocialUserAuth(provider, providerUserId)));
+    }
+
     @GetMapping("/check")
     public ResponseEntity<CommonResponse<Map<String, Boolean>>> checkUserIdentifierAvailability(
             @RequestParam(required = false) String loginId,
@@ -66,6 +75,12 @@ public class UserController {
     @PostMapping
     public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody UserCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(@RequestBody SocialUserCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CommonResponse.create(userService.createSocialUser(request)));
     }
 
     @PutMapping("/{userId}")

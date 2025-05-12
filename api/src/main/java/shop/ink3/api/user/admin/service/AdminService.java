@@ -41,10 +41,10 @@ public class AdminService {
     public AdminAuthResponse getAdminAuth(String loginId) {
         Admin admin = adminRepository.findByLoginId(loginId).orElseThrow(() -> new AdminAuthNotFoundException(loginId));
         if (admin.getStatus() == AdminStatus.DORMANT) {
-            throw new DormantException(loginId);
+            throw new DormantException(admin.getId());
         }
         if (admin.getStatus() == AdminStatus.WITHDRAWN) {
-            throw new WithdrawnException(loginId);
+            throw new WithdrawnException(admin.getId());
         }
         return AdminAuthResponse.from(admin);
     }
