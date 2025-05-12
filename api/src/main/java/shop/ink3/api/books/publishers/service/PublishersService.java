@@ -1,17 +1,17 @@
-package shop.ink3.api.books.service;
+package shop.ink3.api.books.publishers.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.ink3.api.books.dto.PublisherCreateRequest;
-import shop.ink3.api.books.dto.PublisherResponse;
-import shop.ink3.api.books.dto.PublisherUpdateRequest;
+import shop.ink3.api.books.publishers.dto.PublisherCreateRequest;
+import shop.ink3.api.books.publishers.dto.PublisherResponse;
+import shop.ink3.api.books.publishers.dto.PublisherUpdateRequest;
+import shop.ink3.api.books.publishers.entity.Publishers;
+import shop.ink3.api.books.publishers.exception.PublisherAlreadyExistsException;
+import shop.ink3.api.books.publishers.exception.PublisherNotFoundException;
+import shop.ink3.api.books.publishers.repository.PublishersRepository;
 
-import shop.ink3.api.books.entity.Publishers;
-import shop.ink3.api.books.exception.PublisherAlreadyExistsException;
-import shop.ink3.api.books.exception.PublisherNotFoundException;
-import shop.ink3.api.books.repository.PublishersRepository;
 
 @RequiredArgsConstructor
 @Service

@@ -1,4 +1,4 @@
-package shop.ink3.api.books.controller;
+package shop.ink3.api.books.tags.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import shop.ink3.api.books.dto.TagCreateRequest;
+
+import shop.ink3.api.books.tags.dto.TagCreateRequest;
+import shop.ink3.api.books.tags.dto.TagResponse;
+import shop.ink3.api.books.tags.service.TagsService;
 import shop.ink3.api.common.dto.CommonResponse;
-import shop.ink3.api.books.dto.TagResponse;
-import shop.ink3.api.books.service.TagsService;
 
 @RequiredArgsConstructor
 @RestController

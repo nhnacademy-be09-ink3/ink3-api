@@ -5,16 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import shop.ink3.api.books.controller.TagsController;
-import shop.ink3.api.books.dto.TagCreateRequest;
-import shop.ink3.api.books.dto.TagResponse;
 import shop.ink3.api.books.dto.TagUpdateRequest;
-import shop.ink3.api.books.service.TagsService;
 
 import java.util.List;
+import shop.ink3.api.books.tags.controller.TagsController;
+import shop.ink3.api.books.tags.dto.TagCreateRequest;
+import shop.ink3.api.books.tags.dto.TagResponse;
+import shop.ink3.api.books.tags.service.TagsService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
