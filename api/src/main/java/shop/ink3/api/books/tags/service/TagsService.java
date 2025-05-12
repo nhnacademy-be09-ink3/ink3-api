@@ -1,15 +1,15 @@
-package shop.ink3.api.books.tags.service;
+package shop.ink3.api.books.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.ink3.api.books.tags.dto.TagCreateRequest;
-import shop.ink3.api.books.tags.dto.TagResponse;
+import shop.ink3.api.books.dto.TagCreateRequest;
+import shop.ink3.api.books.dto.TagResponse;
 import shop.ink3.api.books.tags.entity.Tags;
-import shop.ink3.api.books.tags.exception.TagAlreadyExistsException;
-import shop.ink3.api.books.tags.exception.TagNotFoundException;
-import shop.ink3.api.books.tags.repository.TagsRepository;
+import shop.ink3.api.books.exception.TagAlreadyExistsException;
+import shop.ink3.api.books.exception.TagNotFoundException;
+import shop.ink3.api.books.repository.TagsRepository;
 
 @RequiredArgsConstructor
 @Service
