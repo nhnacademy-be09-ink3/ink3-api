@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.books.dto.CategoryCreateRequest;
 import shop.ink3.api.books.dto.CategoryResponse;
-import shop.ink3.api.books.entity.Categories;
+import shop.ink3.api.books.categories.entity.Categories;
 import shop.ink3.api.books.repository.CategoriesRepository;
 
 @RequiredArgsConstructor

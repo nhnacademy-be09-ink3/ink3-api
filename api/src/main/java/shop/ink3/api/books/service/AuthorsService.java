@@ -3,10 +3,12 @@ package shop.ink3.api.books.service;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import shop.ink3.api.books.entity.Authors;
+import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.books.authors.entity.Authors;
 import shop.ink3.api.books.repository.AuthorsRepository;
 
 @Service
+@Transactional
 public class AuthorsService {
     AuthorsRepository authorsRepository;
     public AuthorsService(AuthorsRepository authorsRepository) {

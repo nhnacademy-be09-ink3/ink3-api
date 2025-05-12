@@ -1,30 +1,25 @@
-package shop.ink3.api.books.entity;
+package shop.ink3.api.books.authors.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
 
 @Entity
 @Getter
 @Setter
 public class Authors {
     @Id
-    @NotNull
+    @Column(nullable = false)
     private Long id;
-    @Length(max=50)
-    @NotNull
+    @Column(nullable = false, length = 50)
     String name;
-    @NotNull
+    @Column(nullable = false)
     Date date;
-    @NotNull
-    @Length(max=50)
-    @NotNull
+    @Column(nullable = false, length = 50)
     String nationality;
-    @NotNull
+    @Column(nullable = false)
     String biography;
 }

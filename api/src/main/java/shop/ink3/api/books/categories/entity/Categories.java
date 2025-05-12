@@ -1,18 +1,19 @@
-package shop.ink3.api.books.entity;
+package shop.ink3.api.books.categories.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,17 +21,16 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-@Table(name = "book_tags")
-public class BookTags {
+@Table(name = "categories")
+public class Categories {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @ManyToOne
-    private Books books;
+    @Column(nullable = false)
+    @Length(max=20)
+    private String name;
 
-    @NotNull
-    @ManyToOne
-    private Tag tag;
+    @OneToOne
+    private Categories categories;
 }

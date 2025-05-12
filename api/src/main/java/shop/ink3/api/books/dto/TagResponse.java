@@ -1,6 +1,6 @@
 package shop.ink3.api.books.dto;
 
-import shop.ink3.api.books.entity.Tags;
+import shop.ink3.api.books.tags.entity.Tags;
 
 public record TagResponse(
         Long id,

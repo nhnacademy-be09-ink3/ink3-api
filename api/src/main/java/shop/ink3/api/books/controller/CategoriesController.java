@@ -14,7 +14,7 @@ import shop.ink3.api.common.dto.CommonResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/api/books/categories")
 public class CategoriesController {
     private final CategoriesService categoriesService;
 
