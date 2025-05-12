@@ -77,7 +77,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
     }
 
-    @PostMapping
+    @PostMapping("/social")
     public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(@RequestBody SocialUserCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CommonResponse.create(userService.createSocialUser(request)));
