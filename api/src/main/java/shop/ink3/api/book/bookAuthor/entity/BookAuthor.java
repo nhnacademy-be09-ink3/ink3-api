@@ -1,6 +1,8 @@
 package shop.ink3.api.book.bookAuthor.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -19,6 +21,7 @@ import shop.ink3.api.book.book.entity.Book;
 @Table(name = "book_authors")
 public class BookAuthor {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

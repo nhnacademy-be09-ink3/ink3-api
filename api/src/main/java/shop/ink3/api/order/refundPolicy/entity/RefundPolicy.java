@@ -21,7 +21,6 @@ import shop.ink3.api.order.refundPolicy.dto.RefundPolicyUpdateRequest;
 @Entity
 @Table(name = "refund_policies")
 public class RefundPolicy {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -21,7 +21,6 @@ import shop.ink3.api.order.shippingPolicy.dto.ShippingPolicyUpdateRequest;
 @Entity
 @Table(name = "shipping_policies")
 public class ShippingPolicy {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
