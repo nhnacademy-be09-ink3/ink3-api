@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,13 +22,13 @@ public class CouponPolicy {
     private Long id;
 
     private String name;
-    @Column(name = "discount_type")
+
     private DiscountType discountType;
 
     private int minimum_order_amount;
     private int discount_value;
     private int maximum_discount_amount;
-    private LocalDateTime validDays;;
+    private LocalDateTime validDays;
 
     public void update(String name, DiscountType discountType, Integer minimum_order_amount, Integer discount_value, Integer maximum_discount_amount,
                        LocalDateTime valid_days) {
