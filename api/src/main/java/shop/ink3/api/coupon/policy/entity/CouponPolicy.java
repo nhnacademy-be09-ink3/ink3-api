@@ -36,6 +36,8 @@ public class CouponPolicy {
 
     private int discount_value;
 
+    private int discount_percentage;
+
     private int maximum_discount_amount;
 
     @Column(nullable = false)
