@@ -1,15 +1,15 @@
-package shop.ink3.api.cart.cart.service.impl;
+package shop.ink3.api.cart.service.impl;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import shop.ink3.api.cart.cart.dto.CartRequest;
-import shop.ink3.api.cart.cart.dto.CartResponse;
-import shop.ink3.api.cart.cart.entity.Cart;
-import shop.ink3.api.cart.cart.repository.CartRepository;
-import shop.ink3.api.cart.cart.service.CartService;
+import shop.ink3.api.cart.dto.CartRequest;
+import shop.ink3.api.cart.dto.CartResponse;
+import shop.ink3.api.cart.entity.Cart;
+import shop.ink3.api.cart.repository.CartRepository;
+import shop.ink3.api.cart.service.CartService;
 
 @Service
 @RequiredArgsConstructor

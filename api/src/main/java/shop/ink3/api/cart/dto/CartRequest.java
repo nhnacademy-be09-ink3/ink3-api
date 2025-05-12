@@ -1,6 +1,6 @@
-package shop.ink3.api.cart.cart.dto;
+package shop.ink3.api.cart.dto;
 
-import shop.ink3.api.cart.cart.entity.Cart;
+import shop.ink3.api.cart.entity.Cart;
 
 public record CartRequest(
     Long userId,

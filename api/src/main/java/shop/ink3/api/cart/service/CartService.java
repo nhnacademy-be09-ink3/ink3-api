@@ -1,9 +1,9 @@
-package shop.ink3.api.cart.cart.service;
+package shop.ink3.api.cart.service;
 
 import java.util.List;
 
-import shop.ink3.api.cart.cart.dto.CartRequest;
-import shop.ink3.api.cart.cart.dto.CartResponse;
+import shop.ink3.api.cart.dto.CartRequest;
+import shop.ink3.api.cart.dto.CartResponse;
 
 public interface CartService {
     CartResponse addCart(CartRequest request);

@@ -1,4 +1,4 @@
-package shop.ink3.api.cart.cart.controller;
+package shop.ink3.api.cart.controller;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import shop.ink3.api.cart.cart.dto.CartRequest;
-import shop.ink3.api.cart.cart.dto.CartResponse;
-import shop.ink3.api.cart.cart.service.CartService;
+import shop.ink3.api.cart.dto.CartRequest;
+import shop.ink3.api.cart.dto.CartResponse;
+import shop.ink3.api.cart.service.CartService;
 
 @RestController
 @RequestMapping("/carts")
