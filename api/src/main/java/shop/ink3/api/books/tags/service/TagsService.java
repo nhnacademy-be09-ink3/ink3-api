@@ -49,4 +49,15 @@ public class TagsService {
         Tags tags = tagsRepository.findById(tagId).orElseThrow(() -> new TagNotFoundException(tagId));
         tagsRepository.delete(tags);
     }
+
+    @Transactional
+    public TagResponse updateTag(Long tagId, shop.ink3.api.books.dto.TagUpdateRequest request) {
+        Tags tag = tagsRepository.findById(tagId)
+                .orElseThrow(() -> new TagNotFoundException(tagId));
+
+        tag.setName(request.name());
+        Tags updated = tagsRepository.save(tag);
+
+        return TagResponse.from(updated);
+    }
 }
