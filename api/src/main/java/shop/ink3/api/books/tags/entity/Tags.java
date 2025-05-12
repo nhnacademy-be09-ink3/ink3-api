@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 @Entity
@@ -17,6 +18,7 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 public class Tags {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

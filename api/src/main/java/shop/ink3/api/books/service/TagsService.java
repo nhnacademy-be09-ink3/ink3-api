@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.books.dto.TagCreateRequest;
 import shop.ink3.api.books.dto.TagResponse;
+import shop.ink3.api.books.dto.TagUpdateRequest;
 import shop.ink3.api.books.tags.entity.Tags;
 import shop.ink3.api.books.exception.TagAlreadyExistsException;
 import shop.ink3.api.books.exception.TagNotFoundException;
@@ -47,5 +48,16 @@ public class TagsService {
     public void deleteTag(Long tagId) {
         Tags tags = tagsRepository.findById(tagId).orElseThrow(() -> new TagNotFoundException(tagId));
         tagsRepository.delete(tags);
+    }
+
+    @Transactional
+    public TagResponse updateTag(Long tagId, TagUpdateRequest request) {
+        Tags tag = tagsRepository.findById(tagId)
+                .orElseThrow(() -> new TagNotFoundException(tagId));
+
+        tag.setName(request.name());
+        Tags updated = tagsRepository.save(tag);
+
+        return TagResponse.from(updated);
     }
 }
