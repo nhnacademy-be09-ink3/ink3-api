@@ -19,7 +19,6 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "categories")
 public class Categories {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
