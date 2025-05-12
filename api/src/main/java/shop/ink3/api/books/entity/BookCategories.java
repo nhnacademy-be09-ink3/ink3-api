@@ -11,13 +11,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BookCategories {
-
     @Id
     private Long id;
+
     @NotNull
     @ManyToOne
     Books books;
+
     @NotNull
     @ManyToOne
-    Categories categories;
+    Category category;
 }

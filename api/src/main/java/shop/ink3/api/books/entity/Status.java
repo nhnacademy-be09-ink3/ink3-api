@@ -1,5 +1,15 @@
 package shop.ink3.api.books.entity;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum Status {
-    OUT_OF_STOCK, SALES_ENDED, DELETED;
+    AVAILABLE("판매 중"),
+    OUT_OF_STOCK("수량 부족"),
+    SOLD_OUT("판매 종료"),
+    DELETED("삭제");
+
+    private final String label;
 }
