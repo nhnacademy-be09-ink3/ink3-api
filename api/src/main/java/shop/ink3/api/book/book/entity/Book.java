@@ -77,9 +77,6 @@ public class Book {
     @Column(nullable = false)
     private String thumbnailUrl;
 
-    @OneToMany(mappedBy = "book")
-    private List<Cart> carts = new ArrayList<>();
-
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
