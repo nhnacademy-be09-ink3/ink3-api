@@ -7,7 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.books.dto.PublisherCreateRequest;
 import shop.ink3.api.books.dto.PublisherResponse;
 import shop.ink3.api.books.dto.PublisherUpdateRequest;
-import shop.ink3.api.books.publishers.entity.Publishers;
+
+import shop.ink3.api.books.entity.Publishers;
 import shop.ink3.api.books.exception.PublisherAlreadyExistsException;
 import shop.ink3.api.books.exception.PublisherNotFoundException;
 import shop.ink3.api.books.repository.PublishersRepository;

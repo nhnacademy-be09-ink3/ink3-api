@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import shop.ink3.api.books.bookAuthors.entity.BookAuthors;
 import shop.ink3.api.books.bookCategories.entity.BookCategories;
-import shop.ink3.api.books.publishers.entity.Publishers;
+import shop.ink3.api.books.entity.Publishers;
 
 
 @Entity
