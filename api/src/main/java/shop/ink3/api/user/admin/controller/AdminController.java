@@ -67,7 +67,7 @@ public class AdminController {
     }
 
     @PatchMapping("/{adminId}/password")
-    public ResponseEntity<Void> updatePassword(
+    public ResponseEntity<Void> updateAdminPassword(
             @PathVariable long adminId,
             @RequestBody AdminPasswordUpdateRequest request
     ) {
@@ -76,25 +76,25 @@ public class AdminController {
     }
 
     @PatchMapping("/{adminId}/activate")
-    public ResponseEntity<Void> activateUser(@PathVariable long adminId) {
+    public ResponseEntity<Void> activateAdmin(@PathVariable long adminId) {
         adminService.activateAdmin(adminId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{adminId}/dormant")
-    public ResponseEntity<Void> dormantUser(@PathVariable long adminId) {
+    public ResponseEntity<Void> dormantAdmin(@PathVariable long adminId) {
         adminService.markAsDormantAdmin(adminId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{adminId}/withdraw")
-    public ResponseEntity<Void> withdrawUser(@PathVariable long adminId) {
+    public ResponseEntity<Void> withdrawAdmin(@PathVariable long adminId) {
         adminService.withdrawAdmin(adminId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{adminId}/last-login")
-    public ResponseEntity<Void> lastLoginUser(@PathVariable long adminId) {
+    public ResponseEntity<Void> updateLastLogin(@PathVariable long adminId) {
         adminService.updateLastLogin(adminId);
         return ResponseEntity.noContent().build();
     }

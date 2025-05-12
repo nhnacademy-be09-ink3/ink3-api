@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
@@ -314,6 +315,22 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent())
+                .andDo(print());
+    }
+
+    @Test
+    void updateUserPasswordWithInvalidPassword() throws Exception {
+        UserPasswordUpdateRequest request = new UserPasswordUpdateRequest("invalid", "new");
+        doThrow(new InvalidPasswordException()).when(userService).updateUserPassword(1L, request);
+        mockMvc.perform(patch("/users/1/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
                 .andDo(print());
     }
 

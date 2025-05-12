@@ -1,5 +1,3 @@
 spring:
   application:
-    name: Ink3 - API
-  profiles:
-    active: local
+    name: shop-service

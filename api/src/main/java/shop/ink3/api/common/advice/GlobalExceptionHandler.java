@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
             InsufficientPointException.class,
             InvalidPasswordException.class
     })
-    public ResponseEntity<CommonResponse<Void>> handleBadRequestException(IllegalStateException e) {
+    public ResponseEntity<CommonResponse<Void>> handleBadRequestException(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<CommonResponse<Void>> handleWithdrawnException(WithdrawnException e) {
         return ResponseEntity.status(HttpStatus.GONE).body(CommonResponse.error(HttpStatus.GONE, e.getMessage()));
     }
-    
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CommonResponse<Void>> handleException(Exception e) {
         return ResponseEntity.internalServerError()
