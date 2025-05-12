@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,6 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "tags")
 public class Tags {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

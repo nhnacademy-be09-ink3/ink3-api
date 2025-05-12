@@ -5,7 +5,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
-import lombok.Setter;
 import shop.ink3.api.books.books.entity.Books;
 import shop.ink3.api.books.categories.entity.Categories;
 

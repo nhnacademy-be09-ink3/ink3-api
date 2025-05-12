@@ -1,11 +1,10 @@
-package shop.ink3.api.books.entity;
+package shop.ink3.api.books.bookTags.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,7 +21,6 @@ import shop.ink3.api.books.tags.entity.Tags;
 @Builder
 @Getter
 @Setter
-@Table(name = "book_tags")
 public class BookTags {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

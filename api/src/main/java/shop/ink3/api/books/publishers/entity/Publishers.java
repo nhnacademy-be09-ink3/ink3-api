@@ -1,12 +1,9 @@
-package shop.ink3.api.books.entity;
+package shop.ink3.api.books.publishers.entity;
 
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,7 +19,6 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @Getter
 @Setter
-@Table(name = "publishers")
 public class Publishers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
