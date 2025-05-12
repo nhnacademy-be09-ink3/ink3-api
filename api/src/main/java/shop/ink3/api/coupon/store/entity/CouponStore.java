@@ -2,6 +2,8 @@ package shop.ink3.api.coupon.store.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,17 +39,18 @@ public class CouponStore {
     private Coupon coupon;
 
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime used_at;
+    private LocalDateTime usedAt;
 
     @Column(nullable = false)
-    private LocalDateTime valid_from;
+    private LocalDateTime validFrom;
 
     @Column(nullable = false)
-    private LocalDateTime valid_until;
+    private LocalDateTime validUntil;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CouponStatus status;
 }
