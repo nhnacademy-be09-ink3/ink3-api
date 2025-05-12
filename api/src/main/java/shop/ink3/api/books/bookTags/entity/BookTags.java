@@ -13,6 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import shop.ink3.api.books.books.entity.Books;
+import shop.ink3.api.books.tags.entity.Tags;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,5 +34,5 @@ public class BookTags {
 
     @NotNull
     @ManyToOne
-    private Tag tag;
+    private Tags tags;
 }
