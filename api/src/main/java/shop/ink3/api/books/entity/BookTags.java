@@ -32,5 +32,5 @@ public class BookTags {
 
     @NotNull
     @ManyToOne
-    private Tag tag;
+    private Tags tags;
 }
