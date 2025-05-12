@@ -1,6 +1,6 @@
 package shop.ink3.api.books.dto;
 
-import shop.ink3.api.books.entity.Categories;
+import shop.ink3.api.books.categories.entity.Categories;
 public record CategoryResponse(
         Long id,
         String name,

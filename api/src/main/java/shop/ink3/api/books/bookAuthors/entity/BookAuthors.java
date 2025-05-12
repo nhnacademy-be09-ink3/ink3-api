@@ -1,11 +1,13 @@
-package shop.ink3.api.books.entity;
+package shop.ink3.api.books.bookAuthors.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import shop.ink3.api.books.authors.entity.Authors;
+import shop.ink3.api.books.books.entity.Books;
 
 @Entity
 @Getter
@@ -15,10 +17,10 @@ public class BookAuthors {
     @Id
     private Long id;
 
-    @NotNull
+    @JoinColumn(nullable = false)
     @ManyToOne
     Books books;
-    @NotNull
+    @JoinColumn(nullable = false)
     @ManyToOne
     Authors authors;
 }

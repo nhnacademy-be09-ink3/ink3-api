@@ -21,7 +21,7 @@ import shop.ink3.api.books.service.TagsService;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/api/books/tags")
 public class TagsController {
 
     private final TagsService tagsService;
@@ -31,13 +31,13 @@ public class TagsController {
         return ResponseEntity.ok(CommonResponse.success(tagsService.getTags()));
     }
 
-    @GetMapping("/{tagId}")
+    @GetMapping("/tagId/{tagId}")
     public ResponseEntity<CommonResponse<TagResponse>> getTagById(@PathVariable Long tagId) {
         return ResponseEntity.ok(CommonResponse.success(tagsService.getTagById(tagId)));
     }
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<TagResponse>> getTagByName(@RequestParam String tagName) {
+    @GetMapping("/tagName/{tagName}")
+    public ResponseEntity<CommonResponse<TagResponse>> getTagByName(@PathVariable String tagName) {
         return ResponseEntity.ok(CommonResponse.success(tagsService.getTagByName(tagName)));
     }
 
