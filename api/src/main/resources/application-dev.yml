@@ -14,7 +14,7 @@ spring:
         highlight_sql: true
         auto_quote_keyword: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
