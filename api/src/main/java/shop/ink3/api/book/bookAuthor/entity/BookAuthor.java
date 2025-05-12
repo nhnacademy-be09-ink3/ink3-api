@@ -1,4 +1,4 @@
-package shop.ink3.api.cart.entity;
+package shop.ink3.api.book.bookAuthor.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,36 +11,24 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.user.user.entity.User;
 
 @Entity
-@Table(name = "carts")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Cart {
+@Getter
+@Table(name = "book_authors")
+public class BookAuthor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    private int quantity;
-
-    public Cart(User user, Book book, int quantity) {
-        this.user = user;
-        this.book = book;
-        this.quantity = quantity;
-    }
-
-    public void updateQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private Author author;
 }

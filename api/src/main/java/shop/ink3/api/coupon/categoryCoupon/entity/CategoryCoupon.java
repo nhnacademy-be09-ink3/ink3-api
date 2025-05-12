@@ -1,6 +1,5 @@
-package shop.ink3.api.order.guestOrder.entiity;
+package shop.ink3.api.coupon.categoryCoupon.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,27 +13,26 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.order.order.entity.Order;
+import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
 
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
 @Builder
-@Entity
-@Table(name = "guest_order_accesses")
-public class GuestOrderAccess {
+@Getter
+@Table(name = "category_coupons")
+public class CategoryCoupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
 
-    @Column(nullable = false, length = 50)
-    private String email;
-
-    @Column(nullable = false, length = 50)
-    private String password;
+    @OneToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 }
