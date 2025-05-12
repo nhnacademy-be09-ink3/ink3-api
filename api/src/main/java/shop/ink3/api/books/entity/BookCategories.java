@@ -20,5 +20,5 @@ public class BookCategories {
 
     @NotNull
     @ManyToOne
-    Category category;
+    Categories categories;
 }
