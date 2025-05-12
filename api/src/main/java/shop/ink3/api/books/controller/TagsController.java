@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.books.dto.TagCreateRequest;
+import shop.ink3.api.books.dto.TagUpdateRequest;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.books.dto.TagResponse;
 import shop.ink3.api.books.service.TagsService;
@@ -44,7 +46,13 @@ public class TagsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(tagsService.createTag(tagCreateRequest)));
     }
 
-    //update
+    @PutMapping("/{tagId}")
+    public ResponseEntity<CommonResponse<TagResponse>> updateTag(
+            @PathVariable Long tagId,
+            @RequestBody TagUpdateRequest request
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(tagsService.updateTag(tagId, request)));
+    }
 
     @DeleteMapping("/{tagId}")
     public ResponseEntity<Void> deleteTag(@PathVariable Long tagId) {
