@@ -1,35 +1,38 @@
-package shop.ink3.api.coupon.couponPolicy.controller;
+package shop.ink3.api.coupon.couponPolicy.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
+import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
+import shop.ink3.api.coupon.policy.exception.PolicyAlreadyExistException;
+import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 import shop.ink3.api.coupon.policy.service.PolicyService;
 
 @ExtendWith(MockitoExtension.class)
-public class CouponPolicyServiceTest {
+class CouponPolicyServiceTest {
+
     @Mock
-    PolicyRepository policyRepository;
+    private PolicyRepository policyRepository;
 
     @InjectMocks
-    PolicyService policyService;
+    private PolicyService policyService;
 
     @Test
-    void getPolicyById() throws Exception {
+    void getPolicyById_success() {
         // given
         CouponPolicy policy = CouponPolicy.builder()
                 .id(1L)
@@ -41,24 +44,235 @@ public class CouponPolicyServiceTest {
                 .validDays(LocalDateTime.now().plusDays(30))
                 .build();
 
-        PolicyResponse response = PolicyResponse.from(policy, "쿠폰 정책 조회 완료");
+        when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
 
-        when(policyService.getPolicyById(1L)).thenReturn(response);
+        // when
+        PolicyResponse response = policyService.getPolicyById(1L);
+
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(PolicyResponse.from(policy, "쿠폰 정책 조회 완료"), response);
+    }
+
+    @Test
+    void getPolicyById_notFound_throwsException() {
+        // given
+        when(policyRepository.findById(1L)).thenReturn(Optional.empty());
 
         // when & then
-        mockMvc.perform(get("/policies/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.message").value("쿠폰 정책 조회 완료"))
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data.id").value(1L))
-                .andExpect(jsonPath("$.data.name").value("WELCOME10"))
-                .andExpect(jsonPath("$.data.discountType").value("RATE"))
-                .andExpect(jsonPath("$.data.discountValue").value(10))
-                .andExpect(jsonPath("$.data.minimumOrderAmount").value(10000))
-                .andExpect(jsonPath("$.data.maximumDiscountAmount").value(5000))
-                .andExpect(jsonPath("$.data.validDays").exists())
-                .andDo(print());
+        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
+            policyService.getPolicyById(1L);
+        });
+    }
+
+    @Test
+    void getPolicyByName_success() {
+        // given
+        CouponPolicy policy = CouponPolicy.builder()
+                .id(1L)
+                .name("WELCOME10")
+                .discountType(DiscountType.RATE)
+                .discount_value(10)
+                .minimum_order_amount(10000)
+                .maximum_discount_amount(5000)
+                .validDays(LocalDateTime.now().plusDays(30))
+                .build();
+
+        when(policyRepository.findByName("WELCOME10")).thenReturn(Optional.of(policy));
+
+        // when
+        PolicyResponse response = policyService.getPolicyByName("WELCOME10");
+
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(PolicyResponse.from(policy, "쿠폰 정책 조회 완료"), response);
+    }
+
+    @Test
+    void getPolicyByName_notFound_throwsException() {
+        // given
+        when(policyRepository.findByName("NOT_EXIST")).thenReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
+            policyService.getPolicyByName("NOT_EXIST");
+        });
+    }
+
+    @Test
+    void createPolicy_success() {
+        // given
+        PolicyCreateRequest request = new PolicyCreateRequest(
+                "WELCOME10",
+                DiscountType.RATE,
+                10000,
+                10,
+                5000,
+                LocalDateTime.now().plusDays(30)
+        );
+
+        when(policyRepository.existsByName("WELCOME10")).thenReturn(false);
+
+        CouponPolicy savedPolicy = CouponPolicy.builder()
+                .id(1L)
+                .name(request.name())
+                .discountType(request.discountType())
+                .minimum_order_amount(request.minimum_order_amount())
+                .discount_value(request.discount_value())
+                .maximum_discount_amount(request.maximum_discount_amount())
+                .validDays(request.valid_days())
+                .build();
+
+        when(policyRepository.save(any(CouponPolicy.class))).thenReturn(savedPolicy);
+
+        // when
+        PolicyResponse response = policyService.createPolicy(request);
+
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(PolicyResponse.from(savedPolicy, "쿠폰 정책 생성 완료"), response);
+    }
+
+    @Test
+    void createPolicy_alreadyExists_throwsException() {
+        // given
+        PolicyCreateRequest request = new PolicyCreateRequest(
+                "DUPLICATE_COUPON",
+                DiscountType.FIXED,
+                5000,
+                3000,
+                3000,
+                LocalDateTime.now().plusDays(10)
+        );
+
+        when(policyRepository.existsByName("DUPLICATE_COUPON")).thenReturn(true);
+
+        // when & then
+        Assertions.assertThrows(PolicyAlreadyExistException.class, () -> {
+            policyService.createPolicy(request);
+        });
+    }
+
+    @Test
+    void updatePolicy_success() {
+        // given
+        PolicyUpdateRequest request = new PolicyUpdateRequest(
+                "WELCOME10",
+                DiscountType.RATE,
+                10000,
+                15,
+                5000,
+                LocalDateTime.now().plusDays(15)
+        );
+
+        CouponPolicy existingPolicy = CouponPolicy.builder()
+                .id(1L)
+                .name("WELCOME10")
+                .discountType(DiscountType.RATE)
+                .discount_value(10)
+                .minimum_order_amount(10000)
+                .maximum_discount_amount(5000)
+                .validDays(LocalDateTime.now().plusDays(30))
+                .build();
+
+        when(policyRepository.findByName("WELCOME10")).thenReturn(Optional.of(existingPolicy));
+        when(policyRepository.save(any(CouponPolicy.class))).thenReturn(existingPolicy);
+
+        // when
+        PolicyResponse response = policyService.updatePolicy(request);
+
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(PolicyResponse.from(existingPolicy, "쿠폰 정책이 수정되었습니다."), response);
+    }
+
+    @Test
+    void updatePolicy_notFound_throwsException() {
+        // given
+        PolicyUpdateRequest request = new PolicyUpdateRequest(
+                "NOT_EXIST",
+                DiscountType.FIXED,
+                5000,
+                1000,
+                1000,
+                LocalDateTime.now().plusDays(7)
+        );
+
+        when(policyRepository.findByName("NOT_EXIST")).thenReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
+            policyService.updatePolicy(request);
+        });
+    }
+
+    @Test
+    void deletePolicyById_success() {
+        // given
+        CouponPolicy policy = CouponPolicy.builder()
+                .id(1L)
+                .name("DELETE_ME")
+                .discountType(DiscountType.RATE)
+                .discount_value(10)
+                .minimum_order_amount(10000)
+                .maximum_discount_amount(5000)
+                .validDays(LocalDateTime.now().plusDays(30))
+                .build();
+
+        when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
+
+        // when
+        PolicyResponse response = policyService.deletePolicyById(1L);
+
+        // then
+        verify(policyRepository).delete(policy);
+        Assertions.assertEquals(PolicyResponse.from(policy, "쿠폰 정책이 삭제되었습니다."), response);
+    }
+
+    @Test
+    void deletePolicyById_notFound_throwsException() {
+        // given
+        when(policyRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
+            policyService.deletePolicyById(999L);
+        });
+    }
+
+    @Test
+    void deletePolicyByName_success() {
+        // given
+        CouponPolicy policy = CouponPolicy.builder()
+                .id(2L)
+                .name("DELETE_BY_NAME")
+                .discountType(DiscountType.FIXED)
+                .discount_value(2000)
+                .minimum_order_amount(10000)
+                .maximum_discount_amount(3000)
+                .validDays(LocalDateTime.now().plusDays(20))
+                .build();
+
+        when(policyRepository.findByName("DELETE_BY_NAME")).thenReturn(Optional.of(policy));
+
+        // when
+        PolicyResponse response = policyService.deletePolicyByName("DELETE_BY_NAME");
+
+        // then
+        verify(policyRepository).delete(policy);
+        Assertions.assertEquals(PolicyResponse.from(policy, "쿠폰 정책이 삭제되었습니다."), response);
+    }
+
+    @Test
+    void deletePolicyByName_notFound_throwsException() {
+        // given
+        when(policyRepository.findByName("NOT_FOUND")).thenReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
+            policyService.deletePolicyByName("NOT_FOUND");
+        });
     }
 }
+
+
