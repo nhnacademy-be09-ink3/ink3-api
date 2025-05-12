@@ -10,15 +10,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.cart.entity.Cart;
+import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.review.entity.Review;
 import shop.ink3.api.user.membership.entity.Membership;
 
 @Entity
@@ -66,6 +73,12 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "membership_id", nullable = false)
     private Membership membership;
+
+    @OneToMany(mappedBy = "users")
+    private List<Cart> carts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "users")
+    private List<Review> reviews = new ArrayList<>();
 
     private LocalDateTime lastLoginAt;
 

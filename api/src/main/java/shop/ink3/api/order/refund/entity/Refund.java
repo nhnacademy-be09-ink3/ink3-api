@@ -23,12 +23,11 @@ import shop.ink3.api.order.order.entity.Order;
 @Table(name = "refunds")
 public class Refund {
     @Id
-    @Column(name = "id")
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @Column(name = "reason", nullable = false, length = 20)

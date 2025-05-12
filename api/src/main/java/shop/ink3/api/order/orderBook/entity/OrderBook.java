@@ -7,14 +7,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.books.books.entity.Books;
+import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.packaging.entity.Packaging;
+import shop.ink3.api.review.entity.Review;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -31,17 +35,20 @@ public class OrderBook {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    // fix :  bookID 수정 필요 다대일
+    @ManyToOne
     @JoinColumn(name = "book_id")
-    private Long bookId;
+    private Books books;
 
     @ManyToOne
     @JoinColumn(name = "packaging_id", nullable = true)
     private Packaging packaging;
 
-    // fix : coupon_store_id 수정 필요 다대일
+    @ManyToOne
     @JoinColumn(name = "coupon_store_id", nullable = true)
-    private Long couponStoreId;
+    private CouponStore couponStore;
+
+    @OneToOne(mappedBy = "orderBook")
+    private Review review;
 
     @Column(name = "price", nullable = false)
     private int price;

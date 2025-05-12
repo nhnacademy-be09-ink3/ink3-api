@@ -1,16 +1,24 @@
 package shop.ink3.api.coupon.coupon.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.coupon.policy.entity.CouponPolicy;
+import shop.ink3.api.coupon.store.entity.CouponStore;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,8 +38,9 @@ public class Coupon {
     @Column(nullable = false)
     private TriggerType triggerType;
 
-//    @Column(nullable = false)
-//    private CouponPolicy couponPolicy;
+    @ManyToOne
+    @JoinColumn(name = "coupon_policy_id")
+    private CouponPolicy couponPolicy;
 
 //    // === 유틸 메서드 ===
 //    public Optional<BookCoupon> getBookTrigger(List<BookCoupon> allBookTriggers) {

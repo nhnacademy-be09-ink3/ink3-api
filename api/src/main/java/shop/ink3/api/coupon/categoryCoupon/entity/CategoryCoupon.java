@@ -1,6 +1,5 @@
-package shop.ink3.api.payments.entity;
+package shop.ink3.api.coupon.categoryCoupon.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -12,26 +11,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.books.books.entity.Books;
+import shop.ink3.api.books.categories.entity.Categories;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.order.order.entity.Order;
 
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter
 @Builder
-@Entity
-@Table(name = "payments")
-public class Payment {
+@Getter
+@Table(name = "category_coupons")
+public class CategoryCoupon {
     @Id
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @JoinColumn(name = "category_coupon_id")
+    private Coupon coupon;
 
-    @Column(name = "payment_key", nullable = false)
-    private String paymentKey;
-
-    @Column(name = "payment_amount", nullable = false)
-    private int paymentAmount;
+    @OneToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Categories categories;
 }

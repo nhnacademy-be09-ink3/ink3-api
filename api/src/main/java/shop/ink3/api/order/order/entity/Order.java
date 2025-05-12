@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -14,6 +16,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.user.user.entity.User;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -26,8 +31,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // fix : 사용자ID 연결 필요. 다대일
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "users_id", nullable = true)
+    private User users;
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_store_id", nullable = true)
+    private CouponStore couponStore;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -41,7 +51,4 @@ public class Order {
 
     @Column(name = "orderer_phone", nullable = false, length = 20)
     private String ordererPhone;
-
-    // fix : 쿠폰 보관함ID 연결 필요 다대일
-    private Long couponStoreId;
 }

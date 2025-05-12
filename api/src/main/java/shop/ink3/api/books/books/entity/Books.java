@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 import shop.ink3.api.books.bookAuthors.entity.BookAuthors;
 import shop.ink3.api.books.bookCategories.entity.BookCategories;
 import shop.ink3.api.books.publishers.entity.Publishers;
+import shop.ink3.api.cart.entity.Cart;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -71,6 +73,9 @@ public class Books {
 
     @Column(nullable = false)
     private String thumbnailUrl;
+
+    @OneToMany(mappedBy = "books")
+    private List<Cart> carts = new ArrayList<>();
 
     @OneToMany(mappedBy = "books",
             cascade = CascadeType.ALL,

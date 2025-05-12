@@ -22,12 +22,11 @@ import shop.ink3.api.order.order.entity.Order;
 @Table(name = "guest_order_accesses")
 public class GuestOrderAccess {
     @Id
-    @Column(name = "id")
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @Column(name = "email", nullable = false, length = 50)
