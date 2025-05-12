@@ -1,4 +1,4 @@
-package shop.ink3.api.payments.entity;
+package shop.ink3.api.payment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

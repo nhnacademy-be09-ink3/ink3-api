@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.order.entity.Order;
+import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 import shop.ink3.api.order.shipment.dto.ShipmentCreateRequest;
@@ -41,6 +42,13 @@ public class ShipmentService {
     public PageResponse<ShipmentResponse> getUserShipmentList(long userId, Pageable pageable) {
         Page<Shipment> shipmentpage = shipmentRepository.findByOrder_UserId(userId, pageable);
         Page<ShipmentResponse> shipmentResponsePage = shipmentpage.map(shipment -> ShipmentResponse.from(shipment));
+        return PageResponse.from(shipmentResponsePage);
+    }
+
+    // 주문 상태에 따른 배송 list
+    public PageResponse<ShipmentResponse> getShipmentListByOrderStatus(long userId, OrderStatus status, Pageable pageable){
+        Page<Shipment> shipmentPage = shipmentRepository.findByOrder_UserIdAndOrder_Status(userId, status, pageable);
+        Page<ShipmentResponse> shipmentResponsePage = shipmentPage.map(shipment -> ShipmentResponse.from(shipment));
         return PageResponse.from(shipmentResponsePage);
     }
 

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.shipment.dto.ShipmentCreateRequest;
 import shop.ink3.api.order.shipment.dto.ShipmentResponse;
 import shop.ink3.api.order.shipment.dto.ShipmentUpdateRequest;
@@ -40,6 +41,20 @@ public class ShipmentController {
             @PathVariable long userId, Pageable pageable) {
         return ResponseEntity
                 .ok(CommonResponse.success(shipmentService.getUserShipmentList(userId, pageable)));
+    }
+
+    @GetMapping("/user/{userId}/order-status")
+    public ResponseEntity<CommonResponse<PageResponse<ShipmentResponse>>> getUserShipmentByOrderStatus(
+            @PathVariable long userId,
+            @RequestParam String orderStatus,
+            Pageable pageable) {
+
+        return ResponseEntity
+                .ok(CommonResponse.success(
+                        shipmentService.getShipmentListByOrderStatus(
+                                userId,
+                                OrderStatus.valueOf(orderStatus),
+                                pageable)));
     }
 
     @PostMapping

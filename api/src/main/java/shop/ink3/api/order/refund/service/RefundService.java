@@ -37,6 +37,8 @@ public class RefundService {
         return PageResponse.from(pageRefundResponse);
     }
 
+
+
     // 생성
     @Transactional
     public RefundResponse createRefund(RefundCreateRequest request) {
@@ -57,7 +59,7 @@ public class RefundService {
             throw new RefundNotFoundException(orderId);
         }
         Refund refund = optionalRefund.get();
-        refund.update(refund);
+        refund.update(request);
         return RefundResponse.from(refundRepository.save(refund));
     }
 

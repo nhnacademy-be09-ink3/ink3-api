@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.order.order.entity.Order;
+import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -37,9 +38,9 @@ public class Refund {
     @Column(name = "details", nullable = false, length = 255)
     private String details;
 
-    public void update(Refund refund) {
-        this.details = refund.getDetails();
-        this.reason = refund.getReason();
+    public void update(RefundUpdateRequest request) {
+        this.reason = request.getReason();
+        this.details = request.getDetails();
     }
 }
 

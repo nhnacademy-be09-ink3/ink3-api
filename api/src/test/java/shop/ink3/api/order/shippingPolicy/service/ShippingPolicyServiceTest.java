@@ -40,9 +40,6 @@ class ShippingPolicyServiceTest {
     @InjectMocks
     ShippingPolicyService shippingPolicyService;
 
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     @DisplayName("배송 정책 생성 - 성공")
