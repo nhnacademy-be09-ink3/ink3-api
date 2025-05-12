@@ -1,7 +1,8 @@
-package shop.ink3.api.coupon.policy.dto;
+package shop.ink3.api.coupon.policy.dto.valid;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
 
 public class DiscountPolicyValidator implements ConstraintValidator<ValidDiscountPolicy, PolicyCreateRequest> {

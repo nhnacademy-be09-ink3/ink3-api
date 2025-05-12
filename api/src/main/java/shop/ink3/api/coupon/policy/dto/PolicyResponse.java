@@ -1,26 +1,28 @@
 package shop.ink3.api.coupon.policy.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import shop.ink3.api.coupon.policy.dto.valid.ValidDiscountPolicy;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
 
 @ValidDiscountPolicy
 public record PolicyResponse(
-        @NotBlank
+        @NotNull
         Long policyId,
 
         @NotBlank
         String policyName,
 
-        @NotBlank
+        @NotNull
         DiscountType discountType,
 
         int discount_value,
 
         int discount_percentage,
 
-        @NotBlank
+        @NotNull
         LocalDateTime validDays,
 
         @NotBlank

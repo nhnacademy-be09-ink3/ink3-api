@@ -1,4 +1,4 @@
-package shop.ink3.api.coupon.policy.dto;
+package shop.ink3.api.coupon.policy.dto.valid;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
