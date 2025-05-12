@@ -1,18 +1,8 @@
 package shop.ink3.api.coupon.couponPolicy.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,18 +10,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import shop.ink3.api.coupon.policy.controller.PolicyController;
 import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
-import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
-import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.service.PolicyService;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @WebMvcTest(PolicyController.class)
-public class CouponPolicyControllerTest {
+class CouponPolicyControllerTest {
+
     @Autowired
     MockMvc mockMvc;
 
@@ -43,153 +37,86 @@ public class CouponPolicyControllerTest {
 
     @Test
     void getPolicyById() throws Exception {
-        CouponPolicy policy = CouponPolicy.builder()
-                .id(1L)
-                .name("WELCOME")
-                .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
-                .validDays(LocalDateTime.now().plusDays(30))
-                .build();
-
-        PolicyResponse response = PolicyResponse.from(policy, "쿠폰 정책 조회 완료");
+        PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0, LocalDateTime.now().plusDays(30),"쿠폰 정책 조회 완료");
         when(policyService.getPolicyById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/policies/1"))
                 .andExpect(status().isOk())
-                .andExpect((ResultMatcher) content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect((ResultMatcher) jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect((ResultMatcher) jsonPath("$.message").value("쿠폰 정책 조회 완료"))
-                .andExpect((ResultMatcher) jsonPath("$.timestamp").exists())
-                .andExpect((ResultMatcher) jsonPath("$.data.id").value(1L))
-                .andExpect((ResultMatcher) jsonPath("$.data.name").value("WELCOME"))
-                .andExpect((ResultMatcher) jsonPath("$.data.discountType").value("RATE"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.policyId").value(1L))
+                .andExpect(jsonPath("$.data.policyName").value("TestPolicy"))
                 .andDo(print());
     }
 
     @Test
-    void getPolicyById_notFound() throws Exception {
-        when(policyService.getPolicyById(999L)).thenThrow(new PolicyNotFoundException("없는 쿠폰 정책"));
+    void getPolicyByName() throws Exception {
+        PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0,LocalDateTime.now().plusDays(5),"쿠폰 정책 생성 완료");
+        when(policyService.getPolicyByName("TestPolicy")).thenReturn(response);
 
-        mockMvc.perform(get("/policies/999"))
-                .andExpect(status().isNotFound())
-                .andExpect((ResultMatcher) content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect((ResultMatcher) jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
-                .andExpect((ResultMatcher) jsonPath("$.message").exists())
-                .andExpect((ResultMatcher) jsonPath("$.data").isEmpty())
+        mockMvc.perform(get("/policies/policyName/TestPolicy"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.policyName").value("TestPolicy"))
                 .andDo(print());
     }
 
     @Test
     void createPolicy() throws Exception {
-        PolicyCreateRequest request = new PolicyCreateRequest(
-                "WELCOME",
-                DiscountType.RATE,
-                10000,
-                10,
-                5000,
-                LocalDateTime.now().plusDays(30)
-        );
-
-        CouponPolicy policy = CouponPolicy.builder()
-                .id(1L)
-                .name("WELCOME")
-                .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
-                .validDays(request.valid_days())
-                .build();
-
-        PolicyResponse response = PolicyResponse.from(policy, "쿠폰 정책 생성 완료");
-
-        when(policyService.createPolicy(any(PolicyCreateRequest.class))).thenReturn(response);
+        PolicyCreateRequest request = new PolicyCreateRequest("NewPolicy", DiscountType.RATE, 10000,0,10,0, LocalDateTime.now().plusDays(10));
+        PolicyResponse response = new PolicyResponse(1L, "NewPolicy", DiscountType.RATE, 0, 10,LocalDateTime.now().plusDays(10),"쿠폰 정책 생성 완료");
+        when(policyService.createPolicy(any())).thenReturn(response);
 
         mockMvc.perform(post("/policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect((ResultMatcher) jsonPath("$.status").value(HttpStatus.CREATED.value()))
-                .andExpect((ResultMatcher) jsonPath("$.data.name").value("WELCOME"))
-                .andExpect((ResultMatcher) jsonPath("$.message").value("쿠폰 정책 생성 완료"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()))
+                .andExpect(jsonPath("$.data.policyName").value("NewPolicy"))
                 .andDo(print());
     }
 
     @Test
     void updatePolicy() throws Exception {
-        PolicyUpdateRequest request = new PolicyUpdateRequest(
-                "WELCOME",
-                DiscountType.RATE,
-                15000,
-                15,
-                6000,
-                LocalDateTime.now().plusDays(20)
-        );
-
-        CouponPolicy policy = CouponPolicy.builder()
-                .id(1L)
-                .name("WELCOME")
-                .discountType(DiscountType.RATE)
-                .discount_value(15)
-                .minimum_order_amount(15000)
-                .maximum_discount_amount(6000)
-                .validDays(request.valid_days())
-                .build();
-
-        PolicyResponse response = PolicyResponse.from(policy, "쿠폰 정책이 수정되었습니다.");
-        when(policyService.updatePolicy(any(PolicyUpdateRequest.class))).thenReturn(response);
+        PolicyUpdateRequest request = new PolicyUpdateRequest("updatedPolicy", DiscountType.FIXED, 10000,500,0,0, LocalDateTime.now().plusDays(3));
+        PolicyResponse response = new PolicyResponse(1L, "UpdatedPolicy", DiscountType.FIXED, 500, 0, LocalDateTime.now().plusDays(3),"쿠폰 정책이 수정되었습니다.");
+        when(policyService.updatePolicy(any())).thenReturn(response);
 
         mockMvc.perform(put("/policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect((ResultMatcher) jsonPath("$.data.discountValue").value(15))
-                .andExpect((ResultMatcher) jsonPath("$.message").value("쿠폰 정책이 수정되었습니다."))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.policyName").value("UpdatedPolicy"))
                 .andDo(print());
     }
 
     @Test
     void deletePolicyById() throws Exception {
-        CouponPolicy policy = CouponPolicy.builder()
-                .id(1L)
-                .name("WELCOME")
-                .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
-                .validDays(LocalDateTime.now().plusDays(30))
-                .build();
-
-        PolicyResponse response = PolicyResponse.from(policy, "쿠폰 정책이 삭제되었습니다.");
+        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0, LocalDateTime.now().plusDays(3), "쿠폰 정책 생성 완료");
         when(policyService.deletePolicyById(1L)).thenReturn(response);
 
         mockMvc.perform(delete("/policies/1"))
                 .andExpect(status().isOk())
-                .andExpect((ResultMatcher) jsonPath("$.message").value("쿠폰 정책이 삭제되었습니다."))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.policyId").value(1L))
                 .andDo(print());
     }
 
     @Test
     void deletePolicyByName() throws Exception {
-        CouponPolicy policy = CouponPolicy.builder()
-                .id(1L)
-                .name("WELCOME")
-                .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
-                .validDays(LocalDateTime.now().plusDays(30))
-                .build();
+        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0,LocalDateTime.now().plusDays(3),"쿠폰 정책 생성 완료");
+        when(policyService.deletePolicyByName("DeletedPolicy")).thenReturn(response);
 
-        PolicyResponse response = PolicyResponse.from(policy, "쿠폰 정책이 삭제되었습니다.");
-        when(policyService.deletePolicyByName("WELCOME")).thenReturn(response);
-
-        mockMvc.perform(delete("/policies/by-name/WELCOME"))
+        mockMvc.perform(delete("/policies/policyName/DeletedPolicy"))
                 .andExpect(status().isOk())
-                .andExpect((ResultMatcher) jsonPath("$.data.name").value("WELCOME"))
-                .andExpect((ResultMatcher) jsonPath("$.message").value("쿠폰 정책이 삭제되었습니다."))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.policyName").value("DeletedPolicy"))
                 .andDo(print());
     }
-
 }

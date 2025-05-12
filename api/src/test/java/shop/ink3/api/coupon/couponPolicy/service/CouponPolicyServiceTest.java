@@ -107,7 +107,8 @@ class CouponPolicyServiceTest {
                 DiscountType.RATE,
                 10000,
                 10,
-                5000,
+                50,
+                50000,
                 LocalDateTime.now().plusDays(30)
         );
 
@@ -141,7 +142,8 @@ class CouponPolicyServiceTest {
                 DiscountType.FIXED,
                 5000,
                 3000,
-                3000,
+                0,
+                0,
                 LocalDateTime.now().plusDays(10)
         );
 
@@ -160,8 +162,9 @@ class CouponPolicyServiceTest {
                 "WELCOME10",
                 DiscountType.RATE,
                 10000,
+                0,
                 15,
-                5000,
+                0,
                 LocalDateTime.now().plusDays(15)
         );
 
@@ -194,6 +197,7 @@ class CouponPolicyServiceTest {
                 DiscountType.FIXED,
                 5000,
                 1000,
+                0,
                 1000,
                 LocalDateTime.now().plusDays(7)
         );
@@ -213,7 +217,8 @@ class CouponPolicyServiceTest {
                 .id(1L)
                 .name("DELETE_ME")
                 .discountType(DiscountType.RATE)
-                .discount_value(10)
+                .discount_value(0)
+                .discount_percentage(10)
                 .minimum_order_amount(10000)
                 .maximum_discount_amount(5000)
                 .validDays(LocalDateTime.now().plusDays(30))

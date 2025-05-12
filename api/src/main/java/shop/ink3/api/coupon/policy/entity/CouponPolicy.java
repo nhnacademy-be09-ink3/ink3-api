@@ -26,6 +26,7 @@ public class CouponPolicy {
 
     private int minimum_order_amount;
     private int discount_value;
+    private int discount_percentage;
     private int maximum_discount_amount;
     private LocalDateTime validDays;
 

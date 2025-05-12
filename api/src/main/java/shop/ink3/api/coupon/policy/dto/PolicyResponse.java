@@ -5,16 +5,24 @@ import java.time.LocalDateTime;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
 
+@ValidDiscountPolicy
 public record PolicyResponse(
         @NotBlank
         Long policyId,
+
         @NotBlank
         String policyName,
+
         @NotBlank
         DiscountType discountType,
+
         int discount_value,
+
+        int discount_percentage,
+
         @NotBlank
         LocalDateTime validDays,
+
         @NotBlank
         String message
 ) {
@@ -24,6 +32,7 @@ public record PolicyResponse(
                 policy.getName(),
                 policy.getDiscountType(),
                 policy.getDiscount_value(),
+                policy.getDiscount_percentage(),
                 policy.getValidDays(),
                 message
         );
