@@ -1,14 +1,14 @@
-package shop.ink3.api.books.controller;
+package shop.ink3.api.book;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import shop.ink3.api.books.controller.TagsController;
 import shop.ink3.api.books.dto.TagCreateRequest;
 import shop.ink3.api.books.dto.TagResponse;
 import shop.ink3.api.books.dto.TagUpdateRequest;
@@ -43,7 +43,7 @@ class TagsControllerTest {
 
         given(tagsService.createTag(any())).willReturn(response);
 
-        mockMvc.perform(post("/tags")
+        mockMvc.perform(post("/api/books/tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -58,7 +58,7 @@ class TagsControllerTest {
         );
         given(tagsService.getTags()).willReturn(tags);
 
-        mockMvc.perform(get("/tags"))
+        mockMvc.perform(get("/api/books/tags"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].name").value("java"))
                 .andExpect(jsonPath("$.data[1].name").value("spring"));
@@ -71,7 +71,7 @@ class TagsControllerTest {
 
         given(tagsService.updateTag(eq(1L), any())).willReturn(response);
 
-        mockMvc.perform(put("/tags/1")
+        mockMvc.perform(put("/api/books/tags/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -82,7 +82,27 @@ class TagsControllerTest {
     void deleteTag() throws Exception {
         willDoNothing().given(tagsService).deleteTag(1L);
 
-        mockMvc.perform(delete("/tags/1"))
+        mockMvc.perform(delete("/api/books/tags/1"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getTagById() throws Exception {
+        TagResponse response = new TagResponse(1L, "java");
+        given(tagsService.getTagById(1L)).willReturn(response);
+
+        mockMvc.perform(get("/api/books/tags/tagId/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("java"));
+    }
+
+    @Test
+    void getTagByName() throws Exception {
+        TagResponse response = new TagResponse(1L, "java");
+        given(tagsService.getTagByName("java")).willReturn(response);
+
+        mockMvc.perform(get("/api/books/tags/tagName/java"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("java"));
     }
 }

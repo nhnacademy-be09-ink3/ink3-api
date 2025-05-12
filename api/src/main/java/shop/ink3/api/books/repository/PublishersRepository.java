@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.jpa.repository.JpaRepository;
-import shop.ink3.api.books.entity.Publishers;
+import shop.ink3.api.books.publishers.entity.Publishers;
 
 
 public interface PublishersRepository extends JpaRepository<Publishers, Long> {

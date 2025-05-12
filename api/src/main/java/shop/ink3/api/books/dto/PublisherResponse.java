@@ -1,7 +1,7 @@
 package shop.ink3.api.books.dto;
 
 
-import shop.ink3.api.books.entity.Publishers;
+import shop.ink3.api.books.publishers.entity.Publishers;
 
 public record PublisherResponse(
         Long id,
