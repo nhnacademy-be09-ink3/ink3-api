@@ -24,5 +24,5 @@ public class Tags {
 
     @Column(nullable = false)
     @Length(max=20)
-    String name;
+    private String name;
 }

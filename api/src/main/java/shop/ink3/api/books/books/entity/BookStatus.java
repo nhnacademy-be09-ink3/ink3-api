@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum Status {
+public enum BookStatus {
     AVAILABLE("판매 중"),
     OUT_OF_STOCK("수량 부족"),
     SOLD_OUT("판매 종료"),

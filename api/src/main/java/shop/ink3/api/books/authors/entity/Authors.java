@@ -2,24 +2,33 @@ package shop.ink3.api.books.authors.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Date;
+import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Getter
-@Setter
 public class Authors {
     @Id
-    @Column(nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, length = 50)
-    String name;
+
+    @Column(nullable = false, length = 20)
+    private String name;
+
     @Column(nullable = false)
-    Date date;
-    @Column(nullable = false, length = 50)
-    String nationality;
+    private LocalDate birth;
+
+    @Column(nullable = false, length = 20)
+    private String nationality;
+
     @Column(nullable = false)
-    String biography;
+    private String biography;
 }
