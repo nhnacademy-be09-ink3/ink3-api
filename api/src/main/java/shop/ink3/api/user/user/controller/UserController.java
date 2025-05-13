@@ -21,6 +21,7 @@ import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
+import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
@@ -75,6 +76,15 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.update(userService.updateUser(userId, request)));
     }
 
+    @PatchMapping("/{userId}/password")
+    public ResponseEntity<Void> updateUserPassword(
+            @PathVariable long userId,
+            @RequestBody UserPasswordUpdateRequest request
+    ) {
+        userService.updateUserPassword(userId, request);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{userId}/activate")
     public ResponseEntity<Void> activateUser(@PathVariable long userId) {
         userService.activateUser(userId);
@@ -83,13 +93,13 @@ public class UserController {
 
     @PatchMapping("/{userId}/dormant")
     public ResponseEntity<Void> dormantUser(@PathVariable long userId) {
-        userService.markAsDormant(userId);
+        userService.markAsDormantUser(userId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{userId}/withdraw")
     public ResponseEntity<Void> withdrawUser(@PathVariable long userId) {
-        userService.withdraw(userId);
+        userService.withdrawUser(userId);
         return ResponseEntity.noContent().build();
     }
 

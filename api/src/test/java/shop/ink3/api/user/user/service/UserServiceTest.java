@@ -2,6 +2,7 @@ package shop.ink3.api.user.user.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
@@ -24,6 +27,7 @@ import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
+import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
@@ -45,7 +49,7 @@ class UserServiceTest {
     PointHistoryRepository pointHistoryRepository;
 
     @Spy
-    PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @InjectMocks
     UserService userService;
@@ -218,7 +222,6 @@ class UserServiceTest {
                 .build();
         UserUpdateRequest request = new UserUpdateRequest(
                 "new",
-                "new",
                 "new@new.com",
                 "010-5150-5150",
                 LocalDate.of(2025, 1, 2)
@@ -240,6 +243,31 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserPassword() {
+        User user = User.builder().password(passwordEncoder.encode("old")).build();
+        UserPasswordUpdateRequest request = new UserPasswordUpdateRequest("old", "new");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        userService.updateUserPassword(1L, request);
+        Assertions.assertTrue(passwordEncoder.matches(request.newPassword(), user.getPassword()));
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void updateUserPasswordWithInvalidPassword() {
+        User user = User.builder().password(passwordEncoder.encode("old")).build();
+        UserPasswordUpdateRequest request = new UserPasswordUpdateRequest("invalid", "new");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        Assertions.assertThrows(InvalidPasswordException.class, () -> userService.updateUserPassword(1L, request));
+    }
+
+    @Test
+    void updateUserPasswordWithNotFound() {
+        UserPasswordUpdateRequest request = new UserPasswordUpdateRequest("old", "new");
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        Assertions.assertThrows(UserNotFoundException.class, () -> userService.updateUserPassword(1L, request));
+    }
+
+    @Test
     void activateUser() {
         User user = User.builder().id(1L).status(UserStatus.DORMANT).build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -255,31 +283,31 @@ class UserServiceTest {
     }
 
     @Test
-    void markAsDormant() {
+    void markAsDormantUser() {
         User user = User.builder().id(1L).status(UserStatus.ACTIVE).build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        userService.markAsDormant(1L);
+        userService.markAsDormantUser(1L);
         Assertions.assertEquals(UserStatus.DORMANT, user.getStatus());
         verify(userRepository).save(user);
     }
 
     @Test
-    void markAsDormantWithNotFound() {
+    void markAsDormantUserWithNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class, () -> userService.getUserDetail(1L));
     }
 
     @Test
-    void withdraw() {
+    void withdrawUser() {
         User user = User.builder().id(1L).status(UserStatus.ACTIVE).build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        userService.withdraw(1L);
+        userService.withdrawUser(1L);
         Assertions.assertEquals(UserStatus.WITHDRAWN, user.getStatus());
         verify(userRepository).save(user);
     }
 
     @Test
-    void withdrawWithNotFound() {
+    void withdrawUserWithNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class, () -> userService.getUserDetail(1L));
     }

@@ -10,15 +10,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.cart.entity.Cart;
+import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.review.entity.Review;
 import shop.ink3.api.user.membership.entity.Membership;
 
 @Entity
@@ -67,17 +74,26 @@ public class User {
     @JoinColumn(name = "membership_id", nullable = false)
     private Membership membership;
 
+    @OneToMany(mappedBy = "user")
+    private List<Cart> carts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<Review> reviews = new ArrayList<>();
+
     private LocalDateTime lastLoginAt;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public void update(String password, String name, String email, String phone, LocalDate birthday) {
-        this.password = password;
+    public void update(String name, String email, String phone, LocalDate birthday) {
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.birthday = birthday;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
     public void activate() {
@@ -104,7 +120,7 @@ public class User {
         this.membership = membership;
     }
 
-    public void updateLastLoginAt(LocalDateTime time) {
-        this.lastLoginAt = time;
+    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 }
