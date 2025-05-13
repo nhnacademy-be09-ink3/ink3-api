@@ -35,7 +35,7 @@ public class CategoryService {
         if (categoryCreateRequest.parentId() != null) {
             Category parent = categoryRepository.findById(categoryCreateRequest.parentId())
                     .orElseThrow(() -> new IllegalArgumentException("부모 카테고리를 찾을 수 없습니다: " + categoryCreateRequest.parentId()));
-            category.setCategory(parent);
+            category.updateParentCategory(parent);
         }
 
         return CategoryResponse.from(categoryRepository.save(category));
@@ -45,15 +45,14 @@ public class CategoryService {
     public CategoryResponse updateCategory(Long id, CategoryUpdateRequest categoryUpdateRequest) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다: " + id));
-
-        category.setName(categoryUpdateRequest.name());
+        category.updateCategoryName(categoryUpdateRequest.name());
 
         if (categoryUpdateRequest.parentId() != null) {
             Category parent = categoryRepository.findById(categoryUpdateRequest.parentId())
                     .orElseThrow(() -> new IllegalArgumentException("부모 카테고리를 찾을 수 없습니다: " + categoryUpdateRequest.parentId()));
-            category.setCategory(parent);
+            category.updateParentCategory(parent);
         } else {
-            category.setCategory(null);
+            category.updateParentCategory(null);
         }
 
         return CategoryResponse.from(category);

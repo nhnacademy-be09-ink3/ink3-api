@@ -41,4 +41,11 @@ public class Category {
         this.bookCategories.add(bookCategory);
     }
 
+    public void updateCategoryName(@Length(max=20) String name) {
+        this.name = name;
+    }
+
+    public void updateParentCategory(Category category) {
+        this.category = category;
+    }
 }
