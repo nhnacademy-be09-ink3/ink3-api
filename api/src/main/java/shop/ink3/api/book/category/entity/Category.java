@@ -1,19 +1,16 @@
 package shop.ink3.api.book.category.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -33,4 +30,15 @@ public class Category {
     @OneToOne
     @JoinColumn(name = "parent_id")
     private Category category;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "categories",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookCategory> bookCategories = new ArrayList<>();
+
+    public void addBookCategory(BookCategory bookCategory) {
+        this.bookCategories.add(bookCategory);
+    }
+
 }

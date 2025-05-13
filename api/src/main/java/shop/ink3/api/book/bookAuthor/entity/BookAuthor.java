@@ -20,6 +20,11 @@ import shop.ink3.api.book.book.entity.Book;
 @Getter
 @Table(name = "book_authors")
 public class BookAuthor {
+
+    public BookAuthor(Book book, Author author){
+        this.author = author;
+        this.book = book;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

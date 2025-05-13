@@ -13,17 +13,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.publisher.entity.Publisher;
 
+@Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -75,17 +75,27 @@ public class Book {
     @Column(nullable = false)
     private String thumbnailUrl;
 
+    @Builder.Default
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookCategory> bookCategories;
+    private List<BookCategory> bookCategories = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookAuthor> bookAuthors;
+    private List<BookAuthor> bookAuthors = new ArrayList<>();
 
     public void setDiscountRate() {
         this.discountRate = (salePrice / originalPrice) * 100;
+    }
+
+    public void addBookCategory(BookCategory bookCategory) {
+        this.bookCategories.add(bookCategory);
+    }
+
+    public void addBookAuthor(BookAuthor bookAuthor) {
+        this.bookAuthors.add(bookAuthor);
     }
 }

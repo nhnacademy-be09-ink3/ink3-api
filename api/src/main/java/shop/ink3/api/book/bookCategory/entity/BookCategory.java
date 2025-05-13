@@ -20,6 +20,10 @@ import shop.ink3.api.book.category.entity.Category;
 @Getter
 @Table(name = "book_categories")
 public class BookCategory {
+    public BookCategory(Book book, Category category) {
+        this.book = book;
+        this.category = category;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
