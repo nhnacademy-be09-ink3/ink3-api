@@ -9,4 +9,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Category findByName(@NotNull @Length(max=20) String name);
 
     boolean existsByName(@NotNull @Length(max=20) String name);
+
+    boolean existsByCategory(Category category);
 }

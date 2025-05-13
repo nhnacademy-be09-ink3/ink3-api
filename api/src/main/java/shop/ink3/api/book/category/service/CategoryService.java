@@ -19,11 +19,7 @@ import shop.ink3.api.book.category.repository.CategoryRepository;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    /*
-    부모 카테고리가 없는 카테고리 생성
-    부모 카테고리가 있는 카테고리 생성
-    부모 카테고리가 없는 카테고리의 카테고리 수정
-     */
+
 
     @Transactional
     public CategoryResponse createCategory(CategoryCreateRequest categoryCreateRequest) {
@@ -49,12 +45,12 @@ public class CategoryService {
     @Transactional
     public CategoryResponse updateCategory(Long id, CategoryUpdateRequest categoryUpdateRequest) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException(id));
         category.updateCategoryName(categoryUpdateRequest.name());
 
         if (categoryUpdateRequest.parentId() != null) {
             Category parent = categoryRepository.findById(categoryUpdateRequest.parentId())
-                    .orElseThrow(() -> new IllegalArgumentException("부모 카테고리를 찾을 수 없습니다: " + categoryUpdateRequest.parentId()));
+                    .orElseThrow(() -> new CategoryNotFoundException(categoryUpdateRequest.parentId()));
             category.updateParentCategory(parent);
         } else {
             category.updateParentCategory(null);
@@ -63,10 +59,16 @@ public class CategoryService {
         return CategoryResponse.from(category);
     }
 
+
     @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
+
+        if (categoryRepository.existsByCategory(category)) {
+            throw new IllegalStateException("하위 카테고리가 존재하여 삭제할 수 없습니다.");
+        }
+
         categoryRepository.delete(category);
     }
 
@@ -106,5 +108,15 @@ public class CategoryService {
                 .filter(c -> c.getCategory() == null)
                 .map(c -> idToDto.get(c.getId()))
                 .toList();
+    }
+
+    private void validateNoCircularReference(Category category, Category parent) {
+        Category current = parent;
+        while (current != null) {
+            if (current.getId() != null && current.getId().equals(category.getId())) {
+                throw new IllegalArgumentException("자기 자신 또는 하위 카테고리를 부모로 설정할 수 없습니다.");
+            }
+            current = current.getCategory();
+        }
     }
 }
