@@ -19,6 +19,7 @@ import java.util.List;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
@@ -26,6 +27,7 @@ import shop.ink3.api.book.bookCategory.entity.BookCategory;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.cart.entity.Cart;
 
+@Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

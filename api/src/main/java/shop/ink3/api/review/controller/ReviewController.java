@@ -1,7 +1,9 @@
 package shop.ink3.api.review.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,21 +22,27 @@ import shop.ink3.api.review.service.ReviewService;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
-
     private final ReviewService reviewService;
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> create(@RequestBody ReviewRequest request) {
-        return ResponseEntity.ok(reviewService.createReview(request));
+    public ResponseEntity<ReviewResponse> addReview(@RequestBody ReviewRequest request) {
+        return ResponseEntity.ok(reviewService.addReview(request));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReviewResponse>> listByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(reviewService.getReviewsByUserId(userId));
+    public ResponseEntity<ReviewResponse> getReviewByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(reviewService.getReviewByUserId(userId));
+    }
+
+    @GetMapping("/book/{bookId}")
+    public ResponseEntity<Page<ReviewResponse>> getReviewsByBookId(
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+        @PathVariable Long bookId) {
+        return ResponseEntity.ok(reviewService.getReviewsByBookId(pageable, bookId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<?> deleteReview(@PathVariable Long id) {
         reviewService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }

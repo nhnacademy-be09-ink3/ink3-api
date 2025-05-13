@@ -47,9 +47,6 @@ public class OrderBook {
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
 
-    @OneToOne(mappedBy = "orderBook")
-    private Review review;
-
     @Column(name = "price", nullable = false)
     private int price;
 
