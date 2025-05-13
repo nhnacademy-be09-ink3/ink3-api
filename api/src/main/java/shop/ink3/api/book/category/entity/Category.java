@@ -33,7 +33,6 @@ public class Category {
 
     @Builder.Default
     @OneToMany(mappedBy = "category",
-            cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
 

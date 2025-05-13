@@ -36,7 +36,6 @@ public class Tag {
 
     @Builder.Default
     @OneToMany(mappedBy = "tag",
-            cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<BookTag> bookTags = new ArrayList<>();
 
