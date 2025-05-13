@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
+@Builder    // service에서 builder 사용
 @Table(name = "authors")
 public class Author {
     @Id
@@ -33,4 +35,11 @@ public class Author {
 
     @Column(nullable = false)
     private String biography;
+
+    public void update(String name, LocalDate birth, String nationality, String biography) {
+        this.name = name;
+        this.birth = birth;
+        this.nationality = nationality;
+        this.biography = biography;
+    }
 }

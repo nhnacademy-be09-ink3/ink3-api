@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import shop.ink3.api.book.tag.controller.TagController;
@@ -15,6 +19,7 @@ import shop.ink3.api.book.tag.dto.TagUpdateRequest;
 import shop.ink3.api.book.tag.service.TagService;
 
 import java.util.List;
+import shop.ink3.api.common.dto.PageResponse;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,16 +57,29 @@ class TagControllerTest {
 
     @Test
     void getAllTags() throws Exception {
-        List<TagResponse> tags = List.of(
+        List<TagResponse> tagResponses = List.of(
                 new TagResponse(1L, "java"),
                 new TagResponse(2L, "spring")
         );
-        given(tagService.getTags()).willReturn(tags);
+        Page<TagResponse> page = new PageImpl<>(
+                tagResponses,
+                PageRequest.of(0, 10),  // page = 0, size = 10
+                tagResponses.size()                         // totalElements = 2
+        );
+        PageResponse<TagResponse> pageResponse = PageResponse.from(page);
 
-        mockMvc.perform(get("/api/books/tags"))
+        given(tagService.getTags(any(Pageable.class))).willReturn(pageResponse);
+
+        mockMvc.perform(get("/api/books/tags")
+                .param("page", "0")
+                .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("java"))
-                .andExpect(jsonPath("$.data[1].name").value("spring"));
+                .andExpect(jsonPath("$.data.content[0].name").value("java"))
+                .andExpect(jsonPath("$.data.content[1].name").value("spring"))
+                .andExpect(jsonPath("$.data.page").value(0))             // 현재 페이지 번호
+                .andExpect(jsonPath("$.data.size").value(10))            // 요청한 페이지 크기
+                .andExpect(jsonPath("$.data.totalElements").value(2))    // 전체 요소 수
+                .andExpect(jsonPath("$.data.totalPages").value(1));      // 전체 페이지 수
     }
 
     @Test

@@ -2,6 +2,7 @@ package shop.ink3.api.book.publisher.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,7 @@ import shop.ink3.api.book.publisher.dto.PublisherUpdateRequest;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.book.publisher.dto.PublisherResponse;
 import shop.ink3.api.book.publisher.service.PublisherService;
+import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,8 +29,8 @@ public class PublisherController {
     private final PublisherService publisherService;
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<PublisherResponse>>> getPublishers() {
-        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublishers()));
+    public ResponseEntity<CommonResponse<PageResponse<PublisherResponse>>> getPublishers(Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublishers(pageable)));
     }
 
     @GetMapping("/{publisherId}")
