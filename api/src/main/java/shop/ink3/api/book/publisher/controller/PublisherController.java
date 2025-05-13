@@ -38,7 +38,7 @@ public class PublisherController {
     }
 
     @GetMapping("/name/{publisherName}")
-    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@RequestParam String publisherName) {
+    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@PathVariable String publisherName) {
         return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(publisherName)));
     }
 
