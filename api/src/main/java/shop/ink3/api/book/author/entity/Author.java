@@ -41,4 +41,11 @@ public class Author {
     public void addBookAuthor(BookAuthor bookAuthor) {
         this.bookAuthors.add(bookAuthor);
     }
+
+    public void update(String name, LocalDate birth, String nationality, String biography) {
+        this.name = name;
+        this.birth = birth;
+        this.nationality = nationality;
+        this.biography = biography;
+    }
 }

@@ -2,6 +2,7 @@ package shop.ink3.api.book.tag.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,17 +18,17 @@ import shop.ink3.api.book.tag.dto.TagUpdateRequest;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.book.tag.dto.TagResponse;
 import shop.ink3.api.book.tag.service.TagService;
+import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/books/tags")
 public class TagController {
-
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<TagResponse>>> getTags() {
-        return ResponseEntity.ok(CommonResponse.success(tagService.getTags()));
+    public ResponseEntity<CommonResponse<PageResponse<TagResponse>>> getTags(Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(tagService.getTags(pageable)));
     }
 
     @GetMapping("/tagId/{tagId}")

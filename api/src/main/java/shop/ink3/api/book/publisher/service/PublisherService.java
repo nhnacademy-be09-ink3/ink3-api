@@ -1,7 +1,8 @@
 package shop.ink3.api.book.publisher.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.publisher.dto.PublisherCreateRequest;
@@ -12,6 +13,7 @@ import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.book.publisher.exception.PublisherAlreadyExistsException;
 import shop.ink3.api.book.publisher.exception.PublisherNotFoundException;
 import shop.ink3.api.book.publisher.repository.PublisherRepository;
+import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @Service
@@ -19,11 +21,9 @@ public class PublisherService {
 
     private final PublisherRepository publisherRepository;
 
-    public List<PublisherResponse> getPublishers() {
-        return publisherRepository.findAll()
-                .stream()
-                .map(PublisherResponse::from)
-                .toList();
+    public PageResponse<PublisherResponse> getPublishers(Pageable pageable) {
+        Page<Publisher> publishers = publisherRepository.findAll(pageable);
+        return PageResponse.from(publishers.map(PublisherResponse::from));
     }
 
     public PublisherResponse getPublisherById(Long publisherId) {

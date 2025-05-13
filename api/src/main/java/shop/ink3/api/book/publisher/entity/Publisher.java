@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,4 +28,8 @@ public class Publisher {
     @NotNull
     @Length(max=20)
     private String name;
+
+    public void updatePublisherName(String name) {
+        this.name = name;
+    }
 }

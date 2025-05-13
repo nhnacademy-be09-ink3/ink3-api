@@ -20,5 +20,4 @@ public record BookCreateRequest(
         List<Long> categoryIdList,
         List<Long> authorIdList,
         List<Long> tagIdList
-        ) {
-}
+) {}

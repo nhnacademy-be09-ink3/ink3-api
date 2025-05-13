@@ -2,6 +2,8 @@ package shop.ink3.api.book.tag.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.tag.dto.TagCreateRequest;
@@ -11,17 +13,16 @@ import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.exception.TagAlreadyExistsException;
 import shop.ink3.api.book.tag.exception.TagNotFoundException;
 import shop.ink3.api.book.tag.repository.TagRepository;
+import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @Service
 public class TagService {
     private final TagRepository tagRepository;
 
-    public List<TagResponse> getTags() {
-        return tagRepository.findAll()
-                .stream()
-                .map(TagResponse::from)
-                .toList();
+    public PageResponse<TagResponse> getTags(Pageable pageable) {
+        Page<Tag> tags = tagRepository.findAll(pageable);
+        return PageResponse.from(tags.map(TagResponse::from));
     }
 
     public TagResponse getTagById(Long tagId) {
