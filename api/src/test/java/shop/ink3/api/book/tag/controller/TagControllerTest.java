@@ -1,4 +1,4 @@
-package shop.ink3.api.book;
+package shop.ink3.api.book.tag.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import shop.ink3.api.book.tag.controller.TagController;
 import shop.ink3.api.book.tag.dto.TagCreateRequest;
 import shop.ink3.api.book.tag.dto.TagResponse;
 import shop.ink3.api.book.tag.dto.TagUpdateRequest;
@@ -76,10 +75,12 @@ class TagControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].name").value("java"))
                 .andExpect(jsonPath("$.data.content[1].name").value("spring"))
-                .andExpect(jsonPath("$.data.page").value(0))             // 현재 페이지 번호
-                .andExpect(jsonPath("$.data.size").value(10))            // 요청한 페이지 크기
-                .andExpect(jsonPath("$.data.totalElements").value(2))    // 전체 요소 수
-                .andExpect(jsonPath("$.data.totalPages").value(1));      // 전체 페이지 수
+                .andExpect(jsonPath("$.data.page").value(0))
+                .andExpect(jsonPath("$.data.size").value(10))
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.hasNext").value(false))
+                .andExpect(jsonPath("$.data.hasPrevious").value(false));
     }
 
     @Test
