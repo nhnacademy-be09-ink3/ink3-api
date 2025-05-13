@@ -27,8 +27,4 @@ public class Tag {
     @Column(nullable = false)
     @Length(max=20)
     private String name;
-
-    public void updateTagName(String name) {
-        this.name = name;
-    }
 }

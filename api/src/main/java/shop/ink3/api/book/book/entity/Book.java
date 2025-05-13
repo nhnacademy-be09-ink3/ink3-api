@@ -12,10 +12,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.cart.entity.Cart;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -76,9 +75,6 @@ public class Book {
     @Column(nullable = false)
     private String thumbnailUrl;
 
-    @OneToMany(mappedBy = "book")
-    private List<Cart> carts = new ArrayList<>();
-
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
@@ -88,10 +84,6 @@ public class Book {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<BookAuthor> bookAuthors;
-
-    public Book(String title) {
-        this.title = title;
-    }
 
     public void setDiscountRate() {
         this.discountRate = (salePrice / originalPrice) * 100;

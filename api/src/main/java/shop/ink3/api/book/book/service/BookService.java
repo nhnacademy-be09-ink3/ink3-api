@@ -27,7 +27,7 @@ public class BookService {
     }
 
     public List<Book> findAllByAuthor(String author) {
-        return bookRepository.findDistinctByBookAuthorsAuthorsNameContainingIgnoreCase(author);
+        return bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(author);
     }
 
 

@@ -27,8 +27,4 @@ public class Publisher {
     @NotNull
     @Length(max=20)
     private String name;
-
-    public void updatePublisherName(String name) {
-        this.name = name;
-    }
 }
