@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderService {
 
     // 특정 주문에 대한 주문 정보 조회
-    // 특정 사용자의 주문 리스트 조회
+    // 특정 사용자의 주문 리스트 조회(상품 정보도 들어있나?)
+    //
 
     // 생성
     // 수정
     // 삭제
 
-    // 주문 상태 변경
+    // 주문 상태 변경 (관리자에 의한)
     // 적용 쿠폰 변경
+
 }
