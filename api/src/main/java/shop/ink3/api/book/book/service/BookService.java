@@ -44,7 +44,7 @@ public class BookService {
         this.publisherRepository = publisherRepository;
     }
 
-    public void save(BookCreateRequest req) {
+    public Long save(BookCreateRequest req) {
         Publisher publisher = publisherRepository.findById(req.publisherId()).orElseThrow(()->new PublisherNotFoundException(req.publisherId()));
         Book book = Book.builder()
             .ISBN(req.ISBN())
@@ -61,23 +61,18 @@ public class BookService {
             .publisher(publisher)
         .build();
 
-        book.setDiscountRate();
-
         List<Category> categoryList = categoryRepository.findAllById(req.categoryIdList());
         for(Category category : categoryList) {
-            BookCategory bookCategory = new BookCategory(book, category);
-            book.addBookCategory(bookCategory);
-            category.addBookCategory(bookCategory);
+            book.addBookCategory(category);
         }
 
         List<Author> authorList = authorRepository.findAllById(req.authorIdList());
         for(Author author : authorList) {
-            BookAuthor bookAuthor = new BookAuthor(book, author);
-            book.addBookAuthor(bookAuthor);
-            author.addBookAuthor(bookAuthor);
+            book.addBookAuthor(author);
         }
 
         bookRepository.save(book);
+        return book.getId();
     }
 
     public Book findById(Long id) {
