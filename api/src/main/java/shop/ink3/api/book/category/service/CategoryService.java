@@ -40,8 +40,6 @@ public class CategoryService {
         if (categoryCreateRequest.parentId() != null) {
             Category parent = categoryRepository.findById(categoryCreateRequest.parentId())
                     .orElseThrow(() -> new CategoryNotFoundException(categoryCreateRequest.parentId()));
-            category.updateCategory(parent);
-                    .orElseThrow(() -> new IllegalArgumentException("부모 카테고리를 찾을 수 없습니다: " + categoryCreateRequest.parentId()));
             category.updateParentCategory(parent);
         }
 
