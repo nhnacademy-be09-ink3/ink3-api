@@ -10,8 +10,10 @@ import lombok.*;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.bookTag.entity.BookTag;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.publisher.entity.Publisher;
+import shop.ink3.api.book.tag.entity.Tag;
 
 @Builder
 @Entity
@@ -77,6 +79,12 @@ public class Book {
             orphanRemoval = true)
     private List<BookAuthor> bookAuthors = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "book",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookTag> bookTags = new ArrayList<>();
+
     @PrePersist
     @PreUpdate
     public void setDiscountRate() {
@@ -93,5 +101,11 @@ public class Book {
         BookAuthor bookAuthor = new BookAuthor(this, author);
         this.bookAuthors.add(bookAuthor);
         author.addBookAuthor(bookAuthor);
+    }
+
+    public void addBookTag(Tag tag) {
+        BookTag bookTag = new BookTag(this, tag);
+        this.bookTags.add(bookTag);
+        tag.addBookTag(bookTag);
     }
 }

@@ -32,7 +32,7 @@ public class Category {
     private Category category;
 
     @Builder.Default
-    @OneToMany(mappedBy = "categories",
+    @OneToMany(mappedBy = "category",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
