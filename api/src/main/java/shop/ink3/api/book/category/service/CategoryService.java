@@ -1,5 +1,8 @@
 package shop.ink3.api.book.category.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +10,8 @@ import shop.ink3.api.book.category.dto.CategoryCreateRequest;
 import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.category.dto.CategoryUpdateRequest;
 import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.category.exception.CategoryAlreadyExistsException;
+import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 
 @RequiredArgsConstructor
@@ -25,7 +30,7 @@ public class CategoryService {
         String categoryName = categoryCreateRequest.name();
 
         if (categoryRepository.existsByName(categoryName)) {
-            throw new IllegalArgumentException("이미 존재하는 카테고리입니다: " + categoryName);
+            throw new CategoryAlreadyExistsException(categoryName);
         }
 
         Category category = Category.builder()
@@ -34,6 +39,8 @@ public class CategoryService {
 
         if (categoryCreateRequest.parentId() != null) {
             Category parent = categoryRepository.findById(categoryCreateRequest.parentId())
+                    .orElseThrow(() -> new CategoryNotFoundException(categoryCreateRequest.parentId()));
+            category.updateCategory(parent);
                     .orElseThrow(() -> new IllegalArgumentException("부모 카테고리를 찾을 수 없습니다: " + categoryCreateRequest.parentId()));
             category.updateParentCategory(parent);
         }
@@ -61,14 +68,45 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException(id));
         categoryRepository.delete(category);
     }
 
     @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException(id));
         return CategoryResponse.from(category);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(CategoryResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getCategoryTree() {
+        List<Category> categories = categoryRepository.findAll();
+
+        Map<Long, CategoryResponse> idToDto = new HashMap<>();
+        for (Category category : categories) {
+            idToDto.put(category.getId(), CategoryResponse.from(category));
+        }
+
+        for (Category category : categories) {
+            if (category.getCategory() != null) {
+                Long parentId = category.getCategory().getId();
+                CategoryResponse parentDto = idToDto.get(parentId);
+                CategoryResponse childDto = idToDto.get(category.getId());
+                parentDto.children().add(childDto);
+            }
+        }
+
+        return categories.stream()
+                .filter(c -> c.getCategory() == null)
+                .map(c -> idToDto.get(c.getId()))
+                .toList();
     }
 }
