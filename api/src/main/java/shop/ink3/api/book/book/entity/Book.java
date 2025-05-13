@@ -1,19 +1,30 @@
 package shop.ink3.api.book.book.entity;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.*;
-import shop.ink3.api.book.author.entity.Author;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
-import shop.ink3.api.book.bookTag.entity.BookTag;
-import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.book.tag.entity.Tag;
+import shop.ink3.api.cart.entity.Cart;
 
 @Builder
 @Entity
@@ -67,86 +78,17 @@ public class Book {
     @Column(nullable = false)
     private String thumbnailUrl;
 
-    @Builder.Default
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookCategory> bookCategories = new ArrayList<>();
+    private List<BookCategory> bookCategories;
 
-    @Builder.Default
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookAuthor> bookAuthors = new ArrayList<>();
+    private List<BookAuthor> bookAuthors;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "book",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<BookTag> bookTags = new ArrayList<>();
-
-    @PrePersist
-    @PreUpdate
-    public void updateDiscountRate() {
-        this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
-    }
-
-    public void addBookCategory(Category category) {
-        BookCategory bookCategory = new BookCategory(this, category);
-        this.bookCategories.add(bookCategory);
-        category.addBookCategory(bookCategory);
-    }
-
-    public void addBookAuthor(Author author) {
-        BookAuthor bookAuthor = new BookAuthor(this, author);
-        this.bookAuthors.add(bookAuthor);
-        author.addBookAuthor(bookAuthor);
-    }
-
-    public void addBookTag(Tag tag) {
-        BookTag bookTag = new BookTag(this, tag);
-        this.bookTags.add(bookTag);
-        tag.addBookTag(bookTag);
-    }
-
-    public void updateBook(
-            String ISBN,
-            String title,
-            String contents,
-            String description,
-            LocalDate publishedAt,
-            Integer originalPrice,
-            Integer salePrice,
-            Integer quantity,
-            BookStatus status,
-            boolean isPackable,
-            String thumbnailUrl,
-            Publisher publisher
-    ) {
-        this.ISBN = ISBN;
-        this.title = title;
-        this.contents = contents;
-        this.description = description;
-        this.publishedAt = publishedAt;
-        this.originalPrice = originalPrice;
-        this.salePrice = salePrice;
-        this.quantity = quantity;
-        this.status = status;
-        this.isPackable = isPackable;
-        this.thumbnailUrl = thumbnailUrl;
-        this.publisher = publisher;
-    }
-
-    // 주문 시 재고 확인 및 재고 수량 감소
-    public void decreaseQuantity(int amount) {
-        if (this.quantity < amount) {
-            throw new IllegalStateException("재고가 부족합니다.");
-        }
-        this.quantity -= amount;
-    }
-
-    // 반품 시 재고 수량 증가
-    public void increaseQuantity(int amount) {
-        this.quantity += amount;
+    public void setDiscountRate() {
+        this.discountRate = (salePrice / originalPrice) * 100;
     }
 }

@@ -41,7 +41,7 @@ public class Review {
 
     private LocalDateTime createdAt;
 
-    public Review(User user, OrderBook orderBook, String title, String content, int rating, LocalDateTime createdAt) {
+    public Review(User user, OrderBook orderBook, String title, String content, int rating) {
         this.user = user;
         this.orderBook = orderBook;
         this.title = title;
