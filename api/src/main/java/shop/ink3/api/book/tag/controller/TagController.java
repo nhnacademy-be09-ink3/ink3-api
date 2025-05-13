@@ -24,10 +24,7 @@ import shop.ink3.api.common.dto.PageResponse;
 @RestController
 @RequestMapping("/api/books/tags")
 public class TagController {
-
     private final TagService tagService;
-
-    // List와 Page가 필요한 상황을 고려
 
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<TagResponse>>> getTags(Pageable pageable) {

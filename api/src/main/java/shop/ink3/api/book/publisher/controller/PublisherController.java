@@ -1,6 +1,5 @@
 package shop.ink3.api.book.publisher.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -51,8 +50,7 @@ public class PublisherController {
     @PutMapping("/{publisherId}")
     public ResponseEntity<CommonResponse<PublisherResponse>> updatePublisher(@PathVariable Long publisherId,
                                                                              @RequestBody PublisherUpdateRequest publisherUpdateRequest) {
-        return ResponseEntity.ok(CommonResponse.update(
-                publisherService.updatePublisher(publisherId, publisherUpdateRequest)));
+        return ResponseEntity.ok(CommonResponse.update(publisherService.updatePublisher(publisherId, publisherUpdateRequest)));
     }
 
     @DeleteMapping("/{publisherId}")

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.service.BookService;
 
@@ -37,9 +38,7 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<Book> addBooks(@RequestBody Book book) {
-        bookService.save(book);
-        Book newBook = new Book(book.getTitle());
-        return ResponseEntity.ok(newBook);
+    public ResponseEntity<Book> addBooks(@RequestBody BookCreateRequest req) {
+        return ResponseEntity.ok(bookService.save(req));
     }
 }

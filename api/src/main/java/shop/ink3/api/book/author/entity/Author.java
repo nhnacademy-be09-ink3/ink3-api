@@ -1,23 +1,19 @@
 package shop.ink3.api.book.author.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.*;
+import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
+
+@Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Builder    // service에서 builder 사용
 @Table(name = "authors")
 public class Author {
     @Id
@@ -35,6 +31,16 @@ public class Author {
 
     @Column(nullable = false)
     private String biography;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "author",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookAuthor> bookAuthors = new ArrayList<>();
+
+    public void addBookAuthor(BookAuthor bookAuthor) {
+        this.bookAuthors.add(bookAuthor);
+    }
 
     public void update(String name, LocalDate birth, String nationality, String biography) {
         this.name = name;

@@ -1,17 +1,24 @@
 package shop.ink3.api.book.tag.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
+import shop.ink3.api.book.bookTag.entity.BookTag;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,6 +34,16 @@ public class Tag {
     @Column(nullable = false)
     @Length(max=20)
     private String name;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "tags",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookTag> bookTags = new ArrayList<>();
+
+    public void addBookTag(BookTag bookTag) {
+        this.bookTags.add(bookTag);
+    }
 
     public void updateTagName(String name) {
         this.name = name;
