@@ -1,8 +1,7 @@
-package shop.ink3.api.book;
+package shop.ink3.api.book.category.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import shop.ink3.api.book.category.dto.CategoryCreateRequest;
 import shop.ink3.api.book.category.dto.CategoryUpdateRequest;
 import shop.ink3.api.book.category.entity.Category;
