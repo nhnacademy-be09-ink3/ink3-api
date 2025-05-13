@@ -151,11 +151,20 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("장바구니 특정 도서 삭제")
-    void deleteCartItem() {
-        CartRequest cartRequest = new CartRequest(user, book1, 100);
+    @DisplayName("장바구니 특정 도서 삭제 성공")
+    void deleteCartItemSuccess() {
+        CartRequest cartRequest = new CartRequest(user, book1, 10);
         Cart cart = CartRequest.toEntity(cartRequest);
 
+        when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
+        when(cartRepository.save(ArgumentMatchers.any(Cart.class))).thenReturn(cart);
+
+        cartService.deleteCartItem(1L);
+    }
+
+    @Test
+    @DisplayName("장바구니 특정 도서 삭제 실패")
+    void deleteCartItemFailure() {
         when(cartRepository.findById(0L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> cartService.deleteCartItem(0L))
