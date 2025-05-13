@@ -1,4 +1,4 @@
-package shop.ink3.api.cart.controller;
+package shop.ink3.api.order.cart.controller;
 
 import java.util.List;
 
@@ -12,30 +12,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import shop.ink3.api.cart.dto.CartRequest;
-import shop.ink3.api.cart.dto.CartResponse;
-import shop.ink3.api.cart.service.CartService;
+import shop.ink3.api.order.cart.dto.CartRequest;
+import shop.ink3.api.order.cart.dto.CartResponse;
+import shop.ink3.api.order.cart.service.CartService;
 
 @RestController
-@RequestMapping("/carts")
 @RequiredArgsConstructor
+@RequestMapping("/carts")
 public class CartController {
-
     private final CartService cartService;
 
     @PostMapping
     public ResponseEntity<CartResponse> addCart(@RequestBody CartRequest request) {
-        return ResponseEntity.ok(cartService.addCart(request));
+        return ResponseEntity.ok(cartService.addCartItem(request));
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CartResponse>> getCarts(@PathVariable Long userId) {
-        return ResponseEntity.ok(cartService.getCartsByUserId(userId));
+        return ResponseEntity.ok(cartService.getCartItemsByUserId(userId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCart(@PathVariable Long id) {
-        cartService.deleteCart(id);
+        cartService.deleteCartItem(id);
         return ResponseEntity.noContent().build();
     }
 }
