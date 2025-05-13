@@ -9,9 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-@AllArgsConstructor
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ShipmentCreateRequest {
     @NotNull
     private Long orderId;

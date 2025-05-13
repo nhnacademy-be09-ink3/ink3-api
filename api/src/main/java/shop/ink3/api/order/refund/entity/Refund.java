@@ -3,6 +3,8 @@ package shop.ink3.api.order.refund.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
@@ -24,23 +26,22 @@ import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
 @Table(name = "refunds")
 public class Refund {
     @Id
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "reason", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String reason;
 
-    @Column(name = "details", nullable = false, length = 255)
+    @Column(nullable = false, length = 255)
     private String details;
 
     public void update(RefundUpdateRequest request) {
-        this.reason = request.getReason();
         this.details = request.getDetails();
+        this.reason = request.getReason();
     }
 }
-

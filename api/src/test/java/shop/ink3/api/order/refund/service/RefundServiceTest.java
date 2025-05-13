@@ -19,6 +19,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.dto.OrderResponse;
+import shop.ink3.api.order.order.entity.Order;
+import shop.ink3.api.order.order.repository.OrderRepository;
+import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
@@ -35,21 +39,23 @@ class RefundServiceTest {
     @InjectMocks
     RefundService refundService;
 
+    @Mock
+    OrderService orderService;
 
     @Test
     @DisplayName("반품 조회 - 성공")
     void getRefund_성공() {
         // given
-        RefundCreateRequest request = new RefundCreateRequest("테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세");
         Refund refund = Refund.builder()
                 .id(1L)
                 .reason(request.getReason())
                 .details(request.getDetails())
                 .build();
-        when(refundRepository.findById(anyLong())).thenReturn(Optional.of(refund));
+        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(refund));
 
         // when
-        RefundResponse response = refundService.getRefund(1L);
+        RefundResponse response = refundService.getOrderRefund(1L);
 
         // then
         assertNotNull(response);
@@ -60,11 +66,11 @@ class RefundServiceTest {
     @DisplayName("반품 조회 - 실패")
     void getRefund_실패() {
         // given
-        when(refundRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(RefundNotFoundException.class,
-                () -> refundService.getRefund(1L));
+                () -> refundService.getOrderRefund(1L));
     }
 
     @Test
@@ -93,12 +99,15 @@ class RefundServiceTest {
     @DisplayName("사용자의 반품 리스트 조회 - 성공")
     void createRefund_성공() {
         // given
-        RefundCreateRequest request = new RefundCreateRequest("테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세");
+        OrderResponse orderResponse = OrderResponse.from(Order.builder().id(1L).build());
         Refund  refund = Refund.builder()
                 .id(1L)
+                .order(OrderResponse.getOrder(orderResponse))
                 .reason(request.getReason())
                 .details(request.getDetails())
                 .build();
+        when(orderService.getOrder(anyLong())).thenReturn(orderResponse);
         when(refundRepository.save(any())).thenReturn(refund);
 
         // when
@@ -119,11 +128,11 @@ class RefundServiceTest {
                 .reason("변경전 사유")
                 .details("변경전 상세")
                 .build();
-        when(refundRepository.findById(anyLong())).thenReturn(Optional.of(refund));
+        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(refund));
         when(refundRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        RefundResponse saveRefund = refundService.updateRefund(1L, request);
+        RefundResponse saveRefund = refundService.updateRefund(anyLong(),request);
 
         // then
         assertNotNull(saveRefund);
@@ -137,11 +146,11 @@ class RefundServiceTest {
     void updateRefund_실패() {
         // given
         RefundUpdateRequest request = new RefundUpdateRequest("변경후 사유", "변경후 상세");
-        when(refundRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(RefundNotFoundException.class,
-                () -> refundService.updateRefund(1L, request));
+                () -> refundService.updateRefund(anyLong(),request));
     }
 
     @Test
@@ -153,7 +162,7 @@ class RefundServiceTest {
                 .reason("테스트 사유")
                 .details("테스트 상세")
                 .build();
-        when(refundRepository.findById(anyLong())).thenReturn(Optional.of(refund));
+        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(refund));
 
         // when
         refundService.deleteRefund(1L);
@@ -166,7 +175,7 @@ class RefundServiceTest {
     @DisplayName("반품 삭제 - 실패")
     void deleteRefund_실패() {
         // given
-        when(refundRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(RefundNotFoundException.class,

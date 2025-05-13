@@ -1,15 +1,17 @@
 package shop.ink3.api.order.shipment.entity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,42 +28,42 @@ import shop.ink3.api.order.shipment.dto.ShipmentUpdateRequest;
 @Table(name = "shipments")
 public class Shipment {
     @Id
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "preferred_delivery_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate preferredDeliveryDate;
 
-    @Column(name = "delivered_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime deliveredAt;
 
-    @Column(name = "recipient_name", nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String recipientName;
 
-    @Column(name = "recipient_phone", nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String recipientPhone;
 
-    @Column(name = "postal_code", nullable = false)
+    @Column(nullable = false)
     private Integer postalCode;
 
-    @Column(name = "default_address", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String defaultAddress;
 
-    @Column(name = "detail_address", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String detailAddress;
 
-    @Column(name = "extra_address", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String extraAddress;
 
-    @Column(name = "shipping_fee", nullable = false)
+    @Column(nullable = false)
     private Integer shippingFee;
 
-    @Column(name = "shipping_code", length = 20)
+    @Column(length = 20)
     private String shippingCode;
 
 

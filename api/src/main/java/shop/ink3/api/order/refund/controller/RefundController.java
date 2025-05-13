@@ -28,7 +28,7 @@ public class RefundController {
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<RefundResponse>> getRefund(
             @PathVariable long orderId) {
-        return ResponseEntity.ok(CommonResponse.success(refundService.getRefund(orderId)));
+        return ResponseEntity.ok(CommonResponse.success(refundService.getOrderRefund(orderId)));
     }
 
     @GetMapping("/user/{userId}")

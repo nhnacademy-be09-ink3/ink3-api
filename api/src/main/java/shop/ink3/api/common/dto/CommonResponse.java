@@ -38,15 +38,6 @@ public record CommonResponse<T>(
                 .build();
     }
 
-    public static <T> CommonResponse<T> delete(T data) {
-        return CommonResponse.<T>builder()
-                .status(HttpStatus.NO_CONTENT.value())
-                .message(ResponseMessage.DELETED.getMessage())
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
-
     public static <T> CommonResponse<T> error(HttpStatus status, String message) {
         return CommonResponse.<T>builder()
                 .status(status.value())

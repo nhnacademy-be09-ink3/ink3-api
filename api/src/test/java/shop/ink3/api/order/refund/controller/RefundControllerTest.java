@@ -53,7 +53,7 @@ class RefundControllerTest {
         // given
         Refund refund = Refund.builder().id(1L).build();
         RefundResponse response = RefundResponse.from(refund);
-        when(refundService.getRefund(1L)).thenReturn(response);
+        when(refundService.getOrderRefund(1L)).thenReturn(response);
 
         // when, then
         mockMvc.perform(get("/refunds/1"))
@@ -64,14 +64,14 @@ class RefundControllerTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andDo(print());
-        verify(refundService, times(1)).getRefund(1L);
+        verify(refundService, times(1)).getOrderRefund(1L);
     }
 
     @Test
     @DisplayName("반품 정보 조회 - 실패")
     void getRefund_실패() throws Exception {
         // given
-        doThrow(new RefundNotFoundException(1L)).when(refundService).getRefund(anyLong());
+        doThrow(new RefundNotFoundException(1L)).when(refundService).getOrderRefund(anyLong());
 
         // when, then
         mockMvc.perform(get("/refunds/1"))
@@ -119,7 +119,7 @@ class RefundControllerTest {
     @DisplayName("반품 생성 - 성공")
     void createRefund_성공() throws Exception {
         // given
-        RefundCreateRequest request = new RefundCreateRequest("테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
         Refund refund = Refund.builder()
                 .reason(request.getReason())
                 .details(request.getDetails())
@@ -144,7 +144,7 @@ class RefundControllerTest {
     @DisplayName("반품 생성 - 실패")
     void createRefund_실패() throws Exception {
         // given
-        RefundCreateRequest request = new RefundCreateRequest("테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
         doThrow(new RefundNotFoundException(1L)).when(refundService).createRefund(any());
 
         // when, then
@@ -167,7 +167,7 @@ class RefundControllerTest {
         // given
         RefundUpdateRequest request = new RefundUpdateRequest("변경 사유", "변경 상세");
         Refund refund = Refund.builder().id(1L).build();
-        when(refundService.updateRefund(anyLong(), any())).thenReturn(RefundResponse.from(refund));
+        when(refundService.updateRefund(anyLong(),any())).thenReturn(RefundResponse.from(refund));
 
         // when, then
         mockMvc.perform(put("/refunds/1")
@@ -187,7 +187,7 @@ class RefundControllerTest {
     void updateRefund_실패() throws Exception {
         // given
         RefundUpdateRequest request = new RefundUpdateRequest("변경 사유", "변경 상세");
-        doThrow(new RefundNotFoundException(1L)).when(refundService).updateRefund(anyLong(), any());
+        doThrow(new RefundNotFoundException(1L)).when(refundService).updateRefund(anyLong(),any());
 
         // when, then
         mockMvc.perform(put("/refunds/1")

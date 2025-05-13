@@ -8,10 +8,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
+import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.shipment.dto.ShipmentCreateRequest;
 import shop.ink3.api.order.shipment.dto.ShipmentResponse;
 import shop.ink3.api.order.shipment.dto.ShipmentUpdateRequest;
@@ -24,11 +26,11 @@ import shop.ink3.api.order.shipment.repository.ShipmentRepository;
 public class ShipmentService {
 
     private final ShipmentRepository shipmentRepository;
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
     // 특정 주문에 대한 배송 정보 조회
     public ShipmentResponse getShipment(long orderId) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findById(orderId);
+        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
         if (!optionalShipment.isPresent()) {
             throw new ShipmentNotFoundException(orderId);
         }
@@ -56,11 +58,8 @@ public class ShipmentService {
     // 생성
     @Transactional
     public ShipmentResponse createShipment(ShipmentCreateRequest request) {
-        Optional<Order> optionalOrder = orderRepository.findById(request.getOrderId());
-        if (!optionalOrder.isPresent()) {
-            throw new OrderNotFoundException(request.getOrderId());
-        }
-        Order order = optionalOrder.get();
+        OrderResponse orderResponse = orderService.getOrder(request.getOrderId());
+        Order order = OrderResponse.getOrder(orderResponse);
 
         Shipment shipment = Shipment.builder()
                 .id(0L)
@@ -81,7 +80,7 @@ public class ShipmentService {
     // 수정
     @Transactional
     public ShipmentResponse updateShipment(long orderId, ShipmentUpdateRequest request) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findById(orderId);
+        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
         if (!optionalShipment.isPresent()) {
             throw new ShipmentNotFoundException(orderId);
         }
@@ -93,7 +92,7 @@ public class ShipmentService {
     // 삭제
     @Transactional
     public void deleteShipment(long orderId) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findById(orderId);
+        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
         if (!optionalShipment.isPresent()) {
             throw new ShipmentNotFoundException(orderId);
         }
@@ -104,7 +103,7 @@ public class ShipmentService {
     // 배달 완료 시간 변경
     @Transactional
     public ShipmentResponse updateShipmentDeliveredAt(long orderId, LocalDateTime deliveredAt) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findById(orderId);
+        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
         if (!optionalShipment.isPresent()) {
             throw new ShipmentNotFoundException(orderId);
         }
