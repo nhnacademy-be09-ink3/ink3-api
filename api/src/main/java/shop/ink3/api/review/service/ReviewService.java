@@ -10,14 +10,29 @@ import shop.ink3.api.review.dto.ReviewRequest;
 import shop.ink3.api.review.dto.ReviewResponse;
 import shop.ink3.api.review.entity.Review;
 import shop.ink3.api.review.repository.ReviewRepository;
+import shop.ink3.api.user.user.entity.User;
+import shop.ink3.api.user.user.exception.UserNotFoundException;
+import shop.ink3.api.user.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService  {
+    private final UserRepository userRepository;
+    // TODO: private final OrderBookRepository orderBookRepository;
     private final ReviewRepository reviewRepository;
 
     public ReviewResponse addReview(ReviewRequest request) {
-        Review review = ReviewRequest.toEntity(request);
+        User user = userRepository.findById(request.userId())
+            .orElseThrow(() -> new UserNotFoundException(request.userId()));
+        // TODO: OrderBook orderBook = orderBookRepository.findById(request.orderBookId()).orElseThrow(() -> new OrderBookNotFoundException(request.orderBookId()));
+
+        Review review = Review.builder()
+            .user(user)
+            .orderBook(null) // TODO: orderBook
+            .title(request.title())
+            .content(request.content())
+            .rating(request.rating())
+            .build();
         return ReviewResponse.from(reviewRepository.save(review));
     }
 
