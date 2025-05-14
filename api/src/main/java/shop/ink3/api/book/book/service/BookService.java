@@ -14,6 +14,9 @@ import shop.ink3.api.book.author.exception.AuthorNotFoundException;
 import shop.ink3.api.book.author.repository.AuthorRepository;
 import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.book.external.aladin.AladinClient;
+import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
@@ -39,14 +42,17 @@ public class BookService {
     PublisherRepository publisherRepository;
     final
     TagRepository tagRepository;
+    final
+    AladinClient aladinClient;
 
     public BookService(AuthorRepository authorRepository, BookRepository bookRepository, CategoryRepository categoryRepository, PublisherRepository publisherRepository,
-                       TagRepository tagRepository) {
+                       TagRepository tagRepository, AladinClient aladinClient) {
         this.authorRepository = authorRepository;
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
         this.publisherRepository = publisherRepository;
         this.tagRepository = tagRepository;
+        this.aladinClient = aladinClient;
     }
 
     public Book save(BookCreateRequest req) {
@@ -83,6 +89,29 @@ public class BookService {
 
         bookRepository.save(book);
         return book;
+    }
+
+    public Book registerBookByIsbn(String isbn13) {
+        AladinBookDto dto = aladinClient.fetchBookByIsbn(isbn13);
+
+        Publisher publisher = publisherRepository.findByName(dto.publisher())
+                .orElseGet(() -> publisherRepository.save(Publisher.builder().name(dto.publisher()).build()));
+
+        Book book = Book.builder()
+                .title(dto.title())
+                .description(dto.description())
+                .contents(dto.toc())
+                .publisher(publisher)
+                .publishedAt(LocalDate.parse(dto.pubDate()))
+                .ISBN(dto.isbn13())
+                .originalPrice(dto.priceStandard())
+                .salePrice(dto.priceSales())
+                .thumbnailUrl(dto.cover())
+                .isPackable(true)
+                .status(BookStatus.AVAILABLE)
+                .build();
+
+        return bookRepository.save(book);
     }
 
     public Book findById(Long id) {
