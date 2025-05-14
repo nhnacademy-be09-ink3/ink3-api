@@ -109,8 +109,14 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 등록")
     void addReview() {
-        ReviewRequest request = new ReviewRequest(user, orderBook1, "title1", "content1", 5);
-        Review review = ReviewRequest.toEntity(request);
+        ReviewRequest request = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
+        Review review = Review.builder()
+            .user(user)
+            .orderBook(orderBook1)
+            .title(request.title())
+            .content(request.content())
+            .rating(request.rating())
+            .build();
 
         ReflectionTestUtils.setField(review, "id", 1L);
 
@@ -126,7 +132,13 @@ class ReviewServiceTest {
     @Test
     @DisplayName("주문 도서의 리뷰 조회")
     void getReviewByUserId() {
-        Review review = new Review(user, orderBook1, "title1", "content1", 5);
+        Review review = Review.builder()
+            .user(user)
+            .orderBook(orderBook1)
+            .title("title1")
+            .content("content1")
+            .rating(5)
+            .build();
         ReflectionTestUtils.setField(review, "id", 1L);
 
         when(reviewRepository.findByUserId(user.getId())).thenReturn(review);
@@ -143,12 +155,24 @@ class ReviewServiceTest {
     @DisplayName("한 도서의 리뷰 전체 조회")
     void getReviewsByBookId() {
         List<Review> reviews = new ArrayList<>();
-        ReviewRequest reviewRequest1 = new ReviewRequest(user, orderBook1, "title1", "content1", 5);
-        Review review1 = ReviewRequest.toEntity(reviewRequest1);
+        ReviewRequest reviewRequest1 = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
+        Review review1 = Review.builder()
+            .user(user)
+            .orderBook(orderBook1)
+            .title(reviewRequest1.title())
+            .content(reviewRequest1.content())
+            .rating(reviewRequest1.rating())
+            .build();
         ReflectionTestUtils.setField(review1, "id", 1L);
 
-        ReviewRequest cartRequest2 = new ReviewRequest(user, orderBook2, "title2", "content2", 4);
-        Review review2 = ReviewRequest.toEntity(cartRequest2);
+        ReviewRequest reviewRequest2 = new ReviewRequest(user.getId(), orderBook2.getId(), "title2", "content2", 4);
+        Review review2 = Review.builder()
+            .user(user)
+            .orderBook(orderBook2)
+            .title(reviewRequest2.title())
+            .content(reviewRequest2.content())
+            .rating(reviewRequest2.rating())
+            .build();
         ReflectionTestUtils.setField(review2, "id", 2L);
 
         reviews.add(review1);
@@ -168,8 +192,14 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 삭제 성공")
     void deleteReviewSuccess() {
-        ReviewRequest reviewRequest = new ReviewRequest(user, orderBook1, "title1", "content1", 5);
-        Review review = ReviewRequest.toEntity(reviewRequest);
+        ReviewRequest reviewRequest = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
+        Review review = Review.builder()
+            .user(user)
+            .orderBook(orderBook1)
+            .title(reviewRequest.title())
+            .content(reviewRequest.content())
+            .rating(reviewRequest.rating())
+            .build();
 
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewRepository.save(ArgumentMatchers.any(Review.class))).thenReturn(review);

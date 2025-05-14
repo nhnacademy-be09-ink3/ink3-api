@@ -110,8 +110,8 @@ class ReviewControllerTest {
             .quantity(100)
             .build();
 
-        reviewRequest = new ReviewRequest(user, orderBook1, "title1", "content1", 5);
-        reviewResponse = new ReviewResponse(1L, user, orderBook1, "title1", "content1", 5, LocalDateTime.now());
+        reviewRequest = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
+        reviewResponse = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now());
     }
 
     @Test
@@ -132,7 +132,7 @@ class ReviewControllerTest {
     @DisplayName("주문 도서의 리뷰 조회")
     void getReviewByUserId() throws Exception {
         ReviewResponse response = new ReviewResponse(
-            1L, user, orderBook1, "title1", "content1", 5, LocalDateTime.now()
+            1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now()
         );
 
         when(reviewService.getReviewByUserId(user.getId())).thenReturn(response);
@@ -149,8 +149,8 @@ class ReviewControllerTest {
     @DisplayName("한 도서의 리뷰 전체 조회")
     void getReviewsByBookId() throws Exception {
         List<ReviewResponse> content = List.of(
-            new ReviewResponse(1L, user, orderBook1, "title1", "content1", 5, LocalDateTime.now()),
-            new ReviewResponse(2L, user, orderBook2, "title2", "content2", 4, LocalDateTime.now())
+            new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now()),
+            new ReviewResponse(2L, user.getId(), orderBook2.getId(), "title2", "content2", 4, LocalDateTime.now())
         );
 
         Page<ReviewResponse> reviewResponses = new PageImpl<>(

@@ -15,10 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import lombok.Builder;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;

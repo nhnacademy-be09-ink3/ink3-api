@@ -8,15 +8,15 @@ import shop.ink3.api.user.user.entity.User;
 
 public record ReviewResponse(
     Long id,
-    User user,
-    OrderBook orderBook,
+    Long userId,
+    Long orderBookId,
     String title,
     String content,
     int rating,
     LocalDateTime createdAt
 ) {
     public static ReviewResponse from(Review review) {
-        return new ReviewResponse(review.getId(), review.getUser(), review.getOrderBook(), review.getTitle(),
+        return new ReviewResponse(review.getId(), review.getUser().getId(), review.getOrderBook().getId(), review.getTitle(),
             review.getContent(), review.getRating(), review.getCreatedAt());
     }
 }
