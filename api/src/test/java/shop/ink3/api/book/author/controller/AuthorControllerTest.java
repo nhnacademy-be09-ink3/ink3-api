@@ -34,7 +34,6 @@ import shop.ink3.api.book.author.dto.AuthorUpdateRequest;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.author.exception.AuthorNotFoundException;
 import shop.ink3.api.book.author.service.AuthorService;
-import shop.ink3.api.book.tag.dto.TagResponse;
 import shop.ink3.api.common.dto.PageResponse;
 
 @WebMvcTest(AuthorController.class)
@@ -101,8 +100,8 @@ public class AuthorControllerTest {
 
         when(authorService.getAuthors(any(Pageable.class))).thenReturn(response);
         mockMvc.perform(get("/api/books/authors")
-                .param("page", "0")
-                .param("size", "10"))
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -134,8 +133,8 @@ public class AuthorControllerTest {
         );
         when(authorService.createAuthor(request)).thenReturn(response);
         mockMvc.perform(post("/api/books/authors")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()))
@@ -162,8 +161,8 @@ public class AuthorControllerTest {
         );
         when(authorService.updateAuthor(1L, request)).thenReturn(response);
         mockMvc.perform(put("/api/books/authors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -183,8 +182,8 @@ public class AuthorControllerTest {
         );
         when(authorService.updateAuthor(1L, request)).thenThrow(new AuthorNotFoundException(1L));
         mockMvc.perform(put("/api/books/authors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
