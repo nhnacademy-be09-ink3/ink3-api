@@ -19,7 +19,6 @@ import jakarta.persistence.PersistenceContext;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.user.entity.User;
@@ -92,8 +91,11 @@ class CartRepositoryTest {
     @Test
     @DisplayName("회원 ID로 장바구니 조회")
     void findByUserId_success() {
-        CartRequest cartRequest = new CartRequest(user, book, 100);
-        Cart cart = CartRequest.toEntity(cartRequest);
+        Cart cart = Cart.builder()
+            .user(user)
+            .book(book)
+            .quantity(100)
+            .build();
 
         cartRepository.save(cart);
 

@@ -9,11 +9,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.user.user.entity.User;
 
+@Builder
 @Entity
 @Table(name = "carts")
 @Getter

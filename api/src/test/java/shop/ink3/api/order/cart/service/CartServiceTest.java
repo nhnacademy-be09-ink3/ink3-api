@@ -111,8 +111,11 @@ class CartServiceTest {
     @Test
     @DisplayName("장바구니에 도서 추가")
     void addCartItem() {
-        CartRequest cartRequest = new CartRequest(user, book1, 100);
-        Cart cart = CartRequest.toEntity(cartRequest);
+        CartRequest cartRequest = new CartRequest(user.getId(), book1.getId(), 100);
+        Cart cart = Cart.builder()
+            .user(user)
+            .book(book1)
+            .build();
 
         ReflectionTestUtils.setField(cart, "id", 1L);
 
@@ -121,8 +124,8 @@ class CartServiceTest {
         CartResponse cartResponse = cartService.addCartItem(cartRequest);
 
         assertThat(cartResponse.id()).isEqualTo(1L);
-        assertThat(cartResponse.user()).isEqualTo(user);
-        assertThat(cartResponse.book()).isEqualTo(book1);
+        assertThat(cartResponse.userId()).isEqualTo(user.getId());
+        assertThat(cartResponse.bookId()).isEqualTo(book1.getId());
         assertThat(cartResponse.quantity()).isEqualTo(100);
     }
 
@@ -130,12 +133,18 @@ class CartServiceTest {
     @DisplayName("장바구니 목록 조회")
     void getCartItemsByUserId() {
         List<Cart> carts = new ArrayList<>();
-        CartRequest cartRequest1 = new CartRequest(user, book1, 100);
-        Cart cart1 = CartRequest.toEntity(cartRequest1);
+        Cart cart1 = Cart.builder()
+            .user(user)
+            .book(book1)
+            .quantity(100)
+            .build();
         ReflectionTestUtils.setField(cart1, "id", 1L);
 
-        CartRequest cartRequest2 = new CartRequest(user, book2, 100);
-        Cart cart2 = CartRequest.toEntity(cartRequest2);
+        Cart cart2 = Cart.builder()
+            .user(user)
+            .book(book2)
+            .quantity(100)
+            .build();
         ReflectionTestUtils.setField(cart2, "id", 2L);
 
         carts.add(cart1);
@@ -153,8 +162,11 @@ class CartServiceTest {
     @Test
     @DisplayName("장바구니 특정 도서 삭제 성공")
     void deleteCartItemSuccess() {
-        CartRequest cartRequest = new CartRequest(user, book1, 10);
-        Cart cart = CartRequest.toEntity(cartRequest);
+        Cart cart = Cart.builder()
+            .user(user)
+            .book(book1)
+            .quantity(100)
+            .build();
 
         when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
         when(cartRepository.save(ArgumentMatchers.any(Cart.class))).thenReturn(cart);

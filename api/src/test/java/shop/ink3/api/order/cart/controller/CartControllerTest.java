@@ -101,8 +101,8 @@ class CartControllerTest {
             .publisher(publisher)
             .build();
 
-        cartRequest = new CartRequest(user, book1, 100);
-        cartResponse = new CartResponse(1L, user, book1, 100);
+        cartRequest = new CartRequest(user.getId(), book1.getId(), 100);
+        cartResponse = new CartResponse(1L, user.getId(), book1.getId(), 100);
     }
 
     @Test
@@ -121,8 +121,8 @@ class CartControllerTest {
     @DisplayName("장바구니 목록 조회")
     void getCarts() throws Exception {
         List<CartResponse> cartResponses = List.of(
-            new CartResponse(1L, user, book1, 100),
-            new CartResponse(2L, user, book2, 100)
+            new CartResponse(1L, user.getId(), book1.getId(), 100),
+            new CartResponse(2L, user.getId(), book2.getId(), 100)
         );
 
         Mockito.when(cartService.getCartItemsByUserId(user.getId())).thenReturn(cartResponses);

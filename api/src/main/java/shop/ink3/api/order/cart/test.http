@@ -1,0 +1,23 @@
+### 장바구니 생성
+POST http://localhost:8080/carts
+Content-Type: application/json
+Accept: application/json
+
+{
+  "user": {
+    "id": 1
+  },
+  "book": {
+    "id": 1
+  },
+  "quantity": 10
+}
+
+
+### 멤버 상세 조회
+GET http://localhost:8080/carts/user/1
+Accept: application/json
+
+### 멤버 전체 조회
+GET http://localhost:8080/carts/1
+Accept: application/json
