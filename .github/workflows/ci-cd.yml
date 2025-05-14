@@ -174,7 +174,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
-          source: "api-dev/target/*.jar"
+          source: "api/target/*.jar"
           target: "~/ink3-server-dev/api-dev"
 
       - name: Run deploy.sh on server
@@ -185,7 +185,7 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/ink3-server/api
+            cd ~/ink3-server-dev/api-dev
             chmod +x deploy.sh
             export EUREKA_URL=${{ secrets.DEV_EUREKA_URL }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
