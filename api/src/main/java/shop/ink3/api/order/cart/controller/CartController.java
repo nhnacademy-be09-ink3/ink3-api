@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
+import shop.ink3.api.order.cart.dto.CartUpdateRequest;
 import shop.ink3.api.order.cart.service.CartService;
 
 @RestController
@@ -27,14 +29,19 @@ public class CartController {
         return ResponseEntity.ok(cartService.addCartItem(request));
     }
 
+    @GetMapping("/{cartId}")
+    public ResponseEntity<CartResponse> updateQuantity(@PathVariable Long cartId, @RequestBody CartUpdateRequest request) {
+        return ResponseEntity.ok(cartService.updateCartQuantity(cartId, request));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<CartResponse>> getCarts(@PathVariable Long userId) {
         return ResponseEntity.ok(cartService.getCartItemsByUserId(userId));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCart(@PathVariable Long id) {
-        cartService.deleteCartItem(id);
+    @DeleteMapping("/{cartId}")
+    public ResponseEntity<Void> deleteCart(@PathVariable Long cartId) {
+        cartService.deleteCartItem(cartId);
         return ResponseEntity.noContent().build();
     }
 }

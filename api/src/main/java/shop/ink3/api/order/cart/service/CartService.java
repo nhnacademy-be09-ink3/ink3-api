@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
+import shop.ink3.api.order.cart.dto.CartUpdateRequest;
 import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.order.cart.repository.CartRepository;
 import shop.ink3.api.order.common.exception.CartNotFoundException;
@@ -32,7 +33,8 @@ public class CartService {
     private final CartRepository cartRepository;
 
     public CartResponse addCartItem(CartRequest request) {
-        User user = userRepository.findById(request.userId()).orElseThrow(() -> new UserNotFoundException(request.userId()));
+        User user = userRepository.findById(request.userId())
+            .orElseThrow(() -> new UserNotFoundException(request.userId()));
         // TODO: Book book = bookRepository.findById(request.bookId()).orElseThrow(() -> new BookNotFoundException(request.bookId()));
 
         Cart cart = Cart.builder()
@@ -48,6 +50,15 @@ public class CartService {
         redisTemplate.expire(key, Duration.ofDays(3));
 
         return response;
+    }
+
+    public CartResponse updateCartQuantity(Long cartId, CartUpdateRequest request) {
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("존재하지 않는 장바구니입니다."));
+
+        cart.updateQuantity(request.quantity());
+        cartRepository.save(cart);
+
+        return toResponse(cart);
     }
 
     @Transactional(readOnly = true)
