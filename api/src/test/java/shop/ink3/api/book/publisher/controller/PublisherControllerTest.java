@@ -162,29 +162,6 @@ public class PublisherControllerTest {
                 .andDo(print());
     }
 
-//    @Test   // GlobalExceptionHandler에 AlreadyExistsException에 대한 처리가 없음
-//    void createPublisherWithAlreadyExists() throws Exception {
-//        PublisherCreateRequest request = new PublisherCreateRequest("testPublisher");
-//        when(publisherService.createPublisher(request)).thenThrow(new PublisherAlreadyExistsException("testPublisher"));
-//        mockMvc.perform(post("/api/books/publishers")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isConflict())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()))
-//                .andExpect(jsonPath("$.message").exists())
-//                .andExpect(jsonPath("$.timestamp").exists())
-//                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
-//                .andDo(print());
-//    }
-//      // GlobalExceptionHandler에 포함되어야 할까?
-//    @ExceptionHandler(value = {AlreadyExistsException.class})
-//    public ResponseEntity<CommonResponse<Void>> handleAlreadyExistsException(AlreadyExistsException e) {
-//        return ResponseEntity
-//                .status(HttpStatus.CONFLICT)
-//                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage()));
-//    }
-
     @Test
     void updatePublisher() throws Exception {
         PublisherUpdateRequest request = new PublisherUpdateRequest("newPublisher");
