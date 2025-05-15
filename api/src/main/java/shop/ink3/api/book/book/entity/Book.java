@@ -87,7 +87,7 @@ public class Book {
 
     @PrePersist
     @PreUpdate
-    public void setDiscountRate() {
+    public void updateDiscountRate() {
         this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
     }
 
@@ -107,5 +107,46 @@ public class Book {
         BookTag bookTag = new BookTag(this, tag);
         this.bookTags.add(bookTag);
         tag.addBookTag(bookTag);
+    }
+
+    public void updateBook(
+            String ISBN,
+            String title,
+            String contents,
+            String description,
+            LocalDate publishedAt,
+            Integer originalPrice,
+            Integer salePrice,
+            Integer quantity,
+            BookStatus status,
+            boolean isPackable,
+            String thumbnailUrl,
+            Publisher publisher
+    ) {
+        this.ISBN = ISBN;
+        this.title = title;
+        this.contents = contents;
+        this.description = description;
+        this.publishedAt = publishedAt;
+        this.originalPrice = originalPrice;
+        this.salePrice = salePrice;
+        this.quantity = quantity;
+        this.status = status;
+        this.isPackable = isPackable;
+        this.thumbnailUrl = thumbnailUrl;
+        this.publisher = publisher;
+    }
+
+    // 주문 시 재고 확인 및 재고 수량 감소
+    public void decreaseQuantity(int amount) {
+        if (this.quantity < amount) {
+            throw new IllegalStateException("재고가 부족합니다.");
+        }
+        this.quantity -= amount;
+    }
+
+    // 반품 시 재고 수량 증가
+    public void increaseQuantity(int amount) {
+        this.quantity += amount;
     }
 }

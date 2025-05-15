@@ -14,14 +14,12 @@ import shop.ink3.api.book.category.exception.CategoryAlreadyExistsException;
 import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-
-
-    @Transactional
     public CategoryResponse createCategory(CategoryCreateRequest categoryCreateRequest) {
         String categoryName = categoryCreateRequest.name();
 
@@ -42,7 +40,6 @@ public class CategoryService {
         return CategoryResponse.from(categoryRepository.save(category));
     }
 
-    @Transactional
     public CategoryResponse updateCategory(Long id, CategoryUpdateRequest categoryUpdateRequest) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
@@ -60,7 +57,6 @@ public class CategoryService {
     }
 
 
-    @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));

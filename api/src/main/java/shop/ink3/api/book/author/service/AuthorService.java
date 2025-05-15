@@ -1,7 +1,5 @@
 package shop.ink3.api.book.author.service;
 
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,22 +13,24 @@ import shop.ink3.api.book.author.exception.AuthorNotFoundException;
 import shop.ink3.api.book.author.repository.AuthorRepository;
 import shop.ink3.api.common.dto.PageResponse;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class AuthorService {
     private final AuthorRepository authorRepository;
 
+    @Transactional(readOnly = true)
     public AuthorResponse getAuthor(Long authorId) {
         Author author = authorRepository.findById(authorId).orElseThrow(() -> new AuthorNotFoundException(authorId));
         return AuthorResponse.from(author);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<AuthorResponse> getAuthors(Pageable pageable) {
         Page<Author> authors = authorRepository.findAll(pageable);
         return PageResponse.from(authors.map(AuthorResponse::from));
     }
 
-    @Transactional
     public AuthorResponse createAuthor(AuthorCreateRequest request) {
         Author author = Author.builder()
                 .name(request.name())
@@ -41,7 +41,6 @@ public class AuthorService {
         return AuthorResponse.from(authorRepository.save(author));
     }
 
-    @Transactional
     public AuthorResponse updateAuthor(Long authorId, AuthorUpdateRequest request) {
         Author author = authorRepository.findById(authorId).orElseThrow(() -> new AuthorNotFoundException(authorId));
         author.update(
@@ -53,7 +52,6 @@ public class AuthorService {
         return AuthorResponse.from(authorRepository.save(author));
     }
 
-    @Transactional
     public void deleteAuthor(Long authorId) {
         Author author = authorRepository.findById(authorId).orElseThrow(() -> new AuthorNotFoundException(authorId));
         authorRepository.delete(author);
