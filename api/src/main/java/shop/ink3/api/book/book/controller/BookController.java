@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
-import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookSearchRequest;
 import shop.ink3.api.book.book.service.BookService;
 import shop.ink3.api.common.dto.CommonResponse;
@@ -28,15 +26,14 @@ import shop.ink3.api.common.dto.PageResponse;
 @RestController
 @RequestMapping("/api/books/books")
 public class BookController {
-
-
     private final BookService bookService;
+
+    // 도서 제목으로 도서 목록 조회 API
 
     @GetMapping("/title/{title}")
     public ResponseEntity<List<BookResponse>> getBooksByTitle(@PathVariable String title) {
         return ResponseEntity.ok(bookService.findAllByTitle(title));
     }
-
 
     // 저자 이름으로 도서 목록 조회 API
 
@@ -44,7 +41,6 @@ public class BookController {
     public ResponseEntity<List<BookResponse>> getBooksByAuthor(@PathVariable String author) {
         return ResponseEntity.ok(bookService.findAllByAuthor(author));
     }
-
 
      // 전체 도서 목록 조회 (현재는 저자 이름이 빈 문자열일 경우 전체 조회로 활용)
 
@@ -70,7 +66,6 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
-
      // ISBN을 통해 알라딘 API에서 도서정보 자동등록
 
     @PostMapping("/register-by-isbn")
@@ -85,7 +80,6 @@ public class BookController {
             @ModelAttribute BookSearchRequest request) {
         return ResponseEntity.ok(bookService.searchBooks(request));
     }
-
 
     // 도서상세조회 API (ID 기반 단건 조회)
 

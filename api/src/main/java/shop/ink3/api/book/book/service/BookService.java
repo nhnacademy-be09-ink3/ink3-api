@@ -3,7 +3,6 @@ package shop.ink3.api.book.book.service;
 import lombok.RequiredArgsConstructor;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,9 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +20,6 @@ import shop.ink3.api.book.author.repository.AuthorRepository;
 import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
-import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookSearchRequest;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
@@ -33,8 +29,6 @@ import shop.ink3.api.book.book.exception.DuplicateIsbnException;
 import shop.ink3.api.book.book.external.aladin.AladinClient;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
 import shop.ink3.api.book.book.repository.BookRepository;
-import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
-import shop.ink3.api.book.bookCategory.entity.BookCategory;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
@@ -44,6 +38,7 @@ import shop.ink3.api.book.publisher.repository.PublisherRepository;
 import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.exception.TagNotFoundException;
 import shop.ink3.api.book.tag.repository.TagRepository;
+import shop.ink3.api.common.dto.PageResponse;
 
 @Transactional
 @RequiredArgsConstructor
@@ -56,18 +51,8 @@ public class BookService {
     private final TagRepository tagRepository;
     private final AladinClient aladinClient;
 
-    public BookService(AuthorRepository authorRepository, BookRepository bookRepository, CategoryRepository categoryRepository, PublisherRepository publisherRepository,
-                       TagRepository tagRepository, AladinClient aladinClient) {
-        this.authorRepository = authorRepository;
-        this.bookRepository = bookRepository;
-        this.categoryRepository = categoryRepository;
-        this.publisherRepository = publisherRepository;
-        this.tagRepository = tagRepository;
-        this.aladinClient = aladinClient;
-    }
-
     public BookResponse createBook(BookCreateRequest request) {
-        Publisher publisher = publisherRepository.findById(request.publisherId()).orElseThrow(()->new PublisherNotFoundException(request.publisherId()));
+        Publisher publisher = publisherRepository.findById(request.publisherId()).orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
         Book book = Book.builder()
                 .ISBN(request.ISBN())
                 .title(request.title())
@@ -108,7 +93,6 @@ public class BookService {
             throw new DuplicateIsbnException(isbn13);
         }
 
-    public BookResponse registerBookByIsbn(String isbn13) {
         AladinBookDto dto = aladinClient.fetchBookByIsbn(isbn13);
 
         Publisher publisher = publisherRepository.findByName(dto.publisher())
@@ -133,7 +117,6 @@ public class BookService {
                 .status(BookStatus.AVAILABLE)
                 .build();
 
-        return BookResponse.from(bookRepository.save(book));
         // 저자 연결
         book.addBookAuthor(author);
 
@@ -215,12 +198,6 @@ public class BookService {
                     .orElseThrow(() -> new CategoryNotFoundException(categoryId));
             book.addBookCategory(category);
         }
-    // 단건 조회
-    public BookResponse findById(Long id) {
-        return bookRepository.findById(id)
-                .map(BookResponse::from)
-                .orElse(null);
-    }
 
         // 작가 다시 설정
         for (Long authorId : authorIds) {
@@ -228,12 +205,6 @@ public class BookService {
                     .orElseThrow(() -> new AuthorNotFoundException(authorId));
             book.addBookAuthor(author);
         }
-    // 제목 기반 검색
-    public List<BookResponse> findAllByTitle(String title) {
-        return bookRepository.getBooksByTitle(title).stream()
-                .map(BookResponse::from)
-                .toList();
-    }
 
         // 태그 다시 설정
         for (Long tagId : tagIds) {
@@ -241,22 +212,10 @@ public class BookService {
                     .orElseThrow(() -> new TagNotFoundException(tagId));
             book.addBookTag(tag);
         }
-    // 저자 이름으로 검색
-    public List<BookResponse> findAllByAuthor(String author) {
-        return bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(author).stream()
-                .map(BookResponse::from)
-                .toList();
-    }
 
         return BookResponse.from(book);
         //return BookResponse.from(bookRepository.save(book));
     }
-    public PageResponse<BookResponse> searchBooks(BookSearchRequest request) {
-        String title = request.title();
-        String author = request.author();
-        BookSortType sortType = request.sort();
-        int page = request.page() != null ? request.page() : 0;
-        int size = request.size() != null ? request.size() : 10;
 
     public void deleteBook(@PathVariable Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(
@@ -264,7 +223,35 @@ public class BookService {
 
         bookRepository.delete(book);
     }
-}
+
+    // 제목 기반 검색
+    public List<BookResponse> findAllByTitle(String title) {
+        return bookRepository.getBooksByTitle(title).stream()
+                .map(BookResponse::from)
+                .toList();
+    }
+
+    // 단건 조회
+    public BookResponse findById(Long id) {
+        return bookRepository.findById(id)
+                .map(BookResponse::from)
+                .orElse(null);
+    }
+
+    // 저자 이름으로 검색
+    public List<BookResponse> findAllByAuthor(String author) {
+        return bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(author).stream()
+                .map(BookResponse::from)
+                .toList();
+    }
+
+    public PageResponse<BookResponse> searchBooks(BookSearchRequest request) {
+        String title = request.title();
+        String author = request.author();
+        BookSortType sortType = request.sort();
+        int page = request.page() != null ? request.page() : 0;
+        int size = request.size() != null ? request.size() : 10;
+
         //정렬조건
         Sort sortOption = switch (sortType) {
             case TITLE_ASC -> Sort.by("title").ascending();
@@ -287,6 +274,4 @@ public class BookService {
 
         return PageResponse.from(bookPage.map(BookResponse::from));
     }
-
-
 }
