@@ -90,6 +90,12 @@ public class CartService {
         hashOps().delete(key, id.toString());
     }
 
+    public void deleteCartItems(Long userId) {
+        cartRepository.deleteAllByUserId(userId);
+        String key = CART_KEY_PREFIX + userId;
+        redisTemplate.delete(key);
+    }
+
     private CartResponse toResponse(Cart cart) {
         return CartResponse.from(cart);
     }
