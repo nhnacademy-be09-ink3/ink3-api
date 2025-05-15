@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build all modules with Maven
-        run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.EUREKA_URL }} -B
+        run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} -B
 
 
   sonar-analysis:
@@ -63,7 +63,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.EUREKA_URL }} sonar:sonar \
+          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} sonar:sonar \
             -Dsonar.projectKey=ink3_api_server \
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
@@ -116,7 +116,8 @@ jobs:
         run: |
           nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
             --server.port=10260 \
-            --spring.profiles.active=test > app.log 2>&1 &
+            --spring.profiles.active=test \
+            --TTB_KEY=$TTB_KEY > app.log 2>&1 &
           echo $! > app.pid
 
       - name: Wait for application to start
@@ -131,7 +132,8 @@ jobs:
       - name: Run unit tests
         env:
           EUREKA_URL: ${{ secrets.EUREKA_URL }}
-        run: mvn test -Dspring.profiles.active=test -B
+          TTB_KEY: ${{ secrets.TTB_KEY }}
+        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -B
 
       - name: Print app log if health check fails
         if: failure()
@@ -190,5 +192,6 @@ jobs:
             export EUREKA_URL=${{ secrets.EUREKA_URL }}
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export TTB_KEY=${{ secrets.TTB_KEY }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
