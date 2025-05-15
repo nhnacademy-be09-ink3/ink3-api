@@ -1,5 +1,6 @@
 package shop.ink3.api.book.book.dto;
 
+import shop.ink3.api.book.book.entity.Book;
 import java.time.LocalDate;
 import java.util.List;
 import shop.ink3.api.book.book.entity.Book;
@@ -29,6 +30,7 @@ public record BookResponse(
                 book.getId(),
                 book.getISBN(),
                 book.getTitle(),
+                book.getDescription(),
                 book.getContents(),
                 book.getDescription(),
                 book.getPublisher().getName(),

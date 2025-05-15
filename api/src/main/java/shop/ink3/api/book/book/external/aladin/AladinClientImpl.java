@@ -3,8 +3,11 @@ package shop.ink3.api.book.book.external.aladin;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import shop.ink3.api.book.book.exception.AladinBookNotFoundException;
+import shop.ink3.api.book.book.exception.AladinParsingException;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
 
 @Component
@@ -13,13 +16,14 @@ public class AladinClientImpl implements AladinClient {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private static final String TTB_KEY = "ttbin20151747001";
+    @Value("${aladin.ttb-key}")
+    private String ttbKey;
     private static final String BASE_URL = "https://www.aladin.co.kr/ttb/api/ItemLookUp.aspx";
 
     @Override
     public AladinBookDto fetchBookByIsbn(String isbn13) {
         String url = BASE_URL +
-                "?ttbkey=" + TTB_KEY +
+                "?ttbkey=" + ttbKey +
                 "&itemIdType=ISBN13" +
                 "&ItemId=" + isbn13 +
                 "&output=JS" +
@@ -30,7 +34,13 @@ public class AladinClientImpl implements AladinClient {
 
         try {
             JsonNode root = objectMapper.readTree(response);
-            JsonNode item = root.path("item").get(0);
+            JsonNode items = root.path("item");
+
+            if (!items.isArray() || items.size() == 0) {
+                throw new AladinBookNotFoundException(isbn13);
+            }
+
+            JsonNode item = items.get(0);
 
             return new AladinBookDto(
                     item.path("title").asText(),
@@ -45,8 +55,10 @@ public class AladinClientImpl implements AladinClient {
                     item.path("cover").asText(null),
                     item.path("categoryName").asText(null)
             );
+        } catch (AladinBookNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("알라딘 API 파싱 실패", e);
+            throw new AladinParsingException(e);
         }
     }
 }
