@@ -1,31 +1,21 @@
 package shop.ink3.api.book.book.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.bookTag.entity.BookTag;
+import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.cart.entity.Cart;
+import shop.ink3.api.book.tag.entity.Tag;
 
+@Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -77,17 +67,45 @@ public class Book {
     @Column(nullable = false)
     private String thumbnailUrl;
 
+    @Builder.Default
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookCategory> bookCategories;
+    private List<BookCategory> bookCategories = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<BookAuthor> bookAuthors;
+    private List<BookAuthor> bookAuthors = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "book",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookTag> bookTags = new ArrayList<>();
+
+    @PrePersist
+    @PreUpdate
     public void setDiscountRate() {
-        this.discountRate = (salePrice / originalPrice) * 100;
+        this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
+    }
+
+    public void addBookCategory(Category category) {
+        BookCategory bookCategory = new BookCategory(this, category);
+        this.bookCategories.add(bookCategory);
+        category.addBookCategory(bookCategory);
+    }
+
+    public void addBookAuthor(Author author) {
+        BookAuthor bookAuthor = new BookAuthor(this, author);
+        this.bookAuthors.add(bookAuthor);
+        author.addBookAuthor(bookAuthor);
+    }
+
+    public void addBookTag(Tag tag) {
+        BookTag bookTag = new BookTag(this, tag);
+        this.bookTags.add(bookTag);
+        tag.addBookTag(bookTag);
     }
 }
