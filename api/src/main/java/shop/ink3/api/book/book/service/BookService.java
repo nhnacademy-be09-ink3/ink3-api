@@ -199,6 +199,7 @@ public class BookService {
             book.addBookCategory(category);
         }
 
+
         // 작가 다시 설정
         for (Long authorId : authorIds) {
             Author author = authorRepository.findById(authorId)

@@ -1,10 +1,10 @@
 package shop.ink3.api.book.book.dto;
 
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.entity.BookStatus;
+
 import java.time.LocalDate;
 import java.util.List;
-import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.book.book.entity.BookStatus;
 
 public record BookResponse(
         Long id,
@@ -14,10 +14,10 @@ public record BookResponse(
         String description,
         String publisherName,
         LocalDate publishedAt,
-        Integer originalPrice,
-        Integer salePrice,
-        Integer discountRate,
-        Integer quantity,
+        int originalPrice,
+        int salePrice,
+        int discountRate,
+        int quantity,
         BookStatus status,
         boolean isPackable,
         String thumbnailUrl,
@@ -26,19 +26,24 @@ public record BookResponse(
         List<String> tagNames
 ) {
     public static BookResponse from(Book book) {
+        int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
+        int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
+        int discountRate = (originalPrice > 0)
+                ? (int) Math.round((1 - (salePrice / (double) originalPrice)) * 100)
+                : 0;
+
         return new BookResponse(
                 book.getId(),
                 book.getISBN(),
                 book.getTitle(),
-                book.getDescription(),
                 book.getContents(),
                 book.getDescription(),
-                book.getPublisher().getName(),
+                book.getPublisher() != null ? book.getPublisher().getName() : null,
                 book.getPublishedAt(),
-                book.getOriginalPrice(),
-                book.getSalePrice(),
-                book.getDiscountRate(),
-                book.getQuantity(),
+                originalPrice,
+                salePrice,
+                discountRate,
+                book.getQuantity() != null ? book.getQuantity() : 0,
                 book.getStatus(),
                 book.isPackable(),
                 book.getThumbnailUrl(),
