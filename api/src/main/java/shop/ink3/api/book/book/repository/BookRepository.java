@@ -2,6 +2,8 @@ package shop.ink3.api.book.book.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import shop.ink3.api.book.book.entity.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,4 +22,14 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(String name);
 
     boolean existsByISBN(String isbn);
+
+    // 태그이름기반 검색
+
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        JOIN b.bookTags bt
+        JOIN bt.tag t
+        WHERE t.name IN :tagNames
+    """)
+    Page<Book> findDistinctByTagNames(@Param("tagNames") List<String> tagNames, Pageable pageable);
 }

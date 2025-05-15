@@ -26,6 +26,7 @@ import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.enums.BookSortType;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
+import shop.ink3.api.book.book.exception.TooManyCategoriesException;
 import shop.ink3.api.book.book.external.aladin.AladinClient;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
 import shop.ink3.api.book.book.repository.BookRepository;
@@ -52,6 +53,11 @@ public class BookService {
     private final AladinClient aladinClient;
 
     public BookResponse createBook(BookCreateRequest request) {
+
+        if (request.categoryIds() != null && request.categoryIds().size() > 10) {
+            throw new TooManyCategoriesException(request.categoryIds().size());
+        }
+
         Publisher publisher = publisherRepository.findById(request.publisherId()).orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
         Book book = Book.builder()
                 .ISBN(request.ISBN())
@@ -164,6 +170,11 @@ public class BookService {
     }
 
     public BookResponse updateBook(Long bookId, BookUpdateRequest request) {
+
+        if (request.categoryIds() != null && request.categoryIds().size() > 10) {
+            throw new TooManyCategoriesException(request.categoryIds().size());
+        }
+
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
         Publisher publisher = publisherRepository.findById(request.publisherId())
