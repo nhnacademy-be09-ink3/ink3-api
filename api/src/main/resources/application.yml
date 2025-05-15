@@ -1,5 +1,3 @@
 spring:
   application:
     name: shop-service
-  profiles:
-    active: local

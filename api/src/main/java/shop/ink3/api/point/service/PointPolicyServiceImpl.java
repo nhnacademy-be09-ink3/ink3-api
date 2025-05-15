@@ -3,7 +3,7 @@ package shop.ink3.api.point.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.ink3.api.global.exception.PointPolicyNotFoundException;
+import shop.ink3.api.point.exception.PointPolicyNotFoundException;
 import shop.ink3.api.point.PointPolicy;
 import shop.ink3.api.point.repository.PointPolicyRepository;
 

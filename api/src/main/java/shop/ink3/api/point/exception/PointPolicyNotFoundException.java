@@ -1,4 +1,4 @@
-package shop.ink3.api.global.exception;
+package shop.ink3.api.point.exception;
 
 import shop.ink3.api.common.exception.NotFoundException;
 
