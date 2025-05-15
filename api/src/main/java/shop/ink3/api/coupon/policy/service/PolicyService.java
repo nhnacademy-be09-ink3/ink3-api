@@ -42,7 +42,6 @@ public class PolicyService {
                 .discount_value(policyCreateRequest.discount_value())
                 .minimum_order_amount(policyCreateRequest.minimum_order_amount())
                 .maximum_discount_amount(policyCreateRequest.maximum_discount_amount())
-                .validDays(policyCreateRequest.valid_days())
                 .build();
         return PolicyResponse.from(policyRepository.save(policy),"쿠폰 정책 생성 완료");
     }
@@ -55,8 +54,7 @@ public class PolicyService {
         policy.update(policyUpdateRequest.name(), policyUpdateRequest.discountType(),
                 policyUpdateRequest.minimum_order_amount(),
                 policyUpdateRequest.discount_value(),
-                policyUpdateRequest.maximum_discount_amount(),
-                policyUpdateRequest.valid_days());
+                policyUpdateRequest.maximum_discount_amount());
         return PolicyResponse.from(policyRepository.save(policy),"쿠폰 정책이 수정되었습니다.");
     }
 

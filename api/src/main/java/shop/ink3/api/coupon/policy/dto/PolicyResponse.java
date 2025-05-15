@@ -22,9 +22,6 @@ public record PolicyResponse(
 
         int discount_percentage,
 
-        @NotNull
-        LocalDateTime validDays,
-
         @NotBlank
         String message
 ) {
@@ -35,7 +32,6 @@ public record PolicyResponse(
                 policy.getDiscountType(),
                 policy.getDiscount_value(),
                 policy.getDiscount_percentage(),
-                policy.getValidDays(),
                 message
         );
     }

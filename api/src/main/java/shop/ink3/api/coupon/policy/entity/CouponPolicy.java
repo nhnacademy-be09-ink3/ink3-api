@@ -13,20 +13,27 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Builder
 @Getter
 public class CouponPolicy {
+    @Id @GeneratedValue
     private Long id;
 
     private String name;
 
     private DiscountType discountType;
 
-    private LocalDateTime validDays;
+    private int minimum_order_amount;
+    private int discount_value;
+    private int discount_percentage;
+    private int maximum_discount_amount;
 
-                       LocalDateTime valid_days) {
+    public void update(String name, DiscountType discountType, Integer minimum_order_amount, Integer discount_value, Integer maximum_discount_amount) {
         this.name = name;
         this.discountType = discountType;
-        this.validDays = valid_days;
+        this.minimum_order_amount = minimum_order_amount;
+        this.discount_value = discount_value;
+        this.maximum_discount_amount = maximum_discount_amount;
     }
 }

@@ -36,7 +36,7 @@ class CouponPolicyControllerTest {
 
     @Test
     void getPolicyById() throws Exception {
-        PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0, LocalDateTime.now().plusDays(30),"쿠폰 정책 조회 완료");
+        PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0,"쿠폰 정책 조회 완료");
         when(policyService.getPolicyById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/policies/1"))
@@ -50,7 +50,7 @@ class CouponPolicyControllerTest {
 
     @Test
     void getPolicyByName() throws Exception {
-        PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0,LocalDateTime.now().plusDays(5),"쿠폰 정책 생성 완료");
+        PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0,"쿠폰 정책 생성 완료");
         when(policyService.getPolicyByName("TestPolicy")).thenReturn(response);
 
         mockMvc.perform(get("/policies/policyName/TestPolicy"))
@@ -63,8 +63,8 @@ class CouponPolicyControllerTest {
 
     @Test
     void createPolicy() throws Exception {
-        PolicyCreateRequest request = new PolicyCreateRequest("NewPolicy", DiscountType.RATE, 10000,0,10,0, LocalDateTime.now().plusDays(10));
-        PolicyResponse response = new PolicyResponse(1L, "NewPolicy", DiscountType.RATE, 0, 10,LocalDateTime.now().plusDays(10),"쿠폰 정책 생성 완료");
+        PolicyCreateRequest request = new PolicyCreateRequest("NewPolicy", DiscountType.RATE, 10000,0,10,0);
+        PolicyResponse response = new PolicyResponse(1L, "NewPolicy", DiscountType.RATE, 0, 10,"쿠폰 정책 생성 완료");
         when(policyService.createPolicy(any())).thenReturn(response);
 
         mockMvc.perform(post("/policies")
@@ -79,8 +79,8 @@ class CouponPolicyControllerTest {
 
     @Test
     void updatePolicy() throws Exception {
-        PolicyUpdateRequest request = new PolicyUpdateRequest("updatedPolicy", DiscountType.FIXED, 10000,500,0,0, LocalDateTime.now().plusDays(3));
-        PolicyResponse response = new PolicyResponse(1L, "UpdatedPolicy", DiscountType.FIXED, 500, 0, LocalDateTime.now().plusDays(3),"쿠폰 정책이 수정되었습니다.");
+        PolicyUpdateRequest request = new PolicyUpdateRequest("updatedPolicy", DiscountType.FIXED, 10000,500,0,0);
+        PolicyResponse response = new PolicyResponse(1L, "UpdatedPolicy", DiscountType.FIXED, 500, 0,"쿠폰 정책이 수정되었습니다.");
         when(policyService.updatePolicy(any())).thenReturn(response);
 
         mockMvc.perform(put("/policies")
@@ -95,7 +95,7 @@ class CouponPolicyControllerTest {
 
     @Test
     void deletePolicyById() throws Exception {
-        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0, LocalDateTime.now().plusDays(3), "쿠폰 정책 생성 완료");
+        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0, "쿠폰 정책 생성 완료");
         when(policyService.deletePolicyById(1L)).thenReturn(response);
 
         mockMvc.perform(delete("/policies/1"))
@@ -108,7 +108,7 @@ class CouponPolicyControllerTest {
 
     @Test
     void deletePolicyByName() throws Exception {
-        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0,LocalDateTime.now().plusDays(3),"쿠폰 정책 생성 완료");
+        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0,"쿠폰 정책 생성 완료");
         when(policyService.deletePolicyByName("DeletedPolicy")).thenReturn(response);
 
         mockMvc.perform(delete("/policies/policyName/DeletedPolicy"))

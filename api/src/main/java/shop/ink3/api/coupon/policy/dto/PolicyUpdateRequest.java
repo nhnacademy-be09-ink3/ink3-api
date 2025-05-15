@@ -22,9 +22,7 @@ public record PolicyUpdateRequest(
 
         int discount_percentage,
 
-        int maximum_discount_amount,
+        int maximum_discount_amount
 
-        @NotNull
-        LocalDateTime valid_days
 ) {
 }

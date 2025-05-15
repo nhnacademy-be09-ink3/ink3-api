@@ -13,9 +13,24 @@ spring:
         use_sql_comments: true
         highlight_sql: true
         auto_quote_keyword: true
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+#eureka:
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+rabbitmq:
+  host: s4.java21.net
+  port: 5672
+  username: admin
+  password: nhnacademy123!
+  virtual-host: ink_dev
+  listener:
+    simple:
+      retry:
+        enabled: true
+  template:
+    retry:
+      max-attempts: 5
+      initial-interval: 1000
+      multiplier: 2
