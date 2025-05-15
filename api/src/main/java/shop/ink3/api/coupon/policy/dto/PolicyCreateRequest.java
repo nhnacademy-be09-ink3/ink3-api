@@ -18,13 +18,12 @@ public record PolicyCreateRequest(
         @NotNull @Min(0)
         int minimum_order_amount,
 
+        @Size(min = 1000)
         int discount_value,
-
+        @Size(min = 10, max = 100)
         int discount_percentage,
 
-        int maximum_discount_amount,
+        int maximum_discount_amount
 
-        @NotNull
-        LocalDateTime valid_days
 ) {
 }

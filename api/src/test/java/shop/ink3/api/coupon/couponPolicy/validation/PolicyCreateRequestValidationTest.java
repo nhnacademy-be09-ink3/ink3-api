@@ -32,8 +32,7 @@ public class PolicyCreateRequestValidationTest {
                 10000,
                 1000, // value
                 0,    // percentage
-                2000,
-                LocalDateTime.now().plusDays(7)
+                2000
         );
 
         Set<ConstraintViolation<PolicyCreateRequest>> violations = validator.validate(request);
@@ -48,8 +47,7 @@ public class PolicyCreateRequestValidationTest {
                 10000,
                 0,    // value
                 15,   // percentage
-                5000,
-                LocalDateTime.now().plusDays(7)
+                5000
         );
 
         Set<ConstraintViolation<PolicyCreateRequest>> violations = validator.validate(request);
@@ -64,8 +62,7 @@ public class PolicyCreateRequestValidationTest {
                 10000,
                 1000,
                 10,   // ❌ 잘못 입력된 percentage
-                2000,
-                LocalDateTime.now().plusDays(7)
+                2000
         );
 
         Set<ConstraintViolation<PolicyCreateRequest>> violations = validator.validate(request);
@@ -82,8 +79,7 @@ public class PolicyCreateRequestValidationTest {
                 10000,
                 1000, // ❌ 잘못 입력된 value
                 10,
-                2000,
-                LocalDateTime.now().plusDays(7)
+                2000
         );
 
         Set<ConstraintViolation<PolicyCreateRequest>> violations = validator.validate(request);
