@@ -32,7 +32,6 @@ import shop.ink3.api.book.publisher.dto.PublisherCreateRequest;
 import shop.ink3.api.book.publisher.dto.PublisherResponse;
 import shop.ink3.api.book.publisher.dto.PublisherUpdateRequest;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.book.publisher.exception.PublisherAlreadyExistsException;
 import shop.ink3.api.book.publisher.exception.PublisherNotFoundException;
 import shop.ink3.api.book.publisher.service.PublisherService;
 import shop.ink3.api.common.dto.PageResponse;
@@ -162,23 +161,6 @@ public class PublisherControllerTest {
                 .andExpect(jsonPath("$.data.name").value("testPublisher"))
                 .andDo(print());
     }
-
-//    @Test   // GlobalExceptionHandler에 AlreadyExistsException에 대한 처리가 없음
-//    void createPublisherWithAlreadyExists() throws Exception {
-//        PublisherCreateRequest request = new PublisherCreateRequest("testPublisher");
-//        when(publisherService.createPublisher(request)).thenThrow(new PublisherAlreadyExistsException("testPublisher"));
-//        mockMvc.perform(post("/api/books/publishers")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isConflict())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()))
-//                .andExpect(jsonPath("$.message").exists())
-//                .andExpect(jsonPath("$.timestamp").exists())
-//                .andExpect(jsonPath("$.data.id").value(1L))
-//                .andExpect(jsonPath("$.data.name").value("testPublisher"))
-//                .andDo(print());
-//    }
 
     @Test
     void updatePublisher() throws Exception {
