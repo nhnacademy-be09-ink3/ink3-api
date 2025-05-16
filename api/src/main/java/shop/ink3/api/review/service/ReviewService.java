@@ -5,7 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import shop.ink3.api.review.common.exception.ReviewNotFoundException;
+import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
+import shop.ink3.api.order.orderBook.entity.OrderBook;
+import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
+import shop.ink3.api.review.exception.ReviewNotFoundException;
 import shop.ink3.api.review.dto.ReviewRequest;
 import shop.ink3.api.review.dto.ReviewResponse;
 import shop.ink3.api.review.entity.Review;
@@ -18,17 +21,17 @@ import shop.ink3.api.user.user.repository.UserRepository;
 @RequiredArgsConstructor
 public class ReviewService  {
     private final UserRepository userRepository;
-    // TODO: private final OrderBookRepository orderBookRepository;
+    private final OrderBookRepository orderBookRepository;
     private final ReviewRepository reviewRepository;
 
     public ReviewResponse addReview(ReviewRequest request) {
         User user = userRepository.findById(request.userId())
             .orElseThrow(() -> new UserNotFoundException(request.userId()));
-        // TODO: OrderBook orderBook = orderBookRepository.findById(request.orderBookId()).orElseThrow(() -> new OrderBookNotFoundException(request.orderBookId()));
+        OrderBook orderBook = orderBookRepository.findById(request.orderBookId()).orElseThrow(() -> new OrderBookNotFoundException(request.orderBookId()));
 
         Review review = Review.builder()
             .user(user)
-            .orderBook(null) // TODO: orderBook
+            .orderBook(orderBook)
             .title(request.title())
             .content(request.content())
             .rating(request.rating())
@@ -47,7 +50,7 @@ public class ReviewService  {
     }
 
     public void deleteReview(Long id) {
-        reviewRepository.findById(id).orElseThrow(() -> new ReviewNotFoundException("존재하지 않는 리뷰입니다."));
+        reviewRepository.findById(id).orElseThrow(() -> new ReviewNotFoundException(id));
         reviewRepository.deleteById(id);
     }
 }
