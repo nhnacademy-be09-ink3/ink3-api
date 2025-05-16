@@ -121,7 +121,17 @@ jobs:
         run: sleep 15
 
       - name: Check health endpoint
-        run: curl --fail http://localhost:10270/shop/actuator/health
+        run: |
+          for i in {1..10}; do
+            echo "⏳ Waiting for server to start... attempt $i"
+            if curl --fail http://localhost:10270/shop/actuator/health; then
+              echo "✅ Server is up"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "❌ Server failed to start in time"
+          exit 1
 
       - name: Stop application
         run: kill $(cat app.pid)
