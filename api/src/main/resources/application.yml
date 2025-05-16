@@ -1,26 +1,15 @@
-
 spring:
   application:
-    name: Ink3-API
-  datasource:
-    url: jdbc:h2:mem:ink3db       # 인메모리 모드: ink3db 라는 이름
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    name: shop-service
 
-  h2:
-    console:
-      enabled: true              # 콘솔 활성화
-      path: /h2-console
+payment:
+  toss:
+    client_key : "temp"
+    secret_key : "temp"
+    confirm_url : "https://api.tosspayments.com/v1/payments/confirm"
+    success_url : "http://localhost:8080/payment/success"
+    fail_url : "http://localhost:8080/payment/fail"
 
 server:
-  port: 10260
-
-#eureka:
-#  client:
-#    service-url:
-#      defaultZone: http://admin:1234@localhost:10252/eureka,http://admin:1234@localhost:10253/eureka
-#    fetch-registry: true
-#    register-with-eureka: true
-#  instance:
-#    prefer-ip-address: true
+  servlet:
+    context-path: /shop

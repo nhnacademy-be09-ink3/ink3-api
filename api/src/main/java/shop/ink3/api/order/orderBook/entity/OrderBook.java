@@ -47,12 +47,16 @@ public class OrderBook {
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
 
-    @OneToOne(mappedBy = "orderBook")
-    private Review review;
-
     @Column(name = "price", nullable = false)
-    private int price;
+    private Integer price;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
+
+    public void updateCoupon(CouponStore coupon) {
+        this.couponStore = coupon;
+    }
+
+    public void updateQuantity(int quantity) {
+    }
 }

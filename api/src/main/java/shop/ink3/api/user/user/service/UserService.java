@@ -14,6 +14,9 @@ import shop.ink3.api.user.membership.repository.MembershipRepository;
 import shop.ink3.api.user.point.entity.PointHistory;
 import shop.ink3.api.user.point.entity.PointHistoryStatus;
 import shop.ink3.api.user.point.repository.PointHistoryRepository;
+import shop.ink3.api.user.social.entity.Social;
+import shop.ink3.api.user.social.repository.SocialRepository;
+import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
@@ -25,6 +28,7 @@ import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
 import shop.ink3.api.user.user.exception.InsufficientPointException;
+import shop.ink3.api.user.user.exception.SocialUserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
@@ -36,6 +40,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final SocialRepository socialRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
@@ -64,10 +69,23 @@ public class UserService {
     public UserAuthResponse getUserAuth(String loginId) {
         User user = userRepository.findByLoginId(loginId).orElseThrow(() -> new UserAuthNotFoundException(loginId));
         if (user.getStatus() == UserStatus.DORMANT) {
-            throw new DormantException(loginId);
+            throw new DormantException(user.getId());
         }
         if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new WithdrawnException(loginId);
+            throw new WithdrawnException(user.getId());
+        }
+        return UserAuthResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserAuthResponse getSocialUserAuth(String provider, String providerUserId) {
+        User user = socialRepository.findByProviderAndProviderUserId(provider, providerUserId)
+                .orElseThrow(() -> new SocialUserAuthNotFoundException(provider, providerUserId)).getUser();
+        if (user.getStatus() == UserStatus.DORMANT) {
+            throw new DormantException(user.getId());
+        }
+        if (user.getStatus() == UserStatus.WITHDRAWN) {
+            throw new WithdrawnException(user.getId());
         }
         return UserAuthResponse.from(user);
     }
@@ -88,6 +106,34 @@ public class UserService {
                 .createdAt(LocalDateTime.now())
                 .build();
         return UserResponse.from(userRepository.save(user));
+    }
+
+    public UserResponse createSocialUser(SocialUserCreateRequest request) {
+        Membership defaultMembership = membershipRepository.findByIsDefault(true)
+                .orElseThrow(() -> new IllegalStateException("Default membership is not configured."));
+
+        User user = User.builder()
+                .loginId(request.loginId())
+                .password(passwordEncoder.encode(request.password()))
+                .name(request.name())
+                .email(request.email())
+                .phone(request.phone())
+                .birthday(request.birthday())
+                .point(0)
+                .membership(defaultMembership)
+                .status(UserStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .build();
+        user = userRepository.save(user);
+
+        Social social = Social.builder()
+                .user(user)
+                .provider(request.provider())
+                .providerUserId(request.providerUserId())
+                .build();
+        socialRepository.save(social);
+
+        return UserResponse.from(user);
     }
 
     public UserResponse updateUser(long userId, UserUpdateRequest request) {

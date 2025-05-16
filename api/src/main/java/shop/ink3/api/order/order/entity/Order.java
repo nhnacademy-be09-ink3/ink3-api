@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.order.order.dto.OrderUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,6 +39,9 @@ public class Order {
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
 
+    @Column(name = "order_uuid", nullable = true, length = 64, unique = true)
+    private String orderUUID;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
@@ -50,4 +54,17 @@ public class Order {
 
     @Column(nullable = false, length = 20)
     private String ordererPhone;
+
+    public void update(OrderUpdateRequest request) {
+        this.ordererName = request.getOrdererName();
+        this.ordererPhone = request.getOrdererPhone();
+    }
+
+    public void setOrderUUID(String orderUUID) {
+        this.orderUUID = orderUUID;
+    }
+
+    public void updateStatus(OrderStatus orderStatus) {
+        this.status = orderStatus;
+    }
 }

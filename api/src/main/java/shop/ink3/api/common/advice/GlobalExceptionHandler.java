@@ -18,19 +18,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<CommonResponse<Void>> handleNotFoundException(NotFoundException e) {
         return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(CommonResponse.error(HttpStatus.NOT_FOUND, e.getMessage()));
+            .status(HttpStatus.NOT_FOUND)
+            .body(CommonResponse.error(HttpStatus.NOT_FOUND, e.getMessage()));
     }
 
     @ExceptionHandler(value = {
-            IllegalStateException.class,
-            InsufficientPointException.class,
-            InvalidPasswordException.class
+        IllegalStateException.class,
+        InsufficientPointException.class,
+        InvalidPasswordException.class
     })
     public ResponseEntity<CommonResponse<Void>> handleBadRequestException(Exception e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
+            .status(HttpStatus.BAD_REQUEST)
+            .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -59,6 +59,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CommonResponse<Void>> handleException(Exception e) {
         return ResponseEntity.internalServerError()
-                .body(CommonResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+            .body(CommonResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 }
