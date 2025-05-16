@@ -19,6 +19,7 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: 추출된 버전 확인
         run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
@@ -35,6 +36,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-m2-
+
       - name: Build all modules with Maven
         run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} -B
 
@@ -64,6 +66,8 @@ jobs:
             -Dsonar.host.url=http://s4.java21.net:9000 \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
+
+
       - name: Check coverage threshold
         run: |
           LINE_COVERAGE=$(grep -A1 "<counter type=\"LINE\"" api/target/site/jacoco/jacoco.xml | grep -oP 'covered="\K[0-9]+' | paste -sd+ - | bc)
@@ -107,6 +111,7 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: 추출된 버전 확인
         run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
@@ -122,6 +127,7 @@ jobs:
             --spring.profiles.active=test \
             --TTB_KEY=$TTB_KEY > app.log 2>&1 &
           echo $! > app.pid
+
       - name: Wait for application to start
         run: sleep 15
 
@@ -137,6 +143,7 @@ jobs:
           done
           echo ":x: Server failed to start in time"
           exit 1
+
       - name: Stop application
         run: kill $(cat app.pid)
 
@@ -176,6 +183,7 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: 추출된 버전 확인
         run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
