@@ -25,15 +25,23 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
-import shop.ink3.api.review.common.exception.ReviewNotFoundException;
+import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
+import shop.ink3.api.review.exception.ReviewNotFoundException;
 import shop.ink3.api.review.dto.ReviewRequest;
 import shop.ink3.api.review.dto.ReviewResponse;
 import shop.ink3.api.review.entity.Review;
 import shop.ink3.api.review.repository.ReviewRepository;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
+import shop.ink3.api.user.user.repository.UserRepository;
 
 class ReviewServiceTest {
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private OrderBookRepository orderBookRepository;
+
     @Mock
     private ReviewRepository reviewRepository;
 
@@ -120,7 +128,9 @@ class ReviewServiceTest {
 
         ReflectionTestUtils.setField(review, "id", 1L);
 
-        when(reviewRepository.save(ArgumentMatchers.any(Review.class))).thenReturn(review);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(orderBookRepository.findById(orderBook1.getId())).thenReturn(Optional.of(orderBook1));
+        when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
         ReviewResponse response = reviewService.addReview(request);
 
@@ -214,6 +224,6 @@ class ReviewServiceTest {
 
         assertThatThrownBy(() -> reviewService.deleteReview(0L))
             .isInstanceOf(ReviewNotFoundException.class)
-            .hasMessageContaining("존재하지 않는 리뷰입니다.");
+            .hasMessageContaining("존재하지 않는 리뷰입니다. id: ");
     }
 }
