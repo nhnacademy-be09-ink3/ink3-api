@@ -112,12 +112,12 @@ jobs:
           EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         run: |
-          nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
+          nohup java -DREDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
+            -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} \
+            -DTTB_KEY=${{ secrets.TTB_KEY }} \
+            -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
             --server.port=10270 \
-            --spring.profiles.active=test \
-            --TTB_KEY=$TTB_KEY \
-            --REDIS_PASSWORD=$REDIS_PASSWORD > app.log 2>&1 &
-          echo $! > app.pid
+            --spring.profiles.active=test > app.log 2>&1 &
 
       - name: Wait for application to start
         run: sleep 15
