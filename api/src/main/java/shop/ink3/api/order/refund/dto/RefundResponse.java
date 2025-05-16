@@ -20,8 +20,8 @@ public class RefundResponse {
         return new RefundResponse(
                 refund.getId(),
                 refund.getOrder(),
-                refund.getDetails(),
-                refund.getReason()
+                refund.getReason(),
+                refund.getDetails()
         );
     }
 }
