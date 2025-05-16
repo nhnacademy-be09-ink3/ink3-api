@@ -55,7 +55,7 @@ public class ShipmentService {
 
     // 특정 주문에 대한 배송 정보 조회
     public ShipmentResponse getShipment(long orderId) {
-        Shipment shipment = getShippingOrThrow(orderId);
+        Shipment shipment = getShipmentOrThrow(orderId);
         return ShipmentResponse.from(shipment);
     }
 
@@ -77,7 +77,7 @@ public class ShipmentService {
     // 수정
     @Transactional
     public ShipmentResponse updateShipment(long orderId, ShipmentUpdateRequest request) {
-        Shipment shipment = getShippingOrThrow(orderId);
+        Shipment shipment = getShipmentOrThrow(orderId);
         shipment.update(request);
         return ShipmentResponse.from(shipmentRepository.save(shipment));
     }
@@ -85,23 +85,23 @@ public class ShipmentService {
     // 삭제
     @Transactional
     public void deleteShipment(long orderId) {
-        Shipment shipment = getShippingOrThrow(orderId);
+        Shipment shipment = getShipmentOrThrow(orderId);
         shipmentRepository.deleteById(shipment.getId());
     }
 
     // 배달 완료 시간 변경
     @Transactional
     public ShipmentResponse updateShipmentDeliveredAt(long orderId, LocalDateTime deliveredAt) {
-        Shipment shipment = getShippingOrThrow(orderId);
+        Shipment shipment = getShipmentOrThrow(orderId);
         shipment.updateDeliveredAt(deliveredAt);
         return ShipmentResponse.from(shipmentRepository.save(shipment));
     }
 
     // 조회 로직
-    private Shipment getShippingOrThrow(long shippingId) {
-        Optional<Shipment> optionalShipping = shipmentRepository.findById(shippingId);
+    private Shipment getShipmentOrThrow(long orderId) {
+        Optional<Shipment> optionalShipping = shipmentRepository.findByOrder_Id(orderId);
         if (optionalShipping.isEmpty()) {
-            throw new ShippingPolicyNotFoundException();
+            throw new ShipmentNotFoundException();
         }
         return optionalShipping.get();
     }

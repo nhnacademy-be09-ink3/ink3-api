@@ -94,7 +94,7 @@ public class PackagingService {
     private Packaging getPackagingOrThrow(long packagingId) {
         Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
         if (!optionalPackaging.isPresent()) {
-            throw new ShippingPolicyNotFoundException();
+            throw new PackagingNotFoundException();
         }
         return optionalPackaging.get();
     }

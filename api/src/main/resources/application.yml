@@ -8,4 +8,8 @@ payment:
     secret_key : ${payment_secret_key}
     confirm_url : "https://api.tosspayments.com/v1/payments/confirm"
     success_url : "http://localhost:8080/payment/success"
-    fail_url : "/payment/fail"
+    fail_url : "http://localhost:8080/payment/fail"
+
+server:
+  servlet:
+    context-path: /shop

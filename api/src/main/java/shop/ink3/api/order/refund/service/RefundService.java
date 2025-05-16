@@ -36,7 +36,6 @@ public class RefundService {
         }
         Order order = optionalOrder.get();
         Refund refund = Refund.builder()
-                .id(0L)
                 .order(order)
                 .details(request.getDetails())
                 .reason(request.getReason())
@@ -75,10 +74,10 @@ public class RefundService {
     }
 
     // 조회 로직
-    private Refund getRefundOrThrow(long refundId) {
-        Optional<Refund> optionalRefund = refundRepository.findById(refundId);
-        if (!optionalRefund.isPresent()) {
-            throw new RefundNotFoundException(refundId);
+    private Refund getRefundOrThrow(long orderId) {
+        Optional<Refund> optionalRefund = refundRepository.findByOrder_Id(orderId);
+        if (optionalRefund.isEmpty()) {
+            throw new RefundNotFoundException(orderId);
         }
         return optionalRefund.get();
     }

@@ -37,8 +37,9 @@ import shop.ink3.api.order.shipment.repository.ShipmentRepository;
 class ShipmentServiceTest {
 
     @Mock ShipmentRepository shipmentRepository;
-    @Mock OrderService orderService;
     @InjectMocks ShipmentService shipmentService;
+    @Mock
+    OrderRepository orderRepository;
 
     @Test
     @DisplayName("배송 정보 조회 - 성공")
@@ -119,8 +120,8 @@ class ShipmentServiceTest {
                 3000,
                 "CODE123"
         );
-        OrderResponse orderResponse = OrderResponse.from(Order.builder().id(1L).build());
-        when(orderService.getOrder(anyLong())).thenReturn(orderResponse);
+        Order order = Order.builder().id(1L).build();
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(shipmentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // when
@@ -184,13 +185,13 @@ class ShipmentServiceTest {
     void deleteShipment_성공() {
         // given
         Shipment shipment = Shipment.builder().id(1L).build();
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(shipment));
 
         // when
         shipmentService.deleteShipment(1L);
 
         // then
-        verify(shipmentRepository, times(1)).delete(shipment);
+        verify(shipmentRepository, times(1)).deleteById(1L);
     }
 
     @Test

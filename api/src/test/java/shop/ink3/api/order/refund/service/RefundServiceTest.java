@@ -40,7 +40,7 @@ class RefundServiceTest {
     RefundService refundService;
 
     @Mock
-    OrderService orderService;
+    OrderRepository orderRepository;
 
     @Test
     @DisplayName("반품 조회 - 성공")
@@ -100,14 +100,15 @@ class RefundServiceTest {
     void createRefund_성공() {
         // given
         RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세");
-        OrderResponse orderResponse = OrderResponse.from(Order.builder().id(1L).build());
+        Order order = Order.builder().id(1L).build();
+        OrderResponse orderResponse = OrderResponse.from(order);
         Refund  refund = Refund.builder()
                 .id(1L)
                 .order(OrderResponse.getOrder(orderResponse))
                 .reason(request.getReason())
                 .details(request.getDetails())
                 .build();
-        when(orderService.getOrder(anyLong())).thenReturn(orderResponse);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(refundRepository.save(any())).thenReturn(refund);
 
         // when
