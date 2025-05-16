@@ -1,53 +1,65 @@
 package shop.ink3.api.book.book.dto;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 
+import java.time.LocalDate;
+import java.util.List;
+
 public record BookResponse(
-    Long id,
-    String ISBN,
-    String title,
-    String contents,
-    String description,
-    LocalDate publishedAt,
-    Integer originalPrice,
-    Integer salePrice,
-    Integer quantity,
-    BookStatus status,
-    boolean isPackable,
-    String thumbnailUrl,
-    Long publisherId,
-    List<Long> categoryIdList,
-    List<Long> authorIdList,
-    List<Long> tagIdList
+        Long id,
+        String ISBN,
+        String title,
+        String contents,
+        String description,
+        String publisherName,
+        LocalDate publishedAt,
+        int originalPrice,
+        int salePrice,
+        int discountRate,
+        int quantity,
+        BookStatus status,
+        boolean isPackable,
+        String thumbnailUrl,
+        List<String> categoryNames,
+        List<String> authorNames,
+        List<String> tagNames
 ) {
     public static BookResponse from(Book book) {
+        int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
+        int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
+        // 할인율 계산
+        int discountRate = (originalPrice > 0)
+                ? (int) Math.round((1 - (salePrice / (double) originalPrice)) * 100)
+                : 0;
+
         return new BookResponse(
-            book.getId(),
-            book.getISBN(),
-            book.getTitle(),
-            book.getContents(),
-            book.getDescription(),
-            book.getPublishedAt(),
-            book.getOriginalPrice(),
-            book.getSalePrice(),
-            book.getQuantity(),
-            book.getStatus(),
-            book.isPackable(),
-            book.getThumbnailUrl(),
-            book.getPublisher().getId(),
-            book.getBookCategories().stream()
-                .map(category -> category.getCategory().getId())
-                .toList(),
-            book.getBookAuthors().stream()
-                .map(author -> author.getAuthor().getId())
-                .toList(),
-            book.getBookTags().stream()
-                .map(tag -> tag.getTag().getId())
-                .toList()
+                book.getId(),
+                book.getISBN(),
+                book.getTitle(),
+                book.getContents(),
+                book.getDescription(),
+                book.getPublisher() != null ? book.getPublisher().getName() : null,
+                book.getPublishedAt(),
+                originalPrice,
+                salePrice,
+                discountRate,
+                book.getQuantity() != null ? book.getQuantity() : 0,
+                book.getStatus(),
+                book.isPackable(),
+                book.getThumbnailUrl(),
+                book.getBookCategories()
+                        .stream()
+                        .map(bc -> bc.getCategory().getName())
+                        .toList(),
+                book.getBookAuthors()
+                        .stream()
+                        .map(ba -> ba.getAuthor().getName())
+                        .toList(),
+                book.getBookTags()
+                        .stream()
+                        .map(bt -> bt.getTag().getName())
+                        .toList()
         );
     }
 }

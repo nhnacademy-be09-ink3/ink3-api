@@ -1,0 +1,61 @@
+package shop.ink3.api.book.publisher.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import shop.ink3.api.book.publisher.dto.PublisherCreateRequest;
+import shop.ink3.api.book.publisher.dto.PublisherUpdateRequest;
+import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.book.publisher.dto.PublisherResponse;
+import shop.ink3.api.book.publisher.service.PublisherService;
+import shop.ink3.api.common.dto.PageResponse;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/books/publishers")
+public class PublisherController {
+
+    private final PublisherService publisherService;
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<PageResponse<PublisherResponse>>> getPublishers(Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublishers(pageable)));
+    }
+
+    @GetMapping("/id/{publisherId}")
+    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherById(@PathVariable Long publisherId) {
+        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(publisherId)));
+    }
+
+    @GetMapping("/name/{publisherName}")
+    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@PathVariable String publisherName) {
+        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(publisherName)));
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonResponse<PublisherResponse>> createPublisher(@RequestBody PublisherCreateRequest publisherCreateRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(publisherService.createPublisher(publisherCreateRequest)));
+    }
+
+    @PutMapping("/{publisherId}")
+    public ResponseEntity<CommonResponse<PublisherResponse>> updatePublisher(@PathVariable Long publisherId,
+                                                                             @RequestBody PublisherUpdateRequest publisherUpdateRequest) {
+        return ResponseEntity.ok(CommonResponse.update(publisherService.updatePublisher(publisherId, publisherUpdateRequest)));
+    }
+
+    @DeleteMapping("/{publisherId}")
+    public ResponseEntity<Void> deletePublisher(@PathVariable Long publisherId) {
+        publisherService.deletePublisher(publisherId);
+        return ResponseEntity.noContent().build();
+    }
+}
