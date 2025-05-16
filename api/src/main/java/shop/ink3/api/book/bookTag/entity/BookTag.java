@@ -24,6 +24,7 @@ import shop.ink3.api.book.tag.entity.Tag;
 @Getter
 @Table(name = "book_tags")
 public class BookTag {
+
     public BookTag(Book book, Tag tag) {
         this.book = book;
         this.tag = tag;

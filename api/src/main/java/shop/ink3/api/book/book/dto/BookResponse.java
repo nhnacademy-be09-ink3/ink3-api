@@ -28,6 +28,7 @@ public record BookResponse(
     public static BookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
+        // 할인율 계산
         int discountRate = (originalPrice > 0)
                 ? (int) Math.round((1 - (salePrice / (double) originalPrice)) * 100)
                 : 0;

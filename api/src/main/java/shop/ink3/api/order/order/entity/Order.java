@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.user.user.entity.User;
 
