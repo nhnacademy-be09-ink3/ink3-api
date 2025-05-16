@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  pull_request:
+  push:
     branches:
       - dev
 
@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build all modules with Maven
-        run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} -DREDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} -B
+        run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} -B
 
 
   sonar-analysis:
@@ -60,7 +60,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} -DREDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} sonar:sonar \
+          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} sonar:sonar \
             -Dsonar.projectKey=ink3_api_server \
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
@@ -110,14 +110,12 @@ jobs:
       - name: Run application in background
         env:
           EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         run: |
-          nohup java -DREDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
-            -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} \
-            -DTTB_KEY=${{ secrets.TTB_KEY }} \
-            -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
+          nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
             --server.port=10270 \
-            --spring.profiles.active=test > app.log 2>&1 &
+            --spring.profiles.active=test \
+            --TTB_KEY=$TTB_KEY > app.log 2>&1 &
+          echo $! > app.pid
 
       - name: Wait for application to start
         run: sleep 15
@@ -132,8 +130,7 @@ jobs:
         env:
           EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
           TTB_KEY: ${{ secrets.TTB_KEY }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -DREDIS_PASSWORD=$REDIS_PASSWORD -B
+        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -B
 
       - name: Print app log if health check fails
         if: failure()
@@ -193,6 +190,5 @@ jobs:
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export TTB_KEY=${{ secrets.TTB_KEY }}
-            export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
