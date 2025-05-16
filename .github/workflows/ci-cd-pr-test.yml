@@ -19,7 +19,6 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: 추출된 버전 확인
         run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
@@ -36,7 +35,6 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-m2-
-
       - name: Build all modules with Maven
         run: mvn clean install -DskipTests=true -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} -B
 
@@ -66,8 +64,6 @@ jobs:
             -Dsonar.host.url=http://s4.java21.net:9000 \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
-
-
       - name: Check coverage threshold
         run: |
           LINE_COVERAGE=$(grep -A1 "<counter type=\"LINE\"" api/target/site/jacoco/jacoco.xml | grep -oP 'covered="\K[0-9]+' | paste -sd+ - | bc)
@@ -85,6 +81,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -100,7 +107,6 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: 추출된 버전 확인
         run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
@@ -116,13 +122,21 @@ jobs:
             --spring.profiles.active=test \
             --TTB_KEY=$TTB_KEY > app.log 2>&1 &
           echo $! > app.pid
-
       - name: Wait for application to start
         run: sleep 15
 
       - name: Check health endpoint
-        run: curl --fail http://localhost:10270/shop/actuator/health
-
+        run: |
+          for i in {1..10}; do
+            echo ":hourglass_flowing_sand: Waiting for server to start... attempt $i"
+            if curl --fail http://localhost:10270/shop/actuator/health; then
+              echo ":white_check_mark: Server is up"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo ":x: Server failed to start in time"
+          exit 1
       - name: Stop application
         run: kill $(cat app.pid)
 
@@ -162,7 +176,6 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: 추출된 버전 확인
         run: echo "${{ steps.extract_version.outputs.version }} 입니다."
 
@@ -190,5 +203,6 @@ jobs:
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export TTB_KEY=${{ secrets.TTB_KEY }}
+            export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
