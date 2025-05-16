@@ -1,5 +1,8 @@
 package shop.ink3.api.book.book.entity;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,20 +15,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.bookTag.entity.BookTag;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.cart.entity.Cart;
 
+@Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -86,6 +87,11 @@ public class Book {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<BookAuthor> bookAuthors;
+
+    @OneToMany(mappedBy = "book",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
+    private List<BookTag> bookTags;
 
     public void setDiscountRate() {
         this.discountRate = (salePrice / originalPrice) * 100;
