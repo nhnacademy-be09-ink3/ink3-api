@@ -112,7 +112,7 @@ public class PublisherServiceTest {
     @Test
     void createPublisherWithAlreadyExists() {
         PublisherCreateRequest request = new PublisherCreateRequest("testPublisher");
-        when(publisherRepository.save(any(Publisher.class))).thenThrow(new PublisherAlreadyExistsException("testPublisher"));
+        when(publisherRepository.existsByName("testPublisher")).thenReturn(true);
         Assertions.assertThrows(PublisherAlreadyExistsException.class, () -> publisherService.createPublisher(request));
     }
 
