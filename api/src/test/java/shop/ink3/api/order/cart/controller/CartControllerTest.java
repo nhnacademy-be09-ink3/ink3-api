@@ -25,6 +25,8 @@ import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
+import shop.ink3.api.order.cart.dto.CartUpdateRequest;
+import shop.ink3.api.order.cart.dto.GuestCartRequest;
 import shop.ink3.api.order.cart.service.CartService;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -118,6 +120,18 @@ class CartControllerTest {
     }
 
     @Test
+    @DisplayName("장바구니 수량 변경")
+    void updateQuantity() throws Exception {
+        Mockito.when(cartService.updateCartQuantity(anyLong(), any(CartUpdateRequest.class))).thenReturn(cartResponse);
+
+        mockMvc.perform(put("/carts/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cartRequest)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.quantity").value(100));
+    }
+
+    @Test
     @DisplayName("장바구니 목록 조회")
     void getCarts() throws Exception {
         List<CartResponse> cartResponses = List.of(
@@ -132,9 +146,37 @@ class CartControllerTest {
     }
 
     @Test
-    @DisplayName("장바구니 특정 도서 삭제")
+    @DisplayName("비회원 장바구니 목록 조회")
+    void getGuestCarts() throws Exception {
+        List<GuestCartRequest> requests = List.of(
+            new GuestCartRequest(book1.getId(), 100),
+            new GuestCartRequest(book2.getId(), 100)
+        );
+
+        List<CartResponse> cartResponses = List.of(
+            new CartResponse(1L, user.getId(), book1.getId(), 100),
+            new CartResponse(2L, user.getId(), book2.getId(), 100)
+        );
+
+        Mockito.when(cartService.getCartItemsByGuest(anyList())).thenReturn(cartResponses);
+
+        mockMvc.perform(get("/carts/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requests)))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("장바구니 전체 삭제")
+    void deleteCarts() throws Exception {
+        mockMvc.perform(delete("/carts/user/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("장바구니 선택 삭제")
     void deleteCart() throws Exception {
         mockMvc.perform(delete("/carts/1"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk());
     }
 }

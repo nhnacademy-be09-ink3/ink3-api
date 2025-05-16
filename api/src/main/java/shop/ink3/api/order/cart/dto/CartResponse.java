@@ -9,6 +9,12 @@ public record CartResponse(
     int quantity
 ) {
     public static CartResponse from(Cart cart) {
-        return new CartResponse(cart.getId(), cart.getUser().getId(), cart.getBook().getId(), cart.getQuantity());
+        Long userId = cart.getUser() != null ? cart.getUser().getId() : null;
+        return new CartResponse(
+            cart.getId(),
+            userId,
+            cart.getBook().getId(),
+            cart.getQuantity()
+        );
     }
 }

@@ -2,6 +2,9 @@ package shop.ink3.api.order.cart.service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,6 +18,7 @@ import shop.ink3.api.book.common.exception.BookNotFoundException;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
+import shop.ink3.api.order.cart.dto.GuestCartRequest;
 import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.order.cart.repository.CartRepository;
 import shop.ink3.api.order.common.exception.CartNotFoundException;
@@ -82,26 +86,36 @@ public class CartService {
         return carts;
     }
 
-    // public List<CartResponse> getCartItemsByGuest(List<GuestCartRequest> requests) {
-    //     List<Long> bookIds = requests.stream()
-    //         .map(GuestCartRequest::bookId)
-    //         .toList();
-    //
-    //     List<Book> books = bookRepository.findAllById(bookIds);
-    //     Map<Long, Book> bookMap = books.stream()
-    //         .collect(Collectors.toMap(Book::getId, Function.identity()));
-    //
-    //     return requests.stream()
-    //         .map(req -> {
-    //             Book book = bookMap.get(req.bookId());
-    //             if (book == null) {
-    //                 throw new BookNotFoundException("존재하지 않는 도서입니다.");
-    //             }
-    //             Cart cart = new Cart(null, book, req.quantity());
-    //             return toResponse(cart);
-    //         })
-    //         .toList();
-    // }
+    public List<CartResponse> getCartItemsByGuest(List<GuestCartRequest> requests) {
+        List<Long> bookIds = requests.stream()
+            .map(GuestCartRequest::bookId)
+            .toList();
+
+        List<Book> books = bookRepository.findAllById(bookIds);
+        Map<Long, Book> bookMap = books.stream()
+            .collect(Collectors.toMap(Book::getId, Function.identity()));
+
+        return requests.stream()
+            .map(req -> {
+                Book book = bookMap.get(req.bookId());
+                if (book == null) {
+                    throw new BookNotFoundException(req.bookId());
+                }
+                Cart cart = new Cart(null, book, req.quantity());
+                return toResponse(cart);
+            })
+            .toList();
+    }
+
+    public void deleteCartItems(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException(userId);
+        }
+
+        cartRepository.deleteAllByUserId(userId);
+        String key = CART_KEY_PREFIX + userId;
+        redisTemplate.delete(key);
+    }
 
     public void deleteCartItem(Long cartId) {
         Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
@@ -110,12 +124,6 @@ public class CartService {
 
         String key = CART_KEY_PREFIX + cart.getUser().getId();
         hashOps().delete(key, cartId.toString());
-    }
-
-    public void deleteCartItems(Long userId) {
-        cartRepository.deleteAllByUserId(userId);
-        String key = CART_KEY_PREFIX + userId;
-        redisTemplate.delete(key);
     }
 
     private CartResponse toResponse(Cart cart) {

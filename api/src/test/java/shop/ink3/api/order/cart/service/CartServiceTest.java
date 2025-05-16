@@ -26,11 +26,14 @@ import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
+import shop.ink3.api.order.cart.dto.CartUpdateRequest;
+import shop.ink3.api.order.cart.dto.GuestCartRequest;
 import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.order.cart.repository.CartRepository;
 import shop.ink3.api.order.common.exception.CartNotFoundException;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
+import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
 class CartServiceTest {
@@ -143,6 +146,30 @@ class CartServiceTest {
     }
 
     @Test
+    @DisplayName("장바구니 수량 변경")
+    void updateCartQuantity() {
+        CartRequest cartRequest = new CartRequest(user.getId(), book1.getId(), 100);
+        Cart cart = Cart.builder()
+            .user(user)
+            .book(book1)
+            .quantity(cartRequest.quantity())
+            .build();
+
+        ReflectionTestUtils.setField(cart, "id", 1L);
+
+        when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
+        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
+
+        CartUpdateRequest cartUpdateRequest = new CartUpdateRequest(99);
+        CartResponse cartResponse = cartService.updateCartQuantity(cart.getId(), cartUpdateRequest);
+
+        assertThat(cartResponse.id()).isEqualTo(1L);
+        assertThat(cartResponse.userId()).isEqualTo(user.getId());
+        assertThat(cartResponse.bookId()).isEqualTo(book1.getId());
+        assertThat(cartResponse.quantity()).isEqualTo(99);
+    }
+
+    @Test
     @DisplayName("장바구니 목록 조회")
     void getCartItemsByUserId() {
         List<Cart> carts = new ArrayList<>();
@@ -173,8 +200,27 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("장바구니 특정 도서 삭제 성공")
-    void deleteCartItemSuccess() {
+    @DisplayName("비회원 장바구니 목록 조회")
+    void getCartItemsByGuest() {
+        List<GuestCartRequest> guestCarts = List.of(
+            new GuestCartRequest(book1.getId(), 100),
+            new GuestCartRequest(book2.getId(), 200)
+        );
+
+        when(bookRepository.findAllById(anyList())).thenReturn(List.of(book1, book2));
+
+        List<CartResponse> responses = cartService.getCartItemsByGuest(guestCarts);
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).bookId()).isEqualTo(book1.getId());
+        assertThat(responses.get(0).quantity()).isEqualTo(100);
+        assertThat(responses.get(1).bookId()).isEqualTo(book2.getId());
+        assertThat(responses.get(1).quantity()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("장바구니 전체 삭제 성공")
+    void deleteCartItemsSuccess() {
         Cart cart = Cart.builder()
             .user(user)
             .book(book1)
@@ -184,11 +230,35 @@ class CartServiceTest {
         when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
         when(cartRepository.save(ArgumentMatchers.any(Cart.class))).thenReturn(cart);
 
+        cartService.deleteCartItems(1L);
+    }
+
+    @Test
+    @DisplayName("장바구니 전체 삭제 실패")
+    void deleteCartItemsFailure() {
+        when(cartRepository.findById(0L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> cartService.deleteCartItems(0L))
+            .isInstanceOf(UserNotFoundException.class)
+            .hasMessageContaining("User not found. ID: ");
+    }
+
+    @Test
+    @DisplayName("장바구니 선택 삭제 성공")
+    void deleteCartItemSuccess() {
+        Cart cart = Cart.builder()
+            .user(user)
+            .book(book1)
+            .quantity(100)
+            .build();
+
+        when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
+
         cartService.deleteCartItem(1L);
     }
 
     @Test
-    @DisplayName("장바구니 특정 도서 삭제 실패")
+    @DisplayName("장바구니 선택 삭제 실패")
     void deleteCartItemFailure() {
         when(cartRepository.findById(0L)).thenReturn(Optional.empty());
 

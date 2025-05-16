@@ -42,10 +42,10 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCartItemsByUserId(userId));
     }
 
-    // @PostMapping("/guest")
-    // public ResponseEntity<List<CartResponse>> getGuestCarts(@RequestBody List<GuestCartRequest> requests) {
-    //     return ResponseEntity.ok(cartService.getCartItemsByGuest(requests));
-    // }
+    @GetMapping("/guest")
+    public ResponseEntity<List<CartResponse>> getGuestCarts(@RequestBody List<GuestCartRequest> requests) {
+        return ResponseEntity.ok(cartService.getCartItemsByGuest(requests));
+    }
 
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<Void> deleteCarts(@PathVariable Long userId) {
@@ -56,6 +56,6 @@ public class CartController {
     @DeleteMapping("/{cartId}")
     public ResponseEntity<Void> deleteCart(@PathVariable Long cartId) {
         cartService.deleteCartItem(cartId);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
