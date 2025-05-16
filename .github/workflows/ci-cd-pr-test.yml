@@ -110,28 +110,20 @@ jobs:
       - name: Run application in background
         env:
           EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         run: |
           nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
             --server.port=10270 \
             --spring.profiles.active=test \
-            --TTB_KEY=$TTB_KEY > app.log 2>&1 &
+            --TTB_KEY=$TTB_KEY \
+            --REDIS_PASSWORD=$REDIS_PASSWORD > app.log 2>&1 &
           echo $! > app.pid
 
       - name: Wait for application to start
         run: sleep 15
 
       - name: Check health endpoint
-        run: |
-          for i in {1..10}; do
-            echo "⏳ Waiting for server to start... attempt $i"
-            if curl --fail http://localhost:10270/shop/actuator/health; then
-              echo "✅ Server is up"
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "❌ Server failed to start in time"
-          exit 1
+        run: curl --fail http://localhost:10270/shop/actuator/health
 
       - name: Stop application
         run: kill $(cat app.pid)
@@ -141,7 +133,7 @@ jobs:
           EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
           TTB_KEY: ${{ secrets.TTB_KEY }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -DREDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} -B
+        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -DREDIS_PASSWORD=$REDIS_PASSWORD -B
 
       - name: Print app log if health check fails
         if: failure()
