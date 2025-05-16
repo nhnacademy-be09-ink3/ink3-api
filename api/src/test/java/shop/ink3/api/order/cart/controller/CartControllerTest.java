@@ -104,7 +104,17 @@ class CartControllerTest {
             .build();
 
         cartRequest = new CartRequest(user.getId(), book1.getId(), 100);
-        cartResponse = new CartResponse(1L, user.getId(), book1.getId(), 100);
+        cartResponse = new CartResponse(
+            1L,
+            user.getId(),
+            book1.getId(),
+            book1.getTitle(),
+            book1.getOriginalPrice(),
+            book1.getSalePrice(),
+            book1.getDiscountRate(),
+            book1.getThumbnailUrl(),
+            100
+        );
     }
 
     @Test
@@ -135,8 +145,16 @@ class CartControllerTest {
     @DisplayName("장바구니 목록 조회")
     void getCarts() throws Exception {
         List<CartResponse> cartResponses = List.of(
-            new CartResponse(1L, user.getId(), book1.getId(), 100),
-            new CartResponse(2L, user.getId(), book2.getId(), 100)
+            new CartResponse(
+                1L, user.getId(), book1.getId(),
+                book1.getTitle(), book1.getOriginalPrice(), book1.getSalePrice(), book1.getDiscountRate(), book1.getThumbnailUrl(),
+                100
+            ),
+            new CartResponse(
+                2L, user.getId(), book2.getId(),
+                book2.getTitle(), book2.getOriginalPrice(), book2.getSalePrice(), book2.getDiscountRate(), book2.getThumbnailUrl(),
+                100
+            )
         );
 
         Mockito.when(cartService.getCartItemsByUserId(user.getId())).thenReturn(cartResponses);
@@ -154,8 +172,16 @@ class CartControllerTest {
         );
 
         List<CartResponse> cartResponses = List.of(
-            new CartResponse(1L, user.getId(), book1.getId(), 100),
-            new CartResponse(2L, user.getId(), book2.getId(), 100)
+            new CartResponse(
+                1L, user.getId(), book1.getId(),
+                book1.getTitle(), book1.getOriginalPrice(), book1.getSalePrice(), book1.getDiscountRate(), book1.getThumbnailUrl(),
+                100
+            ),
+            new CartResponse(
+                2L, user.getId(), book2.getId(),
+                book2.getTitle(), book2.getOriginalPrice(), book2.getSalePrice(), book2.getDiscountRate(), book2.getThumbnailUrl(),
+                100
+            )
         );
 
         Mockito.when(cartService.getCartItemsByGuest(anyList())).thenReturn(cartResponses);
