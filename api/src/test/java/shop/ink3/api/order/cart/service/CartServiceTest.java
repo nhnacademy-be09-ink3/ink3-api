@@ -221,16 +221,12 @@ class CartServiceTest {
     @Test
     @DisplayName("장바구니 전체 삭제 성공")
     void deleteCartItemsSuccess() {
-        Cart cart = Cart.builder()
-            .user(user)
-            .book(book1)
-            .quantity(100)
-            .build();
-
-        when(cartRepository.findById(1L)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(ArgumentMatchers.any(Cart.class))).thenReturn(cart);
+        when(userRepository.existsById(1L)).thenReturn(true);
 
         cartService.deleteCartItems(1L);
+
+        verify(cartRepository).deleteAllByUserId(1L);
+        verify(redisTemplate).delete("cart:user:1");
     }
 
     @Test
