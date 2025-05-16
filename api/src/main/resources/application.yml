@@ -1,3 +1,6 @@
 spring:
   application:
     name: shop-service
+server:
+  servlet:
+    context-path: /shop
