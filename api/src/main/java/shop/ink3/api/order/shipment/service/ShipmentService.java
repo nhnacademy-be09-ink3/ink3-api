@@ -20,22 +20,42 @@ import shop.ink3.api.order.shipment.dto.ShipmentUpdateRequest;
 import shop.ink3.api.order.shipment.entity.Shipment;
 import shop.ink3.api.order.shipment.exception.ShipmentNotFoundException;
 import shop.ink3.api.order.shipment.repository.ShipmentRepository;
+import shop.ink3.api.order.shippingPolicy.entity.ShippingPolicy;
+import shop.ink3.api.order.shippingPolicy.exception.ShippingPolicyNotFoundException;
 
 @RequiredArgsConstructor
 @Service
 public class ShipmentService {
 
     private final ShipmentRepository shipmentRepository;
-    private final OrderService orderService;
+    private final OrderRepository orderRepository;
+
+    // 생성
+    @Transactional
+    public ShipmentResponse createShipment(ShipmentCreateRequest request) {
+        Optional<Order> optionalOrder = orderRepository.findById(request.getOrderId());
+        if(optionalOrder.isEmpty()){
+            throw new OrderNotFoundException(request.getOrderId());
+        }
+        Order order = optionalOrder.get();
+        Shipment shipment = Shipment.builder()
+                .order(order)
+                .preferredDeliveryDate(request.getPreferredDeliveryDate())
+                .recipientName(request.getRecipientName())
+                .recipientPhone(request.getRecipientPhone())
+                .postalCode(request.getPostalCode())
+                .defaultAddress(request.getDefaultAddress())
+                .extraAddress(request.getExtraAddress())
+                .detailAddress(request.getDetailAddress())
+                .shippingFee(request.getShippingFee())
+                .shippingCode(request.getShippingCode())
+                .build();
+        return ShipmentResponse.from(shipmentRepository.save(shipment));
+    }
 
     // 특정 주문에 대한 배송 정보 조회
     public ShipmentResponse getShipment(long orderId) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
-        if (!optionalShipment.isPresent()) {
-            throw new ShipmentNotFoundException(orderId);
-        }
-        Shipment shipment = optionalShipment.get();
-
+        Shipment shipment = getShippingOrThrow(orderId);
         return ShipmentResponse.from(shipment);
     }
 
@@ -54,37 +74,10 @@ public class ShipmentService {
         return PageResponse.from(shipmentResponsePage);
     }
 
-
-    // 생성
-    @Transactional
-    public ShipmentResponse createShipment(ShipmentCreateRequest request) {
-        OrderResponse orderResponse = orderService.getOrder(request.getOrderId());
-        Order order = OrderResponse.getOrder(orderResponse);
-
-        Shipment shipment = Shipment.builder()
-                .id(0L)
-                .order(order)
-                .preferredDeliveryDate(request.getPreferredDeliveryDate())
-                .recipientName(request.getRecipientName())
-                .recipientPhone(request.getRecipientPhone())
-                .postalCode(request.getPostalCode())
-                .defaultAddress(request.getDefaultAddress())
-                .extraAddress(request.getExtraAddress())
-                .detailAddress(request.getDetailAddress())
-                .shippingFee(request.getShippingFee())
-                .shippingCode(request.getShippingCode())
-                .build();
-        return ShipmentResponse.from(shipmentRepository.save(shipment));
-    }
-
     // 수정
     @Transactional
     public ShipmentResponse updateShipment(long orderId, ShipmentUpdateRequest request) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
-        if (!optionalShipment.isPresent()) {
-            throw new ShipmentNotFoundException(orderId);
-        }
-        Shipment shipment = optionalShipment.get();
+        Shipment shipment = getShippingOrThrow(orderId);
         shipment.update(request);
         return ShipmentResponse.from(shipmentRepository.save(shipment));
     }
@@ -92,23 +85,24 @@ public class ShipmentService {
     // 삭제
     @Transactional
     public void deleteShipment(long orderId) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
-        if (!optionalShipment.isPresent()) {
-            throw new ShipmentNotFoundException(orderId);
-        }
-        Shipment shipment = optionalShipment.get();
-        shipmentRepository.delete(shipment);
+        Shipment shipment = getShippingOrThrow(orderId);
+        shipmentRepository.deleteById(shipment.getId());
     }
 
     // 배달 완료 시간 변경
     @Transactional
     public ShipmentResponse updateShipmentDeliveredAt(long orderId, LocalDateTime deliveredAt) {
-        Optional<Shipment> optionalShipment = shipmentRepository.findByOrder_Id(orderId);
-        if (!optionalShipment.isPresent()) {
-            throw new ShipmentNotFoundException(orderId);
-        }
-        Shipment shipment = optionalShipment.get();
+        Shipment shipment = getShippingOrThrow(orderId);
         shipment.updateDeliveredAt(deliveredAt);
         return ShipmentResponse.from(shipmentRepository.save(shipment));
+    }
+
+    // 조회 로직
+    private Shipment getShippingOrThrow(long shippingId) {
+        Optional<Shipment> optionalShipping = shipmentRepository.findById(shippingId);
+        if (optionalShipping.isEmpty()) {
+            throw new ShippingPolicyNotFoundException();
+        }
+        return optionalShipping.get();
     }
 }

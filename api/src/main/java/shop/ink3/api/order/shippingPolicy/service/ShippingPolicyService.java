@@ -37,11 +37,8 @@ public class ShippingPolicyService {
 
     // 조회
     public ShippingPolicyResponse getShippingPolicy(long shippingPolicyId) {
-        Optional<ShippingPolicy> optionalShippingPolicy = shippingPolicyRepository.findById(shippingPolicyId);
-        if (!optionalShippingPolicy.isPresent()) {
-            throw new ShippingPolicyNotFoundException(shippingPolicyId);
-        }
-        return ShippingPolicyResponse.from(optionalShippingPolicy.get());
+        ShippingPolicy shippingPolicy = getShippingPolicyOrThrow(shippingPolicyId);
+        return ShippingPolicyResponse.from(shippingPolicy);
     }
 
     // 전체 정책 list 조회
@@ -64,23 +61,15 @@ public class ShippingPolicyService {
     // 수정
     @Transactional
     public ShippingPolicyResponse updateShippingPolicy(long shippingPolicyId, ShippingPolicyUpdateRequest request) {
-        Optional<ShippingPolicy> optionalShippingPolicy = shippingPolicyRepository.findById(shippingPolicyId);
-        if (!optionalShippingPolicy.isPresent()) {
-            throw new ShippingPolicyNotFoundException(shippingPolicyId);
-        }
-        ShippingPolicy shippingPolicy = optionalShippingPolicy.get();
+        ShippingPolicy shippingPolicy = getShippingPolicyOrThrow(shippingPolicyId);
         shippingPolicy.update(request);
-
         return ShippingPolicyResponse.from(shippingPolicyRepository.save(shippingPolicy));
     }
 
     // 삭제
     @Transactional
     public void deleteShippingPolicy(long shippingPolicyId) {
-        Optional<ShippingPolicy> optionalShippingPolicy = shippingPolicyRepository.findById(shippingPolicyId);
-        if (!optionalShippingPolicy.isPresent()) {
-            throw new ShippingPolicyNotFoundException(shippingPolicyId);
-        }
+        getShippingPolicyOrThrow(shippingPolicyId);
         shippingPolicyRepository.deleteById(shippingPolicyId);
     }
 
@@ -88,12 +77,7 @@ public class ShippingPolicyService {
     // 특정 배송정책 비활성화
     @Transactional
     public void deactivate(long shippingPolicyId) {
-        Optional<ShippingPolicy> optionalShippingPolicy = shippingPolicyRepository.findById(shippingPolicyId);
-        if (!optionalShippingPolicy.isPresent()) {
-            throw new ShippingPolicyNotFoundException();
-        }
-
-        ShippingPolicy shippingPolicy = optionalShippingPolicy.get();
+        ShippingPolicy shippingPolicy = getShippingPolicyOrThrow(shippingPolicyId);
         shippingPolicy.deactivate();
         shippingPolicyRepository.save(shippingPolicy);
     }
@@ -101,13 +85,17 @@ public class ShippingPolicyService {
     // 특정 배송정책 활성화
     @Transactional
     public void activate(long shippingPolicyId) {
+        ShippingPolicy shippingPolicy = getShippingPolicyOrThrow(shippingPolicyId);
+        shippingPolicy.activate();
+        shippingPolicyRepository.save(shippingPolicy);
+    }
+
+    // 조회 로직
+    private ShippingPolicy getShippingPolicyOrThrow(long shippingPolicyId) {
         Optional<ShippingPolicy> optionalShippingPolicy = shippingPolicyRepository.findById(shippingPolicyId);
         if (!optionalShippingPolicy.isPresent()) {
             throw new ShippingPolicyNotFoundException();
         }
-
-        ShippingPolicy shippingPolicy = optionalShippingPolicy.get();
-        shippingPolicy.activate();
-        shippingPolicyRepository.save(shippingPolicy);
+        return optionalShippingPolicy.get();
     }
 }

@@ -13,6 +13,8 @@ import shop.ink3.api.order.packaging.dto.PackagingUpdateRequest;
 import shop.ink3.api.order.packaging.entity.Packaging;
 import shop.ink3.api.order.packaging.exception.PackagingNotFoundException;
 import shop.ink3.api.order.packaging.repository.PackagingRepository;
+import shop.ink3.api.order.shippingPolicy.entity.ShippingPolicy;
+import shop.ink3.api.order.shippingPolicy.exception.ShippingPolicyNotFoundException;
 
 @RequiredArgsConstructor
 @Service
@@ -20,14 +22,23 @@ public class PackagingService {
 
     private final PackagingRepository packagingRepository;
 
+    // 생성
+    @Transactional
+    public PackagingResponse createPackaging(PackagingCreateRequest request) {
+        Packaging packaging = Packaging.builder()
+                .name(request.getName())
+                .price(request.getPrice())
+                .isAvailable(false)
+                .build();
+
+        return PackagingResponse.from(packagingRepository.save(packaging));
+    }
+
+
     // 조회
     public PackagingResponse getPackaging(long packagingId) {
-        Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
-        if (!optionalPackaging.isPresent()) {
-            throw new PackagingNotFoundException(packagingId);
-        }
-
-        return PackagingResponse.from(optionalPackaging.get());
+        Packaging packaging = getPackagingOrThrow(packagingId);
+        return PackagingResponse.from(packaging);
     }
 
     // 활성화된 포장정책 list 조회
@@ -46,29 +57,10 @@ public class PackagingService {
         return PageResponse.from(packagingResponseList);
     }
 
-
-    // 생성
-    @Transactional
-    public PackagingResponse createPackaging(PackagingCreateRequest request) {
-        Packaging packaging = Packaging.builder()
-                .id(0L)
-                .name(request.getName())
-                .price(request.getPrice())
-                .isAvailable(false)
-                .build();
-
-        return PackagingResponse.from(packagingRepository.save(packaging));
-    }
-
     // 수정
     @Transactional
     public PackagingResponse updatePackaging(long packagingId, PackagingUpdateRequest request) {
-        Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
-        if (!optionalPackaging.isPresent()) {
-            throw new PackagingNotFoundException(packagingId);
-        }
-
-        Packaging packaging = optionalPackaging.get();
+        Packaging packaging = getPackagingOrThrow(packagingId);
         packaging.update(request);
         return PackagingResponse.from(packagingRepository.save(packaging));
     }
@@ -76,11 +68,7 @@ public class PackagingService {
     // 삭제
     @Transactional
     public void deletePackaging(long packagingId) {
-        Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
-        if (!optionalPackaging.isPresent()) {
-            throw new PackagingNotFoundException(packagingId);
-        }
-
+        getPackagingOrThrow(packagingId);
         packagingRepository.deleteById(packagingId);
     }
 
@@ -88,12 +76,7 @@ public class PackagingService {
     // 활성화
     @Transactional
     public void activate(long packagingId) {
-        Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
-        if (!optionalPackaging.isPresent()) {
-            throw new PackagingNotFoundException(packagingId);
-        }
-
-        Packaging packaging = optionalPackaging.get();
+        Packaging packaging = getPackagingOrThrow(packagingId);
         packaging.activate();
         packagingRepository.save(packaging);
     }
@@ -101,13 +84,18 @@ public class PackagingService {
     // 비활성화
     @Transactional
     public void deactivate(long packagingId) {
-        Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
-        if (!optionalPackaging.isPresent()) {
-            throw new PackagingNotFoundException(packagingId);
-        }
-
-        Packaging packaging = optionalPackaging.get();
+        Packaging packaging = getPackagingOrThrow(packagingId);
         packaging.deactivate();
         packagingRepository.save(packaging);
+    }
+
+
+    // 조회 로직
+    private Packaging getPackagingOrThrow(long packagingId) {
+        Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
+        if (!optionalPackaging.isPresent()) {
+            throw new ShippingPolicyNotFoundException();
+        }
+        return optionalPackaging.get();
     }
 }

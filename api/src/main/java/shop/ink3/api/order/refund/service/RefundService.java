@@ -18,21 +18,37 @@ import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
 import shop.ink3.api.order.refund.entity.Refund;
 import shop.ink3.api.order.refund.exception.RefundNotFoundException;
 import shop.ink3.api.order.refund.repository.RefundRepository;
+import shop.ink3.api.order.refundPolicy.entity.RefundPolicy;
+import shop.ink3.api.order.refundPolicy.exception.RefundPolicyNotFoundException;
 
 @RequiredArgsConstructor
 @Service
 public class RefundService {
     private final RefundRepository refundRepository;
-    private final OrderService orderService;
+    private final OrderRepository orderRepository;
+
+    // 생성
+    @Transactional
+    public RefundResponse createRefund(RefundCreateRequest request) {
+        Optional<Order> optionalOrder = orderRepository.findById(request.getOrderId());
+        if(optionalOrder.isEmpty()){
+            throw new OrderNotFoundException(request.getOrderId());
+        }
+        Order order = optionalOrder.get();
+        Refund refund = Refund.builder()
+                .id(0L)
+                .order(order)
+                .details(request.getDetails())
+                .reason(request.getReason())
+                .build();
+        return RefundResponse.from(refundRepository.save(refund));
+    }
+
 
     // 주문 id에 대한 조회
     public RefundResponse getOrderRefund(long orderId){
-        Optional<Refund> optionalRefund = refundRepository.findByOrder_Id(orderId);
-        if (!optionalRefund.isPresent()) {
-            throw new RefundNotFoundException();
-        }
-
-        return RefundResponse.from(optionalRefund.get());
+        Refund refund = getRefundOrThrow(orderId);
+        return RefundResponse.from(refund);
     }
 
     // 사용자에 대한 반품 list 조회
@@ -43,29 +59,10 @@ public class RefundService {
         return PageResponse.from(pageRefundResponse);
     }
 
-    // 생성
-    @Transactional
-    public RefundResponse createRefund(RefundCreateRequest request) {
-        OrderResponse response = orderService.getOrder(request.getOrderId());
-        Refund refund = Refund.builder()
-                .id(0L)
-                .order(OrderResponse.getOrder(response))
-                .details(request.getDetails())
-                .reason(request.getReason())
-                .build();
-
-        return RefundResponse.from(refundRepository.save(refund));
-    }
-
     // 주문 id에 대한 수정
     @Transactional
     public RefundResponse updateRefund(long orderId,RefundUpdateRequest request) {
-        Optional<Refund> optionalRefund = refundRepository.findByOrder_Id(orderId);
-        if(!optionalRefund.isPresent()){
-            throw new RefundNotFoundException();
-        }
-        Refund refund = optionalRefund.get();
-
+        Refund refund = getRefundOrThrow(orderId);
         refund.update(request);
         return RefundResponse.from(refundRepository.save(refund));
     }
@@ -73,11 +70,16 @@ public class RefundService {
     // 주문 Id에 대한 삭제
     @Transactional
     public void deleteRefund(long orderId) {
-        Optional<Refund> optionalRefund = refundRepository.findByOrder_Id(orderId);
-        if (!optionalRefund.isPresent()) {
-            throw new RefundNotFoundException(orderId);
-        }
-
+        getRefundOrThrow(orderId);
         refundRepository.deleteById(orderId);
+    }
+
+    // 조회 로직
+    private Refund getRefundOrThrow(long refundId) {
+        Optional<Refund> optionalRefund = refundRepository.findById(refundId);
+        if (!optionalRefund.isPresent()) {
+            throw new RefundNotFoundException(refundId);
+        }
+        return optionalRefund.get();
     }
 }

@@ -15,21 +15,23 @@ import shop.ink3.api.user.user.entity.User;
 public class OrderResponse {
     private Long id;
     private User user;
+    private CouponStore couponStore;
+    private String orderUUID;
     private OrderStatus status;
     private LocalDateTime orderedAt;
     private String ordererName;
     private String ordererPhone;
-    private CouponStore couponStore;
 
     public static OrderResponse from(Order order){
         return new OrderResponse(
                 order.getId(),
                 order.getUser(),
+                order.getCouponStore(),
+                order.getOrderUUID(),
                 order.getStatus(),
                 order.getOrderedAt(),
                 order.getOrdererName(),
-                order.getOrdererPhone(),
-                order.getCouponStore()
+                order.getOrdererPhone()
         );
     }
 
@@ -37,11 +39,12 @@ public class OrderResponse {
         return Order.builder()
                 .id(response.id)
                 .user(response.user)
+                .couponStore(response.couponStore)
+                .orderUUID(response.orderUUID)
                 .status(response.status)
                 .orderedAt(response.orderedAt)
                 .ordererName(response.ordererName)
                 .ordererPhone(response.ordererPhone)
-                .couponStore(response.couponStore)
                 .build();
     }
 }

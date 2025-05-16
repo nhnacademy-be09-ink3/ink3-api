@@ -1,10 +1,8 @@
 package shop.ink3.api.order.order.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import java.awt.print.Pageable;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -79,7 +77,7 @@ public class OrderController {
                         orderService.getOrderListByDate(dateRequest, pageable)));
     }
 
-    @GetMapping("/status")
+    @PostMapping("/status")
     public ResponseEntity<CommonResponse<PageResponse<OrderResponse>>> getOrderListByStatus(
             @RequestBody OrderStatusRequest statusRequest,
             Pageable pageable){

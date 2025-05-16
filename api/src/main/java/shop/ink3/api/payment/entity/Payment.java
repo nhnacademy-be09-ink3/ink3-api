@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,5 +37,14 @@ public class Payment {
     private String paymentKey;
 
     @Column(nullable = false)
-    private int paymentAmount;
+    private Integer paymentAmount;
+
+    @Column(nullable = false)
+    private PaymentType paymentType;
+
+    @Column(nullable = false)
+    private LocalDateTime requestAt;
+
+    @Column(nullable = true)
+    private LocalDateTime approvedAt;
 }

@@ -39,6 +39,9 @@ public class Order {
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
 
+    @Column(name = "order_uuid", nullable = true, length = 64, unique = true)
+    private String orderUUID;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
@@ -55,6 +58,10 @@ public class Order {
     public void update(OrderUpdateRequest request) {
         this.ordererName = request.getOrdererName();
         this.ordererPhone = request.getOrdererPhone();
+    }
+
+    public void setOrderUUID(String orderUUID) {
+        this.orderUUID = orderUUID;
     }
 
     public void updateStatus(OrderStatus orderStatus) {
