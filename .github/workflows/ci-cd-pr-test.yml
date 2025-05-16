@@ -85,6 +85,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -121,7 +132,17 @@ jobs:
         run: sleep 15
 
       - name: Check health endpoint
-        run: curl --fail http://localhost:10270/shop/actuator/health
+        run: |
+          for i in {1..10}; do
+            echo "⏳ Waiting for server to start... attempt $i"
+            if curl --fail http://localhost:10270/shop/actuator/health; then
+              echo "✅ Server is up"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "❌ Server failed to start in time"
+          exit 1
 
       - name: Stop application
         run: kill $(cat app.pid)
@@ -190,5 +211,6 @@ jobs:
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export TTB_KEY=${{ secrets.TTB_KEY }}
+            export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
