@@ -2,6 +2,7 @@ package shop.ink3.api.coupon.coupon.service;
 
 import java.util.List;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
+import shop.ink3.api.coupon.coupon.dto.CouponDeleteResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
@@ -24,19 +25,16 @@ public interface CouponService {
     CouponResponse getCouponById(long id);
 
     // 쿠폰 조회 by name
-    CouponResponse getCouponByName(String couponName);
+    List<CouponResponse> getCouponByCouponName(String couponName);
 
     // 모든 쿠폰 조회
     List<CouponResponse> getAllCoupons();
 
-    // 쿠폰 업데이트
-    CouponResponse updateCoupon(CouponUpdateRequest coupon);
-
     // 쿠폰 삭제 by 쿠폰 아이디
-    void deleteCoupon(String couponId);
+    CouponDeleteResponse deleteCouponById(Long couponId);
 
     // 쿠폰 삭제 by 쿠폰 이름
-    void deleteCouponByName(String couponName);
+    CouponDeleteResponse deleteCouponByName(String couponName);
 
     // 📘 도서 관련 쿠폰
     void issueBookCoupons(Long userId, Long bookId);

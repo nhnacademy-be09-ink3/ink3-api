@@ -41,6 +41,7 @@ class CouponPolicyServiceTest {
                 .discount_value(10)
                 .minimum_order_amount(10000)
                 .maximum_discount_amount(5000)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
@@ -74,6 +75,7 @@ class CouponPolicyServiceTest {
                 .discount_value(10)
                 .minimum_order_amount(10000)
                 .maximum_discount_amount(5000)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         when(policyRepository.findByName("WELCOME10")).thenReturn(Optional.of(policy));
@@ -106,7 +108,8 @@ class CouponPolicyServiceTest {
                 10000,
                 10,
                 50,
-                50000
+                50000,
+                LocalDateTime.now()
         );
 
         when(policyRepository.existsByName("WELCOME10")).thenReturn(false);
@@ -118,6 +121,7 @@ class CouponPolicyServiceTest {
                 .minimum_order_amount(request.minimum_order_amount())
                 .discount_value(request.discount_value())
                 .maximum_discount_amount(request.maximum_discount_amount())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         when(policyRepository.save(any(CouponPolicy.class))).thenReturn(savedPolicy);
@@ -139,7 +143,8 @@ class CouponPolicyServiceTest {
                 5000,
                 3000,
                 0,
-                0
+                0,
+                LocalDateTime.now()
         );
 
         when(policyRepository.existsByName("DUPLICATE_COUPON")).thenReturn(true);

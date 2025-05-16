@@ -11,7 +11,7 @@ import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
 @RequiredArgsConstructor
 public class AladinClientImpl implements AladinClient {
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper;
     private static final String TTB_KEY = "ttbin20151747001";
     private static final String BASE_URL = "https://www.aladin.co.kr/ttb/api/ItemLookUp.aspx";

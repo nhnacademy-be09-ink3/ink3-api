@@ -1,6 +1,17 @@
+
 spring:
   application:
     name: Ink3-API
+  datasource:
+    url: jdbc:h2:mem:ink3db       # 인메모리 모드: ink3db 라는 이름
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true              # 콘솔 활성화
+      path: /h2-console
 
 server:
   port: 10260

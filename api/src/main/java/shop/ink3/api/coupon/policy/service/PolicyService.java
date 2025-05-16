@@ -1,6 +1,7 @@
 package shop.ink3.api.coupon.policy.service;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,20 +32,27 @@ public class PolicyService {
     }
 
     @Transactional
-    public PolicyResponse createPolicy(PolicyCreateRequest policyCreateRequest) {
-        boolean hasDefault = policyRepository.existsByName(policyCreateRequest.name());
-        if (hasDefault) {
+    public PolicyResponse createPolicy(PolicyCreateRequest req) {
+        // 중복 체크
+        if (policyRepository.existsByName(req.name())) {
             throw new PolicyAlreadyExistException("이미 존재하는 쿠폰");
         }
+
+        // DTO에서 받은 createdAt을 그대로 사용
         CouponPolicy policy = CouponPolicy.builder()
-                .name(policyCreateRequest.name())
-                .discountType(policyCreateRequest.discountType())
-                .discount_value(policyCreateRequest.discount_value())
-                .minimum_order_amount(policyCreateRequest.minimum_order_amount())
-                .maximum_discount_amount(policyCreateRequest.maximum_discount_amount())
+                .name(req.name())
+                .discountType(req.discountType())
+                .discount_value(req.discount_value())
+                .minimum_order_amount(req.minimum_order_amount())
+                .maximum_discount_amount(req.maximum_discount_amount())
+                .createdAt(req.createdAt())    // 수정된 부분
                 .build();
-        return PolicyResponse.from(policyRepository.save(policy),"쿠폰 정책 생성 완료");
+
+        CouponPolicy saved = policyRepository.save(policy);
+        return PolicyResponse.from(saved, "쿠폰 정책 생성 완료");
     }
+
+
 
     @Transactional
     public PolicyResponse updatePolicy(PolicyUpdateRequest policyUpdateRequest) {

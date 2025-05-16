@@ -22,6 +22,8 @@ public record PolicyResponse(
 
         int discount_percentage,
 
+        LocalDateTime createdAt,
+
         @NotBlank
         String message
 ) {
@@ -32,6 +34,7 @@ public record PolicyResponse(
                 policy.getDiscountType(),
                 policy.getDiscount_value(),
                 policy.getDiscount_percentage(),
+                policy.getCreatedAt(),
                 message
         );
     }

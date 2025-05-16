@@ -15,24 +15,14 @@ public record CouponResponse(
         TriggerType triggerType,
         IssueType issueType,
         String couponCode,
+        LocalDateTime issuedAt,
         LocalDateTime expirationDate,
-        List<BookInfo> books,
-        List<CategoryInfo> categories
+        List<Long> books,
+        List<Long> categories
 ) {
-    public record BookInfo(Long bookId, String bookName) {}
-    public record CategoryInfo(Long categoryId, String categoryName) {}
     public static CouponResponse from(Coupon coupon,
-                                      List<BookCoupon> bookCoupons,
-                                      List<CategoryCoupon> categoryCoupons) {
-
-        List<BookInfo> books = bookCoupons.stream()
-                .map(bc -> new BookInfo(bc.getBook().getId(), bc.getBook().getTitle()))
-                .toList();
-
-        List<CategoryInfo> categories = categoryCoupons.stream()
-                .map(cc -> new CategoryInfo(cc.getCategory().getId(), cc.getCategory().getName()))
-                .toList();
-
+                                      List<Long> books,
+                                      List<Long> categories) {
         return new CouponResponse(
                 coupon.getId(),
                 coupon.getCouponPolicy().getId(),
@@ -40,9 +30,10 @@ public record CouponResponse(
                 coupon.getTriggerType(),
                 coupon.getIssueType(),
                 coupon.getCouponCode(),
+                coupon.getIssueDate(),
                 coupon.getExpiredDate(),
-                books.isEmpty() ? null : books,
-                categories.isEmpty() ? null : categories
+                books == null ? List.of() : books,
+                categories == null ? List.of() : categories
         );
     }
 }

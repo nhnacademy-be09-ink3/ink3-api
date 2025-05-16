@@ -11,16 +11,16 @@ import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
 import shop.ink3.api.coupon.policy.service.PolicyService;
 
 @RestController
-@RequestMapping("/policies")
+@RequestMapping("/api/policies")
 @RequiredArgsConstructor
 public class PolicyController {
 
     private final PolicyService policyService;
 
     // 정책 ID로 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<CommonResponse<PolicyResponse>> getPolicyById(@PathVariable long id) {
-        return ResponseEntity.ok(CommonResponse.success(policyService.getPolicyById(id)));
+    @GetMapping("/{policyId}")
+    public ResponseEntity<CommonResponse<PolicyResponse>> getPolicyById(@PathVariable long policyId) {
+        return ResponseEntity.ok(CommonResponse.success(policyService.getPolicyById(policyId)));
     }
 
     // 정책 이름으로 조회
@@ -43,9 +43,9 @@ public class PolicyController {
     }
 
     // 정책 ID로 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<CommonResponse<PolicyResponse>> deletePolicyById(@PathVariable long id) {
-        return ResponseEntity.ok(CommonResponse.success(policyService.deletePolicyById(id)));
+    @DeleteMapping("/{policyId}")
+    public ResponseEntity<CommonResponse<PolicyResponse>> deletePolicyById(@PathVariable long policyId) {
+        return ResponseEntity.ok(CommonResponse.success(policyService.deletePolicyById(policyId)));
     }
 
 

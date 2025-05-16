@@ -38,9 +38,9 @@ public class CategoryCoupon {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public CategoryCoupon(Category category, Coupon coupon) {
-        this.category = category;
+    public CategoryCoupon(Coupon coupon, Category category) {
         this.coupon = coupon;
+        this.category = category;
     }
 }
 

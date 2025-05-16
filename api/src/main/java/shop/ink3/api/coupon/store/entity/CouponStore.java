@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.user.user.entity.User;
 
@@ -24,6 +25,7 @@ import shop.ink3.api.user.user.entity.User;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 @Table(name = "coupon_stores")
 public class CouponStore {
     @Id
@@ -39,7 +41,7 @@ public class CouponStore {
     private Coupon coupon;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; // 저장소 생성 일자
 
     @Column(nullable = false)
     private LocalDateTime usedAt;

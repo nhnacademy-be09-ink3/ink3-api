@@ -39,9 +39,10 @@ public class BookCoupon {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    public BookCoupon(Book book, Coupon coupon) {
-        this.book = book;
+    public BookCoupon(Coupon coupon, Book book) {
         this.coupon = coupon;
+        this.book = book;
     }
+
 }
 
