@@ -1,6 +1,7 @@
 package shop.ink3.api.order.packaging.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,6 @@ public class PackagingUpdateRequest {
     @NotBlank
     @Length(max = 20)
     private String name;
-    @NotBlank
+    @NotNull
     private Integer price;
 }

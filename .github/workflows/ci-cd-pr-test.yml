@@ -134,14 +134,14 @@ jobs:
       - name: Check health endpoint
         run: |
           for i in {1..10}; do
-            echo "⏳ Waiting for server to start... attempt $i"
+            echo ":hourglass_flowing_sand: Waiting for server to start... attempt $i"
             if curl --fail http://localhost:10270/shop/actuator/health; then
-              echo "✅ Server is up"
+              echo ":white_check_mark: Server is up"
               exit 0
             fi
             sleep 3
           done
-          echo "❌ Server failed to start in time"
+          echo ":x: Server failed to start in time"
           exit 1
 
       - name: Stop application
