@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
+import shop.ink3.api.order.cart.dto.GuestCartRequest;
 import shop.ink3.api.order.cart.service.CartService;
 
 @RestController
@@ -40,6 +41,11 @@ public class CartController {
     public ResponseEntity<List<CartResponse>> getCarts(@PathVariable Long userId) {
         return ResponseEntity.ok(cartService.getCartItemsByUserId(userId));
     }
+
+    // @PostMapping("/guest")
+    // public ResponseEntity<List<CartResponse>> getGuestCarts(@RequestBody List<GuestCartRequest> requests) {
+    //     return ResponseEntity.ok(cartService.getCartItemsByGuest(requests));
+    // }
 
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<Void> deleteCarts(@PathVariable Long userId) {

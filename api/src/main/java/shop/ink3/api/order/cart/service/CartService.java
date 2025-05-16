@@ -2,7 +2,6 @@ package shop.ink3.api.order.cart.service;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -11,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.common.exception.BookNotFoundException;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
@@ -29,17 +30,17 @@ public class CartService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final UserRepository userRepository;
-    // TODO: private final BookRepository bookRepository;
+    private final BookRepository bookRepository;
     private final CartRepository cartRepository;
 
     public CartResponse addCartItem(CartRequest request) {
         User user = userRepository.findById(request.userId())
             .orElseThrow(() -> new UserNotFoundException(request.userId()));
-        // TODO: Book book = bookRepository.findById(request.bookId()).orElseThrow(() -> new BookNotFoundException(request.bookId()));
+        Book book = bookRepository.findById(request.bookId()).orElseThrow(() -> new BookNotFoundException(request.bookId()));
 
         Cart cart = Cart.builder()
             .user(user)
-            .book(null) // book
+            .book(book)
             .quantity(request.quantity())
             .build();
         Cart savedCart = cartRepository.save(cart);
@@ -53,7 +54,7 @@ public class CartService {
     }
 
     public CartResponse updateCartQuantity(Long cartId, CartUpdateRequest request) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("존재하지 않는 장바구니입니다."));
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
 
         cart.updateQuantity(request.quantity());
         cartRepository.save(cart);
@@ -81,13 +82,34 @@ public class CartService {
         return carts;
     }
 
-    public void deleteCartItem(Long id) {
-        Cart cart = cartRepository.findById(id).orElseThrow(() -> new CartNotFoundException("존재하지 않는 장바구니입니다."));
+    // public List<CartResponse> getCartItemsByGuest(List<GuestCartRequest> requests) {
+    //     List<Long> bookIds = requests.stream()
+    //         .map(GuestCartRequest::bookId)
+    //         .toList();
+    //
+    //     List<Book> books = bookRepository.findAllById(bookIds);
+    //     Map<Long, Book> bookMap = books.stream()
+    //         .collect(Collectors.toMap(Book::getId, Function.identity()));
+    //
+    //     return requests.stream()
+    //         .map(req -> {
+    //             Book book = bookMap.get(req.bookId());
+    //             if (book == null) {
+    //                 throw new BookNotFoundException("존재하지 않는 도서입니다.");
+    //             }
+    //             Cart cart = new Cart(null, book, req.quantity());
+    //             return toResponse(cart);
+    //         })
+    //         .toList();
+    // }
 
-        cartRepository.deleteById(id);
+    public void deleteCartItem(Long cartId) {
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
+
+        cartRepository.deleteById(cartId);
 
         String key = CART_KEY_PREFIX + cart.getUser().getId();
-        hashOps().delete(key, id.toString());
+        hashOps().delete(key, cartId.toString());
     }
 
     public void deleteCartItems(Long userId) {

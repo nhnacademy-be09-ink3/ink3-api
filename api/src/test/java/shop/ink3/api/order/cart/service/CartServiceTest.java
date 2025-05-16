@@ -22,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
@@ -30,6 +31,7 @@ import shop.ink3.api.order.cart.repository.CartRepository;
 import shop.ink3.api.order.common.exception.CartNotFoundException;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
+import shop.ink3.api.user.user.repository.UserRepository;
 
 class CartServiceTest {
     @Mock
@@ -37,6 +39,12 @@ class CartServiceTest {
 
     @Mock
     private HashOperations<String, String, CartResponse> hashOperations;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private BookRepository bookRepository;
 
     @Mock
     private CartRepository cartRepository;
@@ -106,6 +114,10 @@ class CartServiceTest {
             .thumbnailUrl("https://example.com/image.jpg")
             .publisher(publisher)
             .build();
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(bookRepository.findById(book1.getId())).thenReturn(Optional.of(book1));
+        when(bookRepository.findById(book2.getId())).thenReturn(Optional.of(book2));
     }
 
     @Test
@@ -115,6 +127,7 @@ class CartServiceTest {
         Cart cart = Cart.builder()
             .user(user)
             .book(book1)
+            .quantity(cartRequest.quantity())
             .build();
 
         ReflectionTestUtils.setField(cart, "id", 1L);
@@ -181,6 +194,6 @@ class CartServiceTest {
 
         assertThatThrownBy(() -> cartService.deleteCartItem(0L))
             .isInstanceOf(CartNotFoundException.class)
-            .hasMessageContaining("존재하지 않는 장바구니입니다.");
+            .hasMessageContaining("존재하지 않는 장바구니입니다 id: ");
     }
 }
