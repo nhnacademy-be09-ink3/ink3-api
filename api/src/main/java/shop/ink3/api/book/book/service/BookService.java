@@ -26,6 +26,7 @@ import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.enums.BookSortType;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
+import shop.ink3.api.book.book.exception.InvalidCategoryDepthException;
 import shop.ink3.api.book.book.exception.TooManyCategoriesException;
 import shop.ink3.api.book.book.external.aladin.AladinClient;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
@@ -75,6 +76,7 @@ public class BookService {
                 .build();
 
         List<Category> categories = categoryRepository.findAllById(request.categoryIds());
+        validateCategoryDepth(categories);
         for(Category category : categories) {
             book.addBookCategory(category);
         }
@@ -199,14 +201,21 @@ public class BookService {
         book.getBookAuthors().clear();
         book.getBookTags().clear();
 
+
         List<Long> categoryIds = request.categoryIds();
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
+        validateCategoryDepth(categories);
+
         List<Long> authorIds = request.authorIds();
         List<Long> tagIds = request.tagIds();
+
+
 
         // 카테고리 다시 설정
         for (Long categoryId : categoryIds) {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+
             book.addBookCategory(category);
         }
 
@@ -285,5 +294,11 @@ public class BookService {
         }
 
         return PageResponse.from(bookPage.map(BookResponse::from));
+    }
+
+    private void validateCategoryDepth(List<Category> categories) {
+        if (categories.size() < 2) {
+            throw new InvalidCategoryDepthException();
+        }
     }
 }
