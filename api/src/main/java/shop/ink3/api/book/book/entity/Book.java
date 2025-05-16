@@ -1,0 +1,152 @@
+package shop.ink3.api.book.book.entity;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.*;
+import shop.ink3.api.book.author.entity.Author;
+import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.bookTag.entity.BookTag;
+import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.publisher.entity.Publisher;
+import shop.ink3.api.book.tag.entity.Tag;
+
+@Builder
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Getter
+@Table(name = "books")
+public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 20)
+    private String ISBN;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String contents;
+
+    @Column(nullable = false)
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "publisher_id", nullable = false)
+    private Publisher publisher;
+
+    @Column(nullable = false)
+    private LocalDate publishedAt;
+
+    @Column(nullable = false)
+    private Integer originalPrice;
+
+    @Column(nullable = false)
+    private Integer salePrice;
+
+    @Column(nullable = false)
+    private Integer discountRate;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private BookStatus status;
+
+    @Column(nullable = false)
+    private boolean isPackable;
+
+    @Column(nullable = false)
+    private String thumbnailUrl;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "book",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookCategory> bookCategories = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "book",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookAuthor> bookAuthors = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "book",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<BookTag> bookTags = new ArrayList<>();
+
+    @PrePersist
+    @PreUpdate
+    public void updateDiscountRate() {
+        this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
+    }
+
+    public void addBookCategory(Category category) {
+        BookCategory bookCategory = new BookCategory(this, category);
+        this.bookCategories.add(bookCategory);
+        category.addBookCategory(bookCategory);
+    }
+
+    public void addBookAuthor(Author author) {
+        BookAuthor bookAuthor = new BookAuthor(this, author);
+        this.bookAuthors.add(bookAuthor);
+        author.addBookAuthor(bookAuthor);
+    }
+
+    public void addBookTag(Tag tag) {
+        BookTag bookTag = new BookTag(this, tag);
+        this.bookTags.add(bookTag);
+        tag.addBookTag(bookTag);
+    }
+
+    public void updateBook(
+            String ISBN,
+            String title,
+            String contents,
+            String description,
+            LocalDate publishedAt,
+            Integer originalPrice,
+            Integer salePrice,
+            Integer quantity,
+            BookStatus status,
+            boolean isPackable,
+            String thumbnailUrl,
+            Publisher publisher
+    ) {
+        this.ISBN = ISBN;
+        this.title = title;
+        this.contents = contents;
+        this.description = description;
+        this.publishedAt = publishedAt;
+        this.originalPrice = originalPrice;
+        this.salePrice = salePrice;
+        this.quantity = quantity;
+        this.status = status;
+        this.isPackable = isPackable;
+        this.thumbnailUrl = thumbnailUrl;
+        this.publisher = publisher;
+    }
+
+    // 주문 시 재고 확인 및 재고 수량 감소
+    public void decreaseQuantity(int amount) {
+        if (this.quantity < amount) {
+            throw new IllegalStateException("재고가 부족합니다.");
+        }
+        this.quantity -= amount;
+    }
+
+    // 반품 시 재고 수량 증가
+    public void increaseQuantity(int amount) {
+        this.quantity += amount;
+    }
+}

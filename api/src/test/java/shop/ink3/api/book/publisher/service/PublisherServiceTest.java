@@ -17,9 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import shop.ink3.api.book.author.dto.AuthorResponse;
-import shop.ink3.api.book.author.dto.AuthorUpdateRequest;
-import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.publisher.dto.PublisherCreateRequest;
 import shop.ink3.api.book.publisher.dto.PublisherResponse;
 import shop.ink3.api.book.publisher.dto.PublisherUpdateRequest;
@@ -115,7 +112,7 @@ public class PublisherServiceTest {
     @Test
     void createPublisherWithAlreadyExists() {
         PublisherCreateRequest request = new PublisherCreateRequest("testPublisher");
-        when(publisherRepository.save(any(Publisher.class))).thenThrow(new PublisherAlreadyExistsException("testPublisher"));
+        when(publisherRepository.existsByName("testPublisher")).thenReturn(true);
         Assertions.assertThrows(PublisherAlreadyExistsException.class, () -> publisherService.createPublisher(request));
     }
 
