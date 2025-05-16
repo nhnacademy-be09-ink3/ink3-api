@@ -23,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.common.exception.BookNotFoundException;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
@@ -200,6 +201,24 @@ class CartServiceTest {
     }
 
     @Test
+    @DisplayName("Redis 캐시 hit 시 장바구니 조회")
+    void getCartItemsByUserIdWithRedis() {
+        String key = "cart:user:1";
+        CartResponse cachedCart = CartResponse.from(
+            Cart.builder().id(1L).user(user).book(book1).quantity(1).build()
+        );
+
+        when(hashOperations.values(key)).thenReturn(List.of(cachedCart));
+
+        List<CartResponse> result = cartService.getCartItemsByUserId(user.getId());
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).id()).isEqualTo(1L);
+
+        verify(cartRepository, never()).findByUserId(any());
+    }
+
+    @Test
     @DisplayName("비회원 장바구니 목록 조회")
     void getCartItemsByGuest() {
         List<GuestCartRequest> guestCarts = List.of(
@@ -216,6 +235,21 @@ class CartServiceTest {
         assertThat(responses.get(0).quantity()).isEqualTo(100);
         assertThat(responses.get(1).bookId()).isEqualTo(book2.getId());
         assertThat(responses.get(1).quantity()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("비회원 장바구니에 존재하지 않는 도서 포함 시 예외 발생")
+    void getCartItemsByGuestFailure() {
+        List<GuestCartRequest> guestCarts = List.of(
+            new GuestCartRequest(book1.getId(), 100),
+            new GuestCartRequest(999L, 200)
+        );
+
+        when(bookRepository.findAllById(anyList())).thenReturn(List.of(book1));
+
+        assertThatThrownBy(() -> cartService.getCartItemsByGuest(guestCarts))
+            .isInstanceOf(BookNotFoundException.class)
+            .hasMessageContaining("존재하지 않는 도서입니다 id: ");
     }
 
     @Test
