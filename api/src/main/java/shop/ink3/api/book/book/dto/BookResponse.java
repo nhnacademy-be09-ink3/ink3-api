@@ -1,10 +1,9 @@
 package shop.ink3.api.book.book.dto;
 
-import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.book.book.entity.BookStatus;
-
 import java.time.LocalDate;
 import java.util.List;
+import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.entity.BookStatus;
 
 public record BookResponse(
         Long id,

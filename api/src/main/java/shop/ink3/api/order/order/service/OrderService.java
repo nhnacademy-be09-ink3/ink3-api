@@ -2,7 +2,6 @@ package shop.ink3.api.order.order.service;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
@@ -22,11 +20,9 @@ import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
-import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
-import shop.ink3.api.user.user.service.UserService;
 
 
 @RequiredArgsConstructor
