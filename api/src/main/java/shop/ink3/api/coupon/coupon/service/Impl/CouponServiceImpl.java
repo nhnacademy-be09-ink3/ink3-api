@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
@@ -20,7 +22,6 @@ import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.coupon.service.CouponService;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
-import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.repository.UserCouponRepository;
 
 @Transactional
