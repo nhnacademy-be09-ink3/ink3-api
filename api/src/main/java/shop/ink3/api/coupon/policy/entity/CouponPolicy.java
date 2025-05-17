@@ -1,13 +1,8 @@
 package shop.ink3.api.coupon.policy.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,39 +16,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "coupon_policies")
 public class CouponPolicy {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue
     private Long id;
 
-    @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
-    private int minimumOrderAmount;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private DiscountType discountType;
 
-    private int discountValue;
+    private int minimum_order_amount;
+    private int discount_value;
+    private int discount_percentage;
+    private int maximum_discount_amount;
+    private LocalDateTime createdAt;
 
-    private int discountPercentage;
-
-    private int maximumDiscountAmount;
-
-    @Column(nullable = false)
-    private LocalDateTime validDays;
-
-    public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue,
-                       Integer maximumDiscountAmount,
-                       LocalDateTime valid_days) {
+    public void update(String name, DiscountType discountType, Integer minimum_order_amount, Integer discount_value, Integer maximum_discount_amount) {
         this.name = name;
         this.discountType = discountType;
-        this.minimumOrderAmount = minimumOrderAmount;
-        this.discountValue = discountValue;
-        this.maximumDiscountAmount = maximumDiscountAmount;
-        this.validDays = valid_days;
+        this.minimum_order_amount = minimum_order_amount;
+        this.discount_value = discount_value;
+        this.maximum_discount_amount = maximum_discount_amount;
     }
 }

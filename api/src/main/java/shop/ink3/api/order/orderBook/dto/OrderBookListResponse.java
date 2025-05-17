@@ -1,6 +1,5 @@
 package shop.ink3.api.order.orderBook.dto;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
