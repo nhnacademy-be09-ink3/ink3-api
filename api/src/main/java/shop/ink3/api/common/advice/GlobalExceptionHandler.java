@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.exception.AlreadyExistsException;
 import shop.ink3.api.common.exception.NotFoundException;
 import shop.ink3.api.user.common.exception.DormantException;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
@@ -20,6 +21,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body(CommonResponse.error(HttpStatus.NOT_FOUND, e.getMessage()));
+    }
+
+    @ExceptionHandler(value = {AlreadyExistsException.class})
+    public ResponseEntity<CommonResponse<Void>> handleAlreadyExistsException(AlreadyExistsException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage()));
     }
 
     @ExceptionHandler(value = {

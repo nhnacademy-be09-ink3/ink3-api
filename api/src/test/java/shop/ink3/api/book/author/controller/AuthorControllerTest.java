@@ -37,7 +37,7 @@ import shop.ink3.api.book.author.service.AuthorService;
 import shop.ink3.api.common.dto.PageResponse;
 
 @WebMvcTest(AuthorController.class)
-public class AuthorControllerTest {
+class AuthorControllerTest {
     @MockitoBean
     AuthorService authorService;
 

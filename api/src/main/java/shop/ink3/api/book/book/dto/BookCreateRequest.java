@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record BookCreateRequest(
-        String ISBN,
+        String isbn,
         String title,
         String contents,
         String description,

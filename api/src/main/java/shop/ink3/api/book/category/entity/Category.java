@@ -29,7 +29,7 @@ public class Category {
 
     @OneToOne
     @JoinColumn(name = "parent_id")
-    private Category category;
+    private Category parent;
 
     @Builder.Default
     @OneToMany(mappedBy = "category",
@@ -45,6 +45,6 @@ public class Category {
     }
 
     public void updateParentCategory(Category category) {
-        this.category = category;
+        this.parent = category;
     }
 }

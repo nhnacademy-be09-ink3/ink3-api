@@ -21,7 +21,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(String name);
 
-    boolean existsByISBN(String isbn);
+    boolean existsByIsbn(String isbn);
 
     // 태그이름기반 검색
 

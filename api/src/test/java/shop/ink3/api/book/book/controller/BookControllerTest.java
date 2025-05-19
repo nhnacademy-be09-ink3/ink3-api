@@ -3,9 +3,9 @@ package shop.ink3.api.book.book.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
@@ -31,7 +31,7 @@ class BookControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private BookService bookService;
 
     @Autowired
@@ -132,7 +132,7 @@ class BookControllerTest {
 
         mockMvc.perform(post("/api/books/books/register-by-isbn?isbn=isbn"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("title"));
+                .andExpect(jsonPath("$.data.title").value("title"));
     }
 
     @Test
@@ -151,7 +151,7 @@ class BookControllerTest {
 
     @Test
     void getBookById_shouldReturnBook() throws Exception {
-        given(bookService.findById(1L)).willReturn(createSampleBookResponse());
+        given(bookService.getBook(1L)).willReturn(createSampleBookResponse());
 
         mockMvc.perform(get("/api/books/books/1"))
                 .andExpect(status().isOk())
@@ -160,7 +160,7 @@ class BookControllerTest {
 
     @Test
     void getBookById_shouldReturnNotFound_whenNotExists() throws Exception {
-        given(bookService.findById(999L)).willReturn(null);
+        given(bookService.getBook(999L)).willReturn(null);
 
         mockMvc.perform(get("/api/books/books/999"))
                 .andExpect(status().isOk())

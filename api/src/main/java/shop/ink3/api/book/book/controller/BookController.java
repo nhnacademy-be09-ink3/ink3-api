@@ -3,6 +3,7 @@ package shop.ink3.api.book.book.controller;
 import jakarta.ws.rs.GET;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,25 +29,16 @@ import shop.ink3.api.common.dto.PageResponse;
 public class BookController {
     private final BookService bookService;
 
-    // 도서 제목으로 도서 목록 조회 API
-
-    @GetMapping("/title/{title}")
-    public ResponseEntity<List<BookResponse>> getBooksByTitle(@PathVariable String title) {
-        return ResponseEntity.ok(bookService.findAllByTitle(title));
+    // 도서 상세 조회 (ID 기반 단건 조회)
+    @GetMapping("/{bookId}")
+    public ResponseEntity<CommonResponse<BookResponse>> getBookById(@PathVariable Long bookId) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.getBook(bookId)));
     }
 
-    // 저자 이름으로 도서 목록 조회 API
-
-    @GetMapping("/author/{author}")
-    public ResponseEntity<List<BookResponse>> getBooksByAuthor(@PathVariable String author) {
-        return ResponseEntity.ok(bookService.findAllByAuthor(author));
-    }
-
-     // 전체 도서 목록 조회 (현재는 저자 이름이 빈 문자열일 경우 전체 조회로 활용)
-
+     // 전체 도서 목록 조회
     @GetMapping
-    public ResponseEntity<List<BookResponse>> getBooks() {
-        return ResponseEntity.ok(bookService.findAllByAuthor(""));
+    public ResponseEntity<CommonResponse<PageResponse<BookResponse>>> getBooks(Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.getBooks(pageable)));
     }
 
     @PostMapping
@@ -69,22 +61,34 @@ public class BookController {
      // ISBN을 통해 알라딘 API에서 도서정보 자동등록
 
     @PostMapping("/register-by-isbn")
-    public ResponseEntity<BookResponse> registerByIsbn(@RequestParam String isbn) {
-        return ResponseEntity.ok(bookService.registerBookByIsbn(isbn));
+    public ResponseEntity<CommonResponse<BookResponse>> registerByIsbn(@RequestParam String isbn) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.registerBookByIsbn(isbn)));
     }
 
-     // 도서검색 API (제목 또는 저자 기반검색)
+
+    /*
+     * 검색은 따로 작성
+     */
+
+    // 도서 제목으로 도서 목록 조회 API
+
+    @GetMapping("/title/{title}")
+    public ResponseEntity<List<BookResponse>> getBooksByTitle(@PathVariable String title) {
+        return ResponseEntity.ok(bookService.findAllByTitle(title));
+    }
+
+    // 저자 이름으로 도서 목록 조회 API
+
+    @GetMapping("/author/{author}")
+    public ResponseEntity<List<BookResponse>> getBooksByAuthor(@PathVariable String author) {
+        return ResponseEntity.ok(bookService.findAllByAuthor(author));
+    }
+
+    // 도서검색 API (제목 또는 저자 기반검색)
 
     @GetMapping("/search")
     public ResponseEntity<PageResponse<BookResponse>> searchBooks(
             @ModelAttribute BookSearchRequest request) {
         return ResponseEntity.ok(bookService.searchBooks(request));
-    }
-
-    // 도서상세조회 API (ID 기반 단건 조회)
-
-    @GetMapping("/{id}")
-    public ResponseEntity<BookResponse> getBookById(@PathVariable Long id) {
-        return ResponseEntity.ok(bookService.findById(id));
     }
 }

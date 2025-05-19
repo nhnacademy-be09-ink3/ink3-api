@@ -37,7 +37,7 @@ import shop.ink3.api.book.publisher.service.PublisherService;
 import shop.ink3.api.common.dto.PageResponse;
 
 @WebMvcTest(PublisherController.class)
-public class PublisherControllerTest {
+class PublisherControllerTest {
     @MockitoBean
     PublisherService publisherService;
 

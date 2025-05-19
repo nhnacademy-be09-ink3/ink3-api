@@ -8,7 +8,7 @@ import java.util.List;
 
 public record BookResponse(
         Long id,
-        String ISBN,
+        String isbn,
         String title,
         String contents,
         String description,
@@ -35,7 +35,7 @@ public record BookResponse(
 
         return new BookResponse(
                 book.getId(),
-                book.getISBN(),
+                book.getIsbn(),
                 book.getTitle(),
                 book.getContents(),
                 book.getDescription(),

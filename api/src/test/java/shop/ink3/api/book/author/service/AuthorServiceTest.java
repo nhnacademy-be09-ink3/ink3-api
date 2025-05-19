@@ -27,7 +27,7 @@ import shop.ink3.api.book.author.repository.AuthorRepository;
 import shop.ink3.api.common.dto.PageResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthorServiceTest {
+class AuthorServiceTest {
     @Mock
     AuthorRepository authorRepository;
 

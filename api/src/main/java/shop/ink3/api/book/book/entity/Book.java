@@ -27,7 +27,7 @@ public class Book {
     private Long id;
 
     @Column(nullable = false, length = 20)
-    private String ISBN;
+    private String isbn;
 
     @Column(nullable = false)
     private String title;
@@ -110,7 +110,7 @@ public class Book {
     }
 
     public void updateBook(
-            String ISBN,
+            String isbn,
             String title,
             String contents,
             String description,
@@ -123,7 +123,7 @@ public class Book {
             String thumbnailUrl,
             Publisher publisher
     ) {
-        this.ISBN = ISBN;
+        this.isbn = isbn;
         this.title = title;
         this.contents = contents;
         this.description = description;

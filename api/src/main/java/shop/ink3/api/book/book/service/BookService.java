@@ -53,6 +53,20 @@ public class BookService {
     private final TagRepository tagRepository;
     private final AladinClient aladinClient;
 
+    // 단건 조회
+    @Transactional(readOnly = true)
+    public BookResponse getBook(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        return BookResponse.from(book);
+    }
+
+    // 전체 조회
+    @Transactional(readOnly = true)
+    public PageResponse<BookResponse> getBooks(Pageable pageable) {
+        Page<Book> books = bookRepository.findAll(pageable);
+        return PageResponse.from(books.map(BookResponse::from));
+    }
+
     public BookResponse createBook(BookCreateRequest request) {
 
         if (request.categoryIds() != null && request.categoryIds().size() > 10) {
@@ -61,7 +75,7 @@ public class BookService {
 
         Publisher publisher = publisherRepository.findById(request.publisherId()).orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
         Book book = Book.builder()
-                .ISBN(request.ISBN())
+                .isbn(request.isbn())
                 .title(request.title())
                 .contents(request.contents())
                 .description(request.description())
@@ -94,10 +108,80 @@ public class BookService {
         return BookResponse.from(bookRepository.save(book));
     }
 
+    public BookResponse updateBook(Long bookId, BookUpdateRequest request) {
+
+        if (request.categoryIds() != null && request.categoryIds().size() > 10) {
+            throw new TooManyCategoriesException(request.categoryIds().size());
+        }
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+        Publisher publisher = publisherRepository.findById(request.publisherId())
+                .orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
+
+        book.updateBook(
+                request.isbn(),
+                request.title(),
+                request.contents(),
+                request.description(),
+                request.publishedAt(),
+                request.originalPrice(),
+                request.salePrice(),
+                request.quantity(),
+                request.status(),
+                request.isPackable(),
+                request.thumbnailUrl(),
+                publisher
+        );
+
+        book.getBookCategories().clear();
+        book.getBookAuthors().clear();
+        book.getBookTags().clear();
+
+        List<Long> categoryIds = request.categoryIds();
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
+        validateCategoryDepth(categories);
+
+        List<Long> authorIds = request.authorIds();
+        List<Long> tagIds = request.tagIds();
+
+
+        // 카테고리 다시 설정
+        for (Long categoryId : categoryIds) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+
+            book.addBookCategory(category);
+        }
+
+        // 작가 다시 설정
+        for (Long authorId : authorIds) {
+            Author author = authorRepository.findById(authorId)
+                    .orElseThrow(() -> new AuthorNotFoundException(authorId));
+            book.addBookAuthor(author);
+        }
+
+        // 태그 다시 설정
+        for (Long tagId : tagIds) {
+            Tag tag = tagRepository.findById(tagId)
+                    .orElseThrow(() -> new TagNotFoundException(tagId));
+            book.addBookTag(tag);
+        }
+
+        return BookResponse.from(book);
+    }
+
+    public void deleteBook(@PathVariable Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(
+                () -> new BookNotFoundException(bookId));
+
+        bookRepository.delete(book);
+    }
+
     // 알라딘 ISBN 기반으로 도서 등록
     public BookResponse registerBookByIsbn(String isbn13) {
         // 중복 ISBN 체크
-        if (bookRepository.existsByISBN(isbn13)) {
+        if (bookRepository.existsByIsbn(isbn13)) {
             throw new DuplicateIsbnException(isbn13);
         }
 
@@ -117,7 +201,7 @@ public class BookService {
                 .contents(dto.toc())
                 .publisher(publisher)
                 .publishedAt(LocalDate.parse(dto.pubDate()))
-                .ISBN(dto.isbn13())
+                .isbn(dto.isbn13())
                 .originalPrice(dto.priceStandard())
                 .salePrice(dto.priceSales())
                 .thumbnailUrl(dto.cover())
@@ -171,92 +255,22 @@ public class BookService {
         return result.stream().toList();
     }
 
-    public BookResponse updateBook(Long bookId, BookUpdateRequest request) {
-
-        if (request.categoryIds() != null && request.categoryIds().size() > 10) {
-            throw new TooManyCategoriesException(request.categoryIds().size());
+    private void validateCategoryDepth(List<Category> categories) {
+        if (categories.size() < 2) {
+            throw new InvalidCategoryDepthException();
         }
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException(bookId));
-        Publisher publisher = publisherRepository.findById(request.publisherId())
-                .orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
-
-        book.updateBook(
-                request.ISBN(),
-                request.title(),
-                request.contents(),
-                request.description(),
-                request.publishedAt(),
-                request.originalPrice(),
-                request.salePrice(),
-                request.quantity(),
-                request.status(),
-                request.isPackable(),
-                request.thumbnailUrl(),
-                publisher
-        );
-
-        book.getBookCategories().clear();
-        book.getBookAuthors().clear();
-        book.getBookTags().clear();
-
-
-        List<Long> categoryIds = request.categoryIds();
-        List<Category> categories = categoryRepository.findAllById(categoryIds);
-        validateCategoryDepth(categories);
-
-        List<Long> authorIds = request.authorIds();
-        List<Long> tagIds = request.tagIds();
-
-
-
-        // 카테고리 다시 설정
-        for (Long categoryId : categoryIds) {
-            Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new CategoryNotFoundException(categoryId));
-
-            book.addBookCategory(category);
-        }
-
-
-        // 작가 다시 설정
-        for (Long authorId : authorIds) {
-            Author author = authorRepository.findById(authorId)
-                    .orElseThrow(() -> new AuthorNotFoundException(authorId));
-            book.addBookAuthor(author);
-        }
-
-        // 태그 다시 설정
-        for (Long tagId : tagIds) {
-            Tag tag = tagRepository.findById(tagId)
-                    .orElseThrow(() -> new TagNotFoundException(tagId));
-            book.addBookTag(tag);
-        }
-
-        return BookResponse.from(book);
-        //return BookResponse.from(bookRepository.save(book));
     }
 
-    public void deleteBook(@PathVariable Long bookId) {
-        Book book = bookRepository.findById(bookId).orElseThrow(
-                () -> new BookNotFoundException(bookId));
 
-        bookRepository.delete(book);
-    }
+    /*
+     * 검색은 따로 작성
+     */
 
     // 제목 기반 검색
     public List<BookResponse> findAllByTitle(String title) {
         return bookRepository.getBooksByTitle(title).stream()
                 .map(BookResponse::from)
                 .toList();
-    }
-
-    // 단건 조회
-    public BookResponse findById(Long id) {
-        return bookRepository.findById(id)
-                .map(BookResponse::from)
-                .orElse(null);
     }
 
     // 저자 이름으로 검색
@@ -294,11 +308,5 @@ public class BookService {
         }
 
         return PageResponse.from(bookPage.map(BookResponse::from));
-    }
-
-    private void validateCategoryDepth(List<Category> categories) {
-        if (categories.size() < 2) {
-            throw new InvalidCategoryDepthException();
-        }
     }
 }

@@ -110,7 +110,7 @@ class BookServiceTest {
                 30000, 25000, "cover", "IT > 웹 > 자바"
         );
 
-        given(bookRepository.existsByISBN(isbn)).willReturn(false);
+        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
         given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
         given(publisherRepository.findByName("출판사")).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
         given(authorRepository.findByName("작가")).willReturn(Optional.of(Author.builder().name("작가").build()));
@@ -125,7 +125,7 @@ class BookServiceTest {
 
     @Test
     void registerBookByIsbn_whenDuplicate_shouldThrowException() {
-        given(bookRepository.existsByISBN("123")).willReturn(true);
+        given(bookRepository.existsByIsbn("123")).willReturn(true);
         assertThatThrownBy(() -> bookService.registerBookByIsbn("123"))
                 .isInstanceOf(DuplicateIsbnException.class);
     }
@@ -143,7 +143,7 @@ class BookServiceTest {
                 .build();
 
         given(bookRepository.findById(1L)).willReturn(Optional.of(book));
-        BookResponse response = bookService.findById(1L);
+        BookResponse response = bookService.getBook(1L);
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.title()).isEqualTo("단건조회");
         assertThat(response.originalPrice()).isEqualTo(10000);
@@ -153,10 +153,10 @@ class BookServiceTest {
     }
 
     @Test
-    void findById_whenNotFound_shouldReturnNull() {
+    void findById_whenNotFound_shouldThrowException() {
         given(bookRepository.findById(2L)).willReturn(Optional.empty());
-        BookResponse response = bookService.findById(2L);
-        assertThat(response).isNull();
+        assertThatThrownBy(() -> bookService.getBook(2L))
+                .isInstanceOf(BookNotFoundException.class);
     }
 
     @Test
@@ -258,7 +258,7 @@ class BookServiceTest {
                 30000, 25000, "cover", "카테고리단일"
         );
 
-        given(bookRepository.existsByISBN(isbn)).willReturn(false);
+        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
         given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
         given(publisherRepository.findByName(any())).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
         given(authorRepository.findByName(any())).willReturn(Optional.of(Author.builder().name("작가").build()));
@@ -392,7 +392,7 @@ class BookServiceTest {
                 30000, 25000, "cover", null
         );
 
-        given(bookRepository.existsByISBN(isbn)).willReturn(false);
+        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
         given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
         given(publisherRepository.findByName(any())).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
         given(authorRepository.findByName(any())).willReturn(Optional.of(Author.builder().name("작가").build()));
@@ -426,13 +426,6 @@ class BookServiceTest {
                         Category.builder().id(1L).name("IT 모바일").build(),
                         Category.builder().id(2L).name("웹사이트").build()
                 ));
-    }
-
-    private void mockAllLookupsForCreate() {
-        given(publisherRepository.findById(1L)).willReturn(Optional.of(publisher));
-        given(authorRepository.findAllById(any())).willReturn(List.of(author));
-        given(categoryRepository.findAllById(any())).willReturn(List.of(category));
-        given(tagRepository.findAllById(any())).willReturn(List.of(tag));
     }
 
     @Test
@@ -505,7 +498,7 @@ class BookServiceTest {
                 .build();
 
         given(bookRepository.findById(1L)).willReturn(Optional.of(book));
-        BookResponse result = bookService.findById(1L);
+        BookResponse result = bookService.getBook(1L);
 
         assertThat(result.originalPrice()).isEqualTo(20000);
         assertThat(result.salePrice()).isEqualTo(15000);
