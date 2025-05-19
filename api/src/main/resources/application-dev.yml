@@ -2,14 +2,14 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://s4.java21.net:13306/project_be9_team3_dev
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username:  "project_be9_team3"
+    password: "-/jvCmf5WlFZF!U_"
   data:
     redis:
       host: s4.java21.net
       port: 6379
       database: 297
-      password: ${REDIS_PASSWORD}
+      password: "*N2vya7H@muDTwdNMR!"
   jpa:
     open-in-view: false
     show-sql: true
@@ -30,6 +30,6 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: ${EUREKA_URL}
+      defaultZone: "http://admin:1234@localhost:10252/eureka/"
 aladin:
-  ttb-key: ${TTB_KEY}
+  ttb-key: "ttbin20151747001"

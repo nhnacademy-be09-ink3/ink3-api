@@ -1,3 +1,6 @@
+server:
+  port: 10260
+
 spring:
   h2:
     console:
@@ -13,3 +16,5 @@ spring:
         use_sql_comments: true
         highlight_sql: true
         auto_quote_keyword: true
+aladin:
+  ttb-key: "ttbin20151747001"

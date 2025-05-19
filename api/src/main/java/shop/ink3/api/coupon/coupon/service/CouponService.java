@@ -2,10 +2,8 @@ package shop.ink3.api.coupon.coupon.service;
 
 import java.util.List;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
-import shop.ink3.api.coupon.coupon.dto.CouponDeleteResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
-import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
 import shop.ink3.api.coupon.coupon.entity.TriggerType;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
@@ -31,10 +29,10 @@ public interface CouponService {
     List<CouponResponse> getAllCoupons();
 
     // 쿠폰 삭제 by 쿠폰 아이디
-    CouponDeleteResponse deleteCouponById(Long couponId);
+    void deleteCouponById(Long couponId);
 
     // 쿠폰 삭제 by 쿠폰 이름
-    CouponDeleteResponse deleteCouponByName(String couponName);
+    void deleteCouponByName(String couponName);
 
     // 📘 도서 관련 쿠폰
     void issueBookCoupons(Long userId, Long bookId);

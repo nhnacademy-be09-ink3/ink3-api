@@ -1,14 +1,14 @@
 package shop.ink3.api.coupon.store.dto;
 
 import java.time.LocalDateTime;
+import lombok.Builder;
 
+@Builder
 public record CouponStoreResponse(
         Long storeId,
         Long userId,
         Long couponId,
         LocalDateTime createdAt,
-        LocalDateTime validFrom,
-        LocalDateTime validUntil,
         boolean isUsed,
         LocalDateTime usedAt
 ) {
@@ -18,8 +18,6 @@ public record CouponStoreResponse(
                 cs.getUser().getId(),
                 cs.getCoupon().getId(),
                 cs.getCreatedAt(),
-                cs.getValidFrom(),
-                cs.getValidUntil(),
                 cs.isUsed(),
                 cs.getUsedAt()
         );

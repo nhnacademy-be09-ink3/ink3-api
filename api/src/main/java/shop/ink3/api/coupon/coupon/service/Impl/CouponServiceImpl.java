@@ -12,7 +12,6 @@ import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
-import shop.ink3.api.coupon.coupon.dto.CouponDeleteResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
@@ -123,17 +122,15 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public CouponDeleteResponse deleteCouponById(Long couponId) {
+    public void deleteCouponById(Long couponId) {
         // 존재 여부 체크 등 필요 시 추가
         couponRepository.deleteById(couponId);
-        return CouponDeleteResponse.deleteById(couponId);
     }
 
     @Override
-    public CouponDeleteResponse deleteCouponByName(String couponName) {
+    public void deleteCouponByName(String couponName) {
         // 존재 여부 체크 등 필요 시 추가
         couponRepository.deleteByCouponName(couponName);
-        return CouponDeleteResponse.deleteByName(couponName);
     }
 
 

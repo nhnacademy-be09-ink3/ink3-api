@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
-import shop.ink3.api.coupon.coupon.dto.CouponDeleteResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
 import shop.ink3.api.coupon.coupon.entity.TriggerType;
@@ -77,19 +76,17 @@ public class CouponController {
     }
 
     @DeleteMapping("/name/{couponName}")
-    public ResponseEntity<CommonResponse<CouponDeleteResponse>> deleteByName(
+    public void deleteByName(
             @PathVariable String couponName
     ){
-        CouponDeleteResponse deleteCoupon = couponService.deleteCouponByName(couponName);
-        return ResponseEntity.ok(CommonResponse.success(deleteCoupon));
+        couponService.deleteCouponByName(couponName);
     }
 
     @DeleteMapping("/name/{couponId}")
-    public ResponseEntity<CommonResponse<CouponDeleteResponse>> deleteById(
+    public void deleteById(
             @PathVariable long couponId
     ){
-        CouponDeleteResponse deleteCoupon = couponService.deleteCouponById(couponId);
-        return ResponseEntity.ok(CommonResponse.success(deleteCoupon));
+        couponService.deleteCouponById(couponId);
     }
 
 

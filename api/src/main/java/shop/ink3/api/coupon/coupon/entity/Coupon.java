@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +34,14 @@ import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 @Getter
 @Builder
 @AllArgsConstructor
+@Table(name = "coupons")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name", nullable = false, length = 100)
     private String couponName;
 
     @Enumerated(EnumType.STRING)
