@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +40,7 @@ class ReviewControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ReviewService reviewService;
 
     @Autowired
@@ -137,7 +138,7 @@ class ReviewControllerTest {
 
         when(reviewService.getReviewByUserId(user.getId())).thenReturn(response);
 
-        mockMvc.perform(get("/reviews/user/1", user.getId()))
+        mockMvc.perform(get("/reviews/user/{userId}", user.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.title").value("title1"))

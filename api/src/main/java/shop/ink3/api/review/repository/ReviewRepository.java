@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import shop.ink3.api.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Review findByUserId(Long userId);
+    Review findReviewByUserId(Long userId);
 
     Page<Review> findAllByOrderBook_BookId(Pageable pageable, Long bookId);
 }

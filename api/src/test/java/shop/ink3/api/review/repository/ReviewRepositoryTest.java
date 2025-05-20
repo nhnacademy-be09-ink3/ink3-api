@@ -105,7 +105,7 @@ class ReviewRepositoryTest {
     @Test
     @DisplayName("단일 리뷰 조회")
     void findByUserId() {
-        Optional<Review> result = Optional.ofNullable(reviewRepository.findByUserId(user.getId()));
+        Optional<Review> result = Optional.ofNullable(reviewRepository.findReviewByUserId(user.getId()));
         assertThat(result).isPresent();
         assertThat(result.get().getTitle()).isEqualTo("좋아요");
     }

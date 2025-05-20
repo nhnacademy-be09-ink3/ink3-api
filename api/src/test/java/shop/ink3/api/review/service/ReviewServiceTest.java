@@ -151,7 +151,7 @@ class ReviewServiceTest {
             .build();
         ReflectionTestUtils.setField(review, "id", 1L);
 
-        when(reviewRepository.findByUserId(user.getId())).thenReturn(review);
+        when(reviewRepository.findReviewByUserId(user.getId())).thenReturn(review);
 
         ReviewResponse response = reviewService.getReviewByUserId(user.getId());
 
@@ -215,6 +215,7 @@ class ReviewServiceTest {
         when(reviewRepository.save(ArgumentMatchers.any(Review.class))).thenReturn(review);
 
         reviewService.deleteReview(1L);
+        verify(reviewRepository).deleteById(1L);
     }
 
     @Test
