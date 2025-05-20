@@ -19,17 +19,17 @@ public record PolicyCreateRequest(
 
         @NotNull(message = "최소 주문 금액은 필수입니다.")
         @Min(value = 0, message = "최소 주문 금액은 0 이상이어야 합니다.")
-        Integer minimum_order_amount,
+        Integer minimumOrderAmount,
 
         @NotNull(message = "할인 금액은 필수입니다.")
-        Integer discount_value,
+        Integer discountValue,
 
         @NotNull(message = "할인 비율은 필수입니다.")
-        Integer discount_percentage,
+        Integer discountPercentage,
 
         @NotNull(message = "최대 할인 금액은 필수입니다.")
         @Min(value = 0, message = "최대 할인 금액은 0 이상이어야 합니다.")
-        Integer maximum_discount_amount,
+        Integer maximumDiscountAmount,
 
         @NotNull(message = "생성일자는 필수입니다.")
         LocalDateTime createdAt

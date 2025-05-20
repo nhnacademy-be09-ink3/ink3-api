@@ -14,9 +14,9 @@ public class DiscountPolicyValidator implements ConstraintValidator<ValidDiscoun
         boolean valid = true;
 
         if (request.discountType() == DiscountType.FIXED) {
-            valid = request.discount_value() > 0 && request.discount_percentage() == 0;
+            valid = request.discountValue() > 0 && request.discountPercentage() == 0;
         } else if (request.discountType() == DiscountType.RATE) {
-            valid = request.discount_percentage() > 0 && request.discount_value() == 0;
+            valid = request.discountPercentage() > 0 && request.discountValue() == 0;
         }
 
         if (!valid) {

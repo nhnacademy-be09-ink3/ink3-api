@@ -16,13 +16,13 @@ public record PolicyUpdateRequest(
         @NotNull
         DiscountType discountType,
         @NotNull @Min(0)
-        int minimum_order_amount,
+        int minimumOrderAmount,
 
-        int discount_value,
+        int discountValue,
 
-        int discount_percentage,
+        int discountPercentage,
 
-        int maximum_discount_amount
+        int maximumDiscountAmount
 
 ) {
 }

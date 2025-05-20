@@ -42,9 +42,9 @@ public class PolicyService {
         CouponPolicy policy = CouponPolicy.builder()
                 .name(req.name())
                 .discountType(req.discountType())
-                .discountValue(req.discount_value())
-                .minimumOrderAmount(req.minimum_order_amount())
-                .maximumDiscountAmount(req.maximum_discount_amount())
+                .discountValue(req.discountValue())
+                .minimumOrderAmount(req.minimumOrderAmount())
+                .maximumDiscountAmount(req.maximumDiscountAmount())
                 .createdAt(req.createdAt())    // 수정된 부분
                 .build();
 
@@ -60,9 +60,9 @@ public class PolicyService {
                 .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
 
         policy.update(policyUpdateRequest.name(), policyUpdateRequest.discountType(),
-                policyUpdateRequest.minimum_order_amount(),
-                policyUpdateRequest.discount_value(),
-                policyUpdateRequest.maximum_discount_amount());
+                policyUpdateRequest.minimumOrderAmount(),
+                policyUpdateRequest.discountValue(),
+                policyUpdateRequest.maximumDiscountAmount());
         return PolicyResponse.from(policyRepository.save(policy),"쿠폰 정책이 수정되었습니다.");
     }
 

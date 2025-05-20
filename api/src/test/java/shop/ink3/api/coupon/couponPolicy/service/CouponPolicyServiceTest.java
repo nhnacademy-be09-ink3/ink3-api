@@ -38,9 +38,9 @@ class CouponPolicyServiceTest {
                 .id(1L)
                 .name("WELCOME10")
                 .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
+                .discountValue(10)
+                .minimumOrderAmount(10000)
+                .maximumDiscountAmount(5000)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -72,9 +72,9 @@ class CouponPolicyServiceTest {
                 .id(1L)
                 .name("WELCOME10")
                 .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
+                .discountValue(10)
+                .minimumOrderAmount(10000)
+                .maximumDiscountAmount(5000)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -118,9 +118,9 @@ class CouponPolicyServiceTest {
                 .id(1L)
                 .name(request.name())
                 .discountType(request.discountType())
-                .minimum_order_amount(request.minimum_order_amount())
-                .discount_value(request.discount_value())
-                .maximum_discount_amount(request.maximum_discount_amount())
+                .minimumOrderAmount(request.minimumOrderAmount())
+                .discountValue(request.discountValue())
+                .maximumDiscountAmount(request.maximumDiscountAmount())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -171,9 +171,9 @@ class CouponPolicyServiceTest {
                 .id(1L)
                 .name("WELCOME10")
                 .discountType(DiscountType.RATE)
-                .discount_value(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
+                .discountValue(10)
+                .minimumOrderAmount(10000)
+                .maximumDiscountAmount(5000)
                 .build();
 
         when(policyRepository.findByName("WELCOME10")).thenReturn(Optional.of(existingPolicy));
@@ -214,10 +214,10 @@ class CouponPolicyServiceTest {
                 .id(1L)
                 .name("DELETE_ME")
                 .discountType(DiscountType.RATE)
-                .discount_value(0)
-                .discount_percentage(10)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(5000)
+                .discountValue(0)
+                .discountPercentage(10)
+                .minimumOrderAmount(10000)
+                .maximumDiscountAmount(5000)
                 .build();
 
         when(policyRepository.findById(1L)).thenReturn(Optional.of(policy));
@@ -248,9 +248,9 @@ class CouponPolicyServiceTest {
                 .id(2L)
                 .name("DELETE_BY_NAME")
                 .discountType(DiscountType.FIXED)
-                .discount_value(2000)
-                .minimum_order_amount(10000)
-                .maximum_discount_amount(3000)
+                .discountValue(2000)
+                .minimumOrderAmount(10000)
+                .maximumDiscountAmount(3000)
                 .build();
 
         when(policyRepository.findByName("DELETE_BY_NAME")).thenReturn(Optional.of(policy));
