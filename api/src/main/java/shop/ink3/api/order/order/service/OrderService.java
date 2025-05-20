@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
@@ -22,6 +23,8 @@ import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
+import shop.ink3.api.order.orderBook.service.OrderBookService;
+import shop.ink3.api.payment.dto.OrderFormCreateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
@@ -35,6 +38,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
+
     // 생성
     @Transactional
     public OrderResponse createOrder(OrderCreateRequest request){
@@ -44,7 +48,7 @@ public class OrderService {
                     .orElseThrow(()->new UserNotFoundException(request.getUserId()));
         }
 
-        // fix : 조회 한 쿠폰 객체 넣어주기
+        //TODO : 조회 한 쿠폰 객체 넣어주기
         CouponStore couponStore = null;
 
         Order order = Order.builder()
@@ -133,7 +137,7 @@ public class OrderService {
         orderRepository.deleteById(orderId);
     }
 
-    // 주문 상태 변경 (관리자에 의한)
+    // 주문 상태 변경
     @Transactional
     public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request){
         Order order = orderRepository.findById(orderId)

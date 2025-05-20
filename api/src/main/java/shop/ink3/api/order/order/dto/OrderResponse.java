@@ -1,6 +1,7 @@
 package shop.ink3.api.order.order.dto;
 
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,12 +11,12 @@ import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.user.user.entity.User;
 
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class OrderResponse {
     private Long id;
-    private User user;
-    private CouponStore couponStore;
+    private Long userId;
+    private Long couponStoreId;
     private String orderUUID;
     private OrderStatus status;
     private LocalDateTime orderedAt;
@@ -25,26 +26,13 @@ public class OrderResponse {
     public static OrderResponse from(Order order){
         return new OrderResponse(
                 order.getId(),
-                order.getUser(),
-                order.getCouponStore(),
+                order.getUser().getId(),
+                order.getCouponStore().getId(),
                 order.getOrderUUID(),
                 order.getStatus(),
                 order.getOrderedAt(),
                 order.getOrdererName(),
                 order.getOrdererPhone()
         );
-    }
-
-    public static Order getOrder(OrderResponse response){
-        return Order.builder()
-                .id(response.id)
-                .user(response.user)
-                .couponStore(response.couponStore)
-                .orderUUID(response.orderUUID)
-                .status(response.status)
-                .orderedAt(response.orderedAt)
-                .ordererName(response.ordererName)
-                .ordererPhone(response.ordererPhone)
-                .build();
     }
 }

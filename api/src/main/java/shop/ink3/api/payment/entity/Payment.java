@@ -35,8 +35,11 @@ public class Payment {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String paymentKey;
+
+    @Column(nullable = false)
+    private Integer usedPoint;
 
     @Column(nullable = false)
     private Integer paymentAmount;

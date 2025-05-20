@@ -1,5 +1,6 @@
 package shop.ink3.api.order.refund.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,11 +32,14 @@ public class RefundController {
         return ResponseEntity.ok(CommonResponse.success(refundService.getOrderRefund(orderId)));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/me")
     public ResponseEntity<CommonResponse<PageResponse<RefundResponse>>> getUserRefundList(
-            @PathVariable long userId, Pageable pageable) {
+            HttpServletRequest request, Pageable pageable) {
+        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
         return ResponseEntity.ok(CommonResponse.success(refundService.getUserRefundList(userId, pageable)));
     }
+
+
 
     @PostMapping
     public ResponseEntity<CommonResponse<RefundResponse>> createRefund(

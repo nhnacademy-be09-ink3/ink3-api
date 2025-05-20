@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.exception.NotFoundException;
+import shop.ink3.api.order.order.exception.InsufficientBookStockException;
+import shop.ink3.api.payment.exception.PaymentParserFailException;
+import shop.ink3.api.payment.exception.PaymentProcessorFailException;
 import shop.ink3.api.user.common.exception.DormantException;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.common.exception.WithdrawnException;
@@ -54,6 +57,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WithdrawnException.class)
     public ResponseEntity<CommonResponse<Void>> handleWithdrawnException(WithdrawnException e) {
         return ResponseEntity.status(HttpStatus.GONE).body(CommonResponse.error(HttpStatus.GONE, e.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientBookStockException.class)
+    public ResponseEntity<CommonResponse<Void>> handleInsufficientBookStockException(InsufficientBookStockException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentParserFailException.class)
+    public ResponseEntity<CommonResponse<Void>> handlePaymentParserFailException(PaymentParserFailException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentProcessorFailException.class)
+    public ResponseEntity<CommonResponse<Void>> handlePaymentProcessorFailException(PaymentProcessorFailException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

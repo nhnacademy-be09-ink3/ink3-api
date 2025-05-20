@@ -59,14 +59,6 @@ public class ShipmentService {
         return ShipmentResponse.from(shipment);
     }
 
-
-    // 특정 사용자의 배송 list
-    public PageResponse<ShipmentResponse> getUserShipmentList(long userId, Pageable pageable) {
-        Page<Shipment> shipmentpage = shipmentRepository.findByOrder_UserId(userId, pageable);
-        Page<ShipmentResponse> shipmentResponsePage = shipmentpage.map(shipment -> ShipmentResponse.from(shipment));
-        return PageResponse.from(shipmentResponsePage);
-    }
-
     // 주문 상태에 따른 배송 list
     public PageResponse<ShipmentResponse> getShipmentListByOrderStatus(long userId, OrderStatus status, Pageable pageable){
         Page<Shipment> shipmentPage = shipmentRepository.findByOrder_UserIdAndOrder_Status(userId, status, pageable);

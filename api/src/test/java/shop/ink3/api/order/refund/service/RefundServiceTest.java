@@ -101,10 +101,9 @@ class RefundServiceTest {
         // given
         RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세");
         Order order = Order.builder().id(1L).build();
-        OrderResponse orderResponse = OrderResponse.from(order);
         Refund  refund = Refund.builder()
                 .id(1L)
-                .order(OrderResponse.getOrder(orderResponse))
+                .order(order)
                 .reason(request.getReason())
                 .details(request.getDetails())
                 .build();

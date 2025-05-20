@@ -1,5 +1,6 @@
 package shop.ink3.api.order.orderBook.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import shop.ink3.api.order.orderBook.entity.OrderBook;
 
 public interface OrderBookRepository extends JpaRepository<OrderBook, Long> {
     Page<OrderBook> findByOrder_Id(long orderId, Pageable pageable);
+    List<OrderBook> findByOrder_Id(long orderId);
 
     Optional<OrderBook> findByOrder_IdAndBook_Id(long orderId, long bookId);
 

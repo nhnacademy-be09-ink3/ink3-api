@@ -46,17 +46,14 @@ public class RefundPolicyService {
     // 전체 정책 list 조회
     public PageResponse<RefundPolicyResponse> getRefundPolicyList(Pageable pageable) {
         Page<RefundPolicy> page = refundPolicyRepository.findAll(pageable);
-        Page<RefundPolicyResponse> responsePage = page.map(refundPolicy ->
-                RefundPolicyResponse.from(refundPolicy));
+        Page<RefundPolicyResponse> responsePage = page.map(RefundPolicyResponse::from);
         return PageResponse.from(responsePage);
     }
 
     // 활성화된 정책 list 조회
-    public PageResponse<RefundPolicyResponse> getAvailableRefundPolicyList(Pageable pageable) {
-        Page<RefundPolicy> page = refundPolicyRepository.findByIsAvailableTrue(pageable);
-        Page<RefundPolicyResponse> responsePage = page.map(refundPolicy ->
-                RefundPolicyResponse.from(refundPolicy));
-        return PageResponse.from(responsePage);
+    public RefundPolicyResponse getAvailableRefundPolicy() {
+        RefundPolicy refundPolicy = refundPolicyRepository.findByIsAvailableTrue();
+        return RefundPolicyResponse.from(refundPolicy);
     }
 
     // 수정

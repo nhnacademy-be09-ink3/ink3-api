@@ -1,5 +1,6 @@
 package shop.ink3.api.order.shipment.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +23,15 @@ import shop.ink3.api.order.shipment.dto.ShipmentCreateRequest;
 import shop.ink3.api.order.shipment.dto.ShipmentResponse;
 import shop.ink3.api.order.shipment.dto.ShipmentUpdateRequest;
 import shop.ink3.api.order.shipment.service.ShipmentService;
+import shop.ink3.api.user.address.dto.AddressResponse;
+import shop.ink3.api.user.address.service.AddressService;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/shipments")
 public class ShipmentController {
     private final ShipmentService shipmentService;
+    private final AddressService addressService;
 
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<ShipmentResponse>> getShipment(
@@ -36,19 +40,12 @@ public class ShipmentController {
                 .ok(CommonResponse.success(shipmentService.getShipment(orderId)));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<CommonResponse<PageResponse<ShipmentResponse>>> getUserShipment(
-            @PathVariable long userId, Pageable pageable) {
-        return ResponseEntity
-                .ok(CommonResponse.success(shipmentService.getUserShipmentList(userId, pageable)));
-    }
-
-    @GetMapping("/user/{userId}/order-status")
+    @GetMapping("/me/order-status")
     public ResponseEntity<CommonResponse<PageResponse<ShipmentResponse>>> getUserShipmentByOrderStatus(
-            @PathVariable long userId,
             @RequestParam String orderStatus,
+            HttpServletRequest request,
             Pageable pageable) {
-
+        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
         return ResponseEntity
                 .ok(CommonResponse.success(
                         shipmentService.getShipmentListByOrderStatus(

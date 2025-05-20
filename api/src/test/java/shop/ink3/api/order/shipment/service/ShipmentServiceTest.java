@@ -130,7 +130,7 @@ class ShipmentServiceTest {
         // then
         assertNotNull(response);
         assertEquals("수령인", response.getRecipientName());
-        assertEquals(1L, response.getOrder().getId());
+        assertEquals(1L, response.getOrderId());
     }
 
     @Test

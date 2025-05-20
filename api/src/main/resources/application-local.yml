@@ -13,3 +13,11 @@ spring:
         use_sql_comments: true
         highlight_sql: true
         auto_quote_keyword: true
+
+payment:
+  toss:
+    client_key : "temp"
+    secret_key : "temp"
+    confirm_url : "https://api.tosspayments.com/v1/payments/confirm"
+    success_url : "http://localhost:8080/payment/success"
+    fail_url : "http://localhost:8080/payment/fail"

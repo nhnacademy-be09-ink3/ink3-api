@@ -33,3 +33,4 @@ eureka:
       defaultZone: ${EUREKA_URL}
 aladin:
   ttb-key: ${TTB_KEY}
+

@@ -44,16 +44,14 @@ public class PackagingService {
     // 활성화된 포장정책 list 조회
     public PageResponse<PackagingResponse> getAvailablePackagingList(Pageable pageable) {
         Page<Packaging> page = packagingRepository.findByIsAvailableTrue(pageable);
-        Page<PackagingResponse> packagingResponseList = page.map(packaging ->
-                PackagingResponse.from(packaging));
+        Page<PackagingResponse> packagingResponseList = page.map(PackagingResponse::from);
         return PageResponse.from(packagingResponseList);
     }
 
     // 전체 포장정책 list 조회
     public PageResponse<PackagingResponse> getPackagingList(Pageable pageable) {
         Page<Packaging> page = packagingRepository.findAll(pageable);
-        Page<PackagingResponse> packagingResponseList = page.map(packaging ->
-                PackagingResponse.from(packaging));
+        Page<PackagingResponse> packagingResponseList = page.map(PackagingResponse::from);
         return PageResponse.from(packagingResponseList);
     }
 
