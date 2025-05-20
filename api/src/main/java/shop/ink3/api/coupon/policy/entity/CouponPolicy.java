@@ -43,17 +43,12 @@ public class CouponPolicy {
 
     private int maximumDiscountAmount;
 
-    @Column(nullable = false)
-    private LocalDateTime validDays;
-
     public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue,
-                       Integer maximumDiscountAmount,
-                       LocalDateTime valid_days) {
+                       Integer maximumDiscountAmount) {
         this.name = name;
         this.discountType = discountType;
         this.minimumOrderAmount = minimumOrderAmount;
         this.discountValue = discountValue;
         this.maximumDiscountAmount = maximumDiscountAmount;
-        this.validDays = valid_days;
     }
 }
