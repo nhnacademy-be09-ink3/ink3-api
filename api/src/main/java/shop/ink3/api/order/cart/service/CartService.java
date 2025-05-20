@@ -56,12 +56,19 @@ public class CartService {
     }
 
     public CartResponse updateCartQuantity(Long cartId, CartUpdateRequest request) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
+        Cart cart = cartRepository.findById(cartId)
+            .orElseThrow(() -> new CartNotFoundException(cartId));
 
         cart.updateQuantity(request.quantity());
         cartRepository.save(cart);
 
-        return toResponse(cart);
+        CartResponse response = toResponse(cart);
+
+        String key = CART_KEY_PREFIX + cart.getUser().getId();
+        hashOps().put(key, response.id().toString(), response);
+        redisTemplate.expire(key, Duration.ofDays(3));
+
+        return response;
     }
 
     @Transactional(readOnly = true)
