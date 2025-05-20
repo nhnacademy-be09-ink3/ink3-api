@@ -57,8 +57,7 @@ public class CartService {
     }
 
     public CartResponse updateCartQuantity(Long cartId, CartUpdateRequest request) {
-        Cart cart = cartRepository.findById(cartId)
-            .orElseThrow(() -> new CartNotFoundException(cartId));
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
 
         cart.updateQuantity(request.quantity());
         cartRepository.save(cart);
