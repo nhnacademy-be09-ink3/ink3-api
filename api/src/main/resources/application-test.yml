@@ -25,4 +25,4 @@ logging:
   level:
     org.hibernate.SQL: debug
 aladin:
-  ttb-key:  "ttbin20151747001"
+  ttb-key: ${TTB_KEY}
