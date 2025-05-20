@@ -32,8 +32,8 @@ public record PolicyResponse(
                 policy.getId(),
                 policy.getName(),
                 policy.getDiscountType(),
-                policy.getDiscount_value(),
-                policy.getDiscount_percentage(),
+                policy.getDiscountValue(),
+                policy.getDiscountPercentage(),
                 policy.getCreatedAt(),
                 message
         );

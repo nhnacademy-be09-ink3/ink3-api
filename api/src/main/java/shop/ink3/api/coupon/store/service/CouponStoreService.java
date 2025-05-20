@@ -1,6 +1,8 @@
 package shop.ink3.api.coupon.store.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.store.dto.CouponStoreCreateRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
 import shop.ink3.api.coupon.store.exception.DuplicateCouponException;
@@ -44,7 +47,7 @@ public class CouponStoreService {
                 .user(user)
                 .coupon(coupon)
                 .createdAt(LocalDateTime.now())
-                .isUsed(false)
+                .couponStatus(CouponStatus.READY)
                 .usedAt(null)
                 .build();
 
@@ -65,19 +68,21 @@ public class CouponStoreService {
         return userCouponRepository.findByCouponId(couponId);
     }
 
+    /** fix 예정 */
     /** 4) 미사용 쿠폰만 조회 */
-    @Transactional(readOnly = true)
-    public List<CouponStore> getUnusedStoresByUserId(Long userId) {
-        return userCouponRepository.findByUserIdAndIsUsedFalse(userId);
-    }
+//    @Transactional(readOnly = true)
+//    public List<CouponStore> getUnusedStoresByUserId(Long userId) {
+//        return userCouponRepository.findByUserIdAndIsUsedFalse(userId);
+//    }
 
     /** 5) 사용 여부 업데이트 */
     public CouponStore updateStore(Long storeId, CouponStoreUpdateRequest req) {
         CouponStore store = userCouponRepository.findById(storeId)
                 .orElseThrow(() -> new CouponStoreNotFoundException(storeId + " coupon not found"));
 
-        store.setUsed(req.isUsed());
-        store.setUsedAt(req.isUsed() ? req.usedAt() : null);  // 미사용이면 usedAt도 null
+        store.setCouponStatus(req.couponStatus());
+        store.setUsedAt(req.usedAt());
+
         return store;
     }
 
@@ -93,5 +98,13 @@ public class CouponStoreService {
     @Transactional(readOnly = true)
     public boolean isAlreadyIssued(Long userId, Long couponId) {
         return userCouponRepository.existsByUserIdAndCouponId(userId, couponId);
+    }
+
+    /** 8) 정기적으로 발급되는 쿠폰 처리 (생일쿠폰) */
+    @Transactional(readOnly = true)
+    public boolean isAlreadyIssuedBirthday(Long userId, Long couponId) {
+
+        return userCouponRepository.existsByUserIdAndCouponIdAndYear(
+                userId, couponId, Year.now().getValue());
     }
 }

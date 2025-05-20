@@ -42,11 +42,11 @@ public class CouponStore {
     private Coupon coupon;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt; // 저장소 생성 일자
+    private LocalDateTime createdAt; // 저장소 생성 일자(issuedAt)
 
     @Column
     private LocalDateTime usedAt;
 
     @Column(nullable = false)
-    private boolean isUsed;
+    private CouponStatus couponStatus;
 }

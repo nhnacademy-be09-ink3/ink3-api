@@ -42,9 +42,9 @@ public class PolicyService {
         CouponPolicy policy = CouponPolicy.builder()
                 .name(req.name())
                 .discountType(req.discountType())
-                .discount_value(req.discount_value())
-                .minimum_order_amount(req.minimum_order_amount())
-                .maximum_discount_amount(req.maximum_discount_amount())
+                .discountValue(req.discount_value())
+                .minimumOrderAmount(req.minimum_order_amount())
+                .maximumDiscountAmount(req.maximum_discount_amount())
                 .createdAt(req.createdAt())    // 수정된 부분
                 .build();
 

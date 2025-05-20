@@ -2,6 +2,8 @@ package shop.ink3.api.coupon.store.dto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
 
 @Builder
 public record CouponStoreResponse(
@@ -9,7 +11,7 @@ public record CouponStoreResponse(
         Long userId,
         Long couponId,
         LocalDateTime createdAt,
-        boolean isUsed,
+        CouponStatus couponStatus,
         LocalDateTime usedAt
 ) {
     public static CouponStoreResponse fromEntity(shop.ink3.api.coupon.store.entity.CouponStore cs) {
@@ -18,7 +20,7 @@ public record CouponStoreResponse(
                 cs.getUser().getId(),
                 cs.getCoupon().getId(),
                 cs.getCreatedAt(),
-                cs.isUsed(),
+                cs.getCouponStatus(),
                 cs.getUsedAt()
         );
     }

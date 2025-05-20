@@ -1,10 +1,11 @@
 package shop.ink3.api.coupon.store.dto;
 
 import java.time.LocalDateTime;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
 
 public record CouponStoreUpdateResponse(
         Long storeId,
-        boolean isUsed,
+        CouponStatus couponStatus,
         LocalDateTime usedAt,
         String message
 ) {
@@ -13,7 +14,7 @@ public record CouponStoreUpdateResponse(
     ) {
         return new CouponStoreUpdateResponse(
                 cs.getId(),
-                cs.isUsed(),
+                cs.getCouponStatus(),
                 cs.getUsedAt(),
                 String.format("CouponStore 엔트리 %d 업데이트 완료", cs.getId())
         );
