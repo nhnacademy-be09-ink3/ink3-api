@@ -47,6 +47,6 @@ public class CouponStore {
     @Column
     private LocalDateTime usedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false) @Enumerated(EnumType.STRING)
     private CouponStatus couponStatus;
 }
