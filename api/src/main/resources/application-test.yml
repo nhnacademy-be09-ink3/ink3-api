@@ -1,7 +1,3 @@
-eureka:
-  client:
-    enabled: false
-
 spring:
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -24,5 +20,3 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
-aladin:
-  ttb-key: ${TTB_KEY}
