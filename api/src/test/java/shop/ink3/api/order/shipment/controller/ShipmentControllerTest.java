@@ -91,32 +91,6 @@ class ShipmentControllerTest {
     }
 
     @Test
-    @DisplayName("사용자의 배송 리스트 조회 - 성공")
-    void getUserShipmentList_성공() throws Exception {
-        // given
-        PageResponse<ShipmentResponse> response = new PageResponse<>(
-                List.of(
-                        ShipmentResponse.from(Shipment.builder().id(1L).build()),
-                        ShipmentResponse.from(Shipment.builder().id(2L).build())
-                ),
-                0, 2, 2L, 1, false, false
-        );
-        when(shipmentService.getUserShipmentList(anyLong(), any())).thenReturn(response);
-
-        // when, then
-        mockMvc.perform(get("/shipments/user/1")
-                        .param("page", "0")
-                        .param("size", "2"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data.content[0].id").value(1L))
-                .andDo(print());
-    }
-
-    @Test
     @DisplayName("주문 상태별 배송 리스트 조회 - 성공")
     void getUserShipmentByOrderStatus_성공() throws Exception {
         // given

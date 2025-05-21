@@ -14,7 +14,8 @@ spring:
         highlight_sql: true
         auto_quote_keyword: true
 
-
+aladin:
+  ttb-key: ${TTB_KEY}
 
 payment:
   toss:

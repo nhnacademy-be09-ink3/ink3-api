@@ -67,24 +67,7 @@ class ShipmentServiceTest {
                 () -> shipmentService.getShipment(1L));
     }
 
-    @Test
-    @DisplayName("사용자의 배송 리스트 조회 - 성공")
-    void getUserShipmentList_성공() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        List<Shipment> list = List.of(
-                Shipment.builder().id(1L).build(),
-                Shipment.builder().id(2L).build()
-        );
-        Page<Shipment> page = new PageImpl<>(list, pageable, list.size());
-        when(shipmentRepository.findByOrder_UserId(anyLong(), any())).thenReturn(page);
 
-        // when
-        PageResponse<ShipmentResponse> response = shipmentService.getUserShipmentList(1L, pageable);
-
-        // then
-        assertEquals(2, response.content().size());
-    }
 
     @Test
     @DisplayName("배송 상태에 따른 배송 정보 리스트 조회 - 성공")

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.shipment.entity.Shipment;
 
-@@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 public class ShipmentResponse {
