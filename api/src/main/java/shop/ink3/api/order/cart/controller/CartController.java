@@ -39,11 +39,6 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCartItemsByUserId(userId));
     }
 
-    @GetMapping("/guest")
-    public ResponseEntity<List<CartResponse>> getGuestCarts(@RequestBody List<GuestCartRequest> requests) {
-        return ResponseEntity.ok(cartService.getCartItemsByGuest(requests));
-    }
-
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<Void> deleteCarts(@PathVariable Long userId) {
         cartService.deleteCartItems(userId);

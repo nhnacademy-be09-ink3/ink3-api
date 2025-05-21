@@ -164,35 +164,6 @@ class CartControllerTest {
     }
 
     @Test
-    @DisplayName("비회원 장바구니 목록 조회")
-    void getGuestCarts() throws Exception {
-        List<GuestCartRequest> requests = List.of(
-            new GuestCartRequest(book1.getId(), 100),
-            new GuestCartRequest(book2.getId(), 100)
-        );
-
-        List<CartResponse> cartResponses = List.of(
-            new CartResponse(
-                1L, user.getId(), book1.getId(),
-                book1.getTitle(), book1.getOriginalPrice(), book1.getSalePrice(), book1.getDiscountRate(), book1.getThumbnailUrl(),
-                100
-            ),
-            new CartResponse(
-                2L, user.getId(), book2.getId(),
-                book2.getTitle(), book2.getOriginalPrice(), book2.getSalePrice(), book2.getDiscountRate(), book2.getThumbnailUrl(),
-                100
-            )
-        );
-
-        Mockito.when(cartService.getCartItemsByGuest(anyList())).thenReturn(cartResponses);
-
-        mockMvc.perform(get("/carts/guest")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests)))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     @DisplayName("장바구니 전체 삭제")
     void deleteCarts() throws Exception {
         mockMvc.perform(delete("/carts/user/1"))
