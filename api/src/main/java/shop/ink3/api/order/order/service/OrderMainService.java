@@ -29,6 +29,7 @@ public class OrderMainService {
         OrderResponse order = orderService.createOrder(request.orderCreateRequest());
         orderBookService.createOrderBook(request.createRequestList());
         shipmentService.createShipment(request.shipmentCreateRequest());
+        // 비회원일 경우 저장해줘야함
         return order;
     }
 
