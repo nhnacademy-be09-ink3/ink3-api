@@ -3,13 +3,9 @@ package shop.ink3.api.coupon.coupon.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
-import shop.ink3.api.coupon.coupon.dto.CouponResponse;
+
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
-import shop.ink3.api.coupon.coupon.entity.TriggerType;
 
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
 

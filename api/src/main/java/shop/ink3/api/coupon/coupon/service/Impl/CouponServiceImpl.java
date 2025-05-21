@@ -20,7 +20,6 @@ import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.CategoryInfo;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
-import shop.ink3.api.coupon.coupon.entity.TriggerType;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.coupon.service.CouponService;

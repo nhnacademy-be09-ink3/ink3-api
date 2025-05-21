@@ -4,9 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
-import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
-import shop.ink3.api.coupon.coupon.entity.TriggerType;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
 
 public interface CouponService {

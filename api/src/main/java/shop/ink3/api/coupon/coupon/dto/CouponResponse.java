@@ -2,11 +2,9 @@ package shop.ink3.api.coupon.coupon.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
-import shop.ink3.api.coupon.coupon.entity.TriggerType;
+
 
 public record CouponResponse(
         Long couponId,
