@@ -113,7 +113,7 @@ class ReviewRepositoryTest {
     @Test
     @DisplayName("한 도서에 대한 모든 리뷰 조회")
     void findAllByOrderBook_BookId() {
-        Page<Review> page = reviewRepository.findAllByOrderBook_BookId(
+        Page<Review> page = reviewRepository.findAllByBookId(
             PageRequest.of(0, 10), book.getId()
         );
         assertThat(page.getTotalElements()).isEqualTo(1);

@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
+import shop.ink3.api.review.dto.ReviewUpdateRequest;
 import shop.ink3.api.review.exception.ReviewNotFoundException;
 import shop.ink3.api.review.dto.ReviewRequest;
 import shop.ink3.api.review.dto.ReviewResponse;
@@ -46,9 +48,19 @@ public class ReviewService  {
         return ReviewResponse.from(review);
     }
 
-    public Page<ReviewResponse> getReviewsByBookId(Pageable pageable, Long bookId) {
-        return reviewRepository.findAllByOrderBook_BookId(pageable, bookId)
+    public PageResponse<ReviewResponse> getReviewsByBookId(Pageable pageable, Long bookId) {
+        Page<ReviewResponse> page = reviewRepository
+            .findAllByBookId(pageable, bookId)
             .map(ReviewResponse::from);
+
+        return PageResponse.from(page);
+    }
+
+    public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        review.update(request.title(), request.content(), request.rating());
+
+        return ReviewResponse.from(reviewRepository.save(review));
     }
 
     public void deleteReview(Long id) {
