@@ -37,18 +37,16 @@ public class CouponStore {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CouponStatus status;
 
-    @Column
-    private LocalDateTime usedAt; // 쿠폰 사용 일자
+    private LocalDateTime usedAt;
 
     @Column(nullable = false)
-    private LocalDateTime issuedAt; // 발급 일자
-
+    private LocalDateTime issuedAt;
 }

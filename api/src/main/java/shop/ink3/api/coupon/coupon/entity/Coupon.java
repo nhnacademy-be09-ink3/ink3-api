@@ -25,19 +25,18 @@ import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
-
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
-@Table(name = "coupons")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+@Getter
+@Table(name = "coupons")
 public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -56,8 +55,8 @@ public class Coupon {
     @Builder.Default
     @OneToMany(
             mappedBy = "coupon",
-    cascade = CascadeType.ALL,
-    orphanRemoval = true)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<BookCoupon> bookCoupons = new ArrayList<>();
 
     @Builder.Default
@@ -80,6 +79,4 @@ public class Coupon {
             this.categoryCoupons.add(categoryCoupon);
         }
     }
-
-
 }
