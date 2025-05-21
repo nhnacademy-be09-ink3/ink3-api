@@ -39,18 +39,11 @@ public class CouponStore {
     private Coupon coupon;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    private CouponStatus status;
 
-    @Column(nullable = false)
     private LocalDateTime usedAt;
 
     @Column(nullable = false)
-    private LocalDateTime validFrom;
-
-    @Column(nullable = false)
-    private LocalDateTime validUntil;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CouponStatus status;
+    private LocalDateTime issuedAt;
 }
