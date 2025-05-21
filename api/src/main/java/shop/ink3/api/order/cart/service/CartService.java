@@ -43,7 +43,7 @@ public class CartService {
         Cart cart = cartRepository.findByUserIdAndBookId(user.getId(), book.getId());
 
         if (Objects.nonNull(cart)) {
-            cart.updateQuantity(request.quantity());
+            cart.updateQuantity(cart.getQuantity() + request.quantity());
         } else {
             cart = Cart.builder()
                 .user(user)

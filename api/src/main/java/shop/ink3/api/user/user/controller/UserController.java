@@ -9,6 +9,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -148,5 +149,16 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<CommonResponse<Map<String, Long>>> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = Long.parseLong(authentication.getName());
+        Map<String, Long> body = Map.of("userId", userId);
+        return ResponseEntity.ok(CommonResponse.success(body));
     }
 }
