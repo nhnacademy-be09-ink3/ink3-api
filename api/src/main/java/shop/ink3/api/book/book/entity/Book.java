@@ -69,20 +69,20 @@ public class Book {
 
     @Builder.Default
     @OneToMany(mappedBy = "book",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "book",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
     private List<BookAuthor> bookAuthors = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "book",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
     private List<BookTag> bookTags = new ArrayList<>();
 
     @PrePersist
@@ -110,18 +110,18 @@ public class Book {
     }
 
     public void updateBook(
-            String ISBN,
-            String title,
-            String contents,
-            String description,
-            LocalDate publishedAt,
-            Integer originalPrice,
-            Integer salePrice,
-            Integer quantity,
-            BookStatus status,
-            boolean isPackable,
-            String thumbnailUrl,
-            Publisher publisher
+        String ISBN,
+        String title,
+        String contents,
+        String description,
+        LocalDate publishedAt,
+        Integer originalPrice,
+        Integer salePrice,
+        Integer quantity,
+        BookStatus status,
+        boolean isPackable,
+        String thumbnailUrl,
+        Publisher publisher
     ) {
         this.ISBN = ISBN;
         this.title = title;
