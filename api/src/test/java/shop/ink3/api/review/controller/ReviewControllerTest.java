@@ -28,9 +28,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.review.dto.ReviewRequest;
 import shop.ink3.api.review.dto.ReviewResponse;
+import shop.ink3.api.review.dto.ReviewUpdateRequest;
 import shop.ink3.api.review.service.ReviewService;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -147,24 +149,48 @@ class ReviewControllerTest {
     }
 
     @Test
-    @DisplayName("한 도서의 리뷰 전체 조회")
+    @DisplayName("도서의 리뷰 목록 조회")
     void getReviewsByBookId() throws Exception {
-        List<ReviewResponse> content = List.of(
+        List<ReviewResponse> reviewList = List.of(
             new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now()),
             new ReviewResponse(2L, user.getId(), orderBook2.getId(), "title2", "content2", 4, LocalDateTime.now())
         );
 
-        Page<ReviewResponse> reviewResponses = new PageImpl<>(
-            content,
-            PageRequest.of(0, 10),
-            content.size()
+        PageResponse<ReviewResponse> pageResponse = new PageResponse<>(
+            reviewList,
+            0,
+            10,
+            2L,
+            1,
+            false,
+            false
         );
 
-        Mockito.when(reviewService.getReviewsByBookId(any(), eq(book.getId()))).thenReturn(reviewResponses);
+        when(reviewService.getReviewsByBookId(any(), eq(book.getId()))).thenReturn(pageResponse);
 
-        mockMvc.perform(get("/reviews/book/1"))
+        mockMvc.perform(get("/reviews/book/{bookId}", book.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content.length()").value(2));
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].title").value("title1"))
+            .andExpect(jsonPath("$.content[1].title").value("title2"));
+    }
+
+    @Test
+    @DisplayName("리뷰 수정")
+    void updateReview() throws Exception {
+        ReviewUpdateRequest request = new ReviewUpdateRequest("updatedTitle", "updatedContent", 4);
+        ReviewResponse response = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "updatedTitle", "updatedContent", 4, LocalDateTime.now());
+
+        when(reviewService.updateReview(eq(1L), any(ReviewUpdateRequest.class))).thenReturn(response);
+
+        mockMvc.perform(put("/reviews/{reviewId}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.title").value("updatedTitle"))
+            .andExpect(jsonPath("$.content").value("updatedContent"))
+            .andExpect(jsonPath("$.rating").value(4));
     }
 
     @Test

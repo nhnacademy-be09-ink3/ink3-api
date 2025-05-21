@@ -5,10 +5,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import feign.Param;
 import shop.ink3.api.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Review findReviewByUserId(Long userId);
 
-    Page<Review> findAllByOrderBook_BookId(Pageable pageable, Long bookId);
+    @Query("SELECT r FROM Review r WHERE r.orderBook.book.id = :bookId")
+    Page<Review> findAllByBookId(Pageable pageable, @Param("bookId") Long bookId);
 }

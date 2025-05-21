@@ -1,5 +1,8 @@
 package shop.ink3.api.review.entity;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,11 +38,13 @@ public class Review {
     @JoinColumn(name = "order_book_id")
     private OrderBook orderBook;
 
+    @Column(length = 50)
     private String title;
     private String content;
     private int rating;
 
     private LocalDateTime createdAt;
+    // private LocalDateTime modifiedAt;
 
     public Review(User user, OrderBook orderBook, String title, String content, int rating) {
         this.user = user;
@@ -49,5 +53,12 @@ public class Review {
         this.content = content;
         this.rating = rating;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void update(String title, String content, int rating) {
+        this.title = title;
+        this.content = content;
+        this.rating = rating;
+        // this.modifiedAt = LocalDateTime.now();
     }
 }
