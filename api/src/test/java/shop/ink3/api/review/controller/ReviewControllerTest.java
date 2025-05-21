@@ -122,10 +122,10 @@ class ReviewControllerTest {
         mockMvc.perform(post("/reviews")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(reviewRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1L))
-            .andExpect(jsonPath("$.title").value("title1"))
-            .andExpect(jsonPath("$.content").value("content1"));
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.id").value(1L))
+            .andExpect(jsonPath("$.data.title").value("title1"))
+            .andExpect(jsonPath("$.data.content").value("content1"));
     }
 
     @Test
@@ -137,12 +137,12 @@ class ReviewControllerTest {
 
         when(reviewService.getReviewByUserId(user.getId())).thenReturn(response);
 
-        mockMvc.perform(get("/reviews/user/{userId}", user.getId()))
+        mockMvc.perform(get("/users/{userId}/reviews", user.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1L))
-            .andExpect(jsonPath("$.title").value("title1"))
-            .andExpect(jsonPath("$.content").value("content1"))
-            .andExpect(jsonPath("$.rating").value(5));
+            .andExpect(jsonPath("$.data.id").value(1L))
+            .andExpect(jsonPath("$.data.title").value("title1"))
+            .andExpect(jsonPath("$.data.content").value("content1"))
+            .andExpect(jsonPath("$.data.rating").value(5));
     }
 
     @Test
@@ -165,7 +165,7 @@ class ReviewControllerTest {
 
         when(reviewService.getReviewsByBookId(any(), eq(book.getId()))).thenReturn(pageResponse);
 
-        mockMvc.perform(get("/reviews/book/{bookId}", book.getId()))
+        mockMvc.perform(get("/books/{bookId}/reviews", book.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(2))
             .andExpect(jsonPath("$.content[0].title").value("title1"))
@@ -184,10 +184,10 @@ class ReviewControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1L))
-            .andExpect(jsonPath("$.title").value("updatedTitle"))
-            .andExpect(jsonPath("$.content").value("updatedContent"))
-            .andExpect(jsonPath("$.rating").value(4));
+            .andExpect(jsonPath("$.data.id").value(1L))
+            .andExpect(jsonPath("$.data.title").value("updatedTitle"))
+            .andExpect(jsonPath("$.data.content").value("updatedContent"))
+            .andExpect(jsonPath("$.data.rating").value(4));
     }
 
     @Test

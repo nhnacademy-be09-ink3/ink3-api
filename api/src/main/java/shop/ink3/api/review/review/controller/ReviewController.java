@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
@@ -23,36 +24,35 @@ import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
 import shop.ink3.api.review.review.service.ReviewService;
 
 @RestController
-@RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
 
-    @PostMapping
-    public ResponseEntity<CommonResponse<ReviewResponse>> addReview(@RequestBody ReviewRequest request) {
+    @PostMapping("/reviews")
+    public ResponseEntity<CommonResponse<ReviewResponse>> addReview(@RequestBody @Valid ReviewRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(reviewService.addReview(request)));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}/reviews")
     public ResponseEntity<CommonResponse<ReviewResponse>> getReviewByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(CommonResponse.success(reviewService.getReviewByUserId(userId)));
     }
 
-    @GetMapping("/book/{bookId}")
+    @GetMapping("/books/{bookId}/reviews")
     public ResponseEntity<PageResponse<ReviewResponse>> getReviewsByBookId(
         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @PathVariable Long bookId) {
         return ResponseEntity.ok(reviewService.getReviewsByBookId(pageable, bookId));
     }
 
-    @PutMapping("/{reviewId}")
+    @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<CommonResponse<ReviewResponse>> updateReview(@PathVariable Long reviewId,
-        @RequestBody ReviewUpdateRequest request) {
+        @RequestBody @Valid ReviewUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(reviewService.updateReview(reviewId, request)));
     }
 
 
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
