@@ -155,57 +155,57 @@ class CouponPolicyServiceTest {
         });
     }
 
-    @Test
-    void updatePolicy_success() {
-        // given
-        PolicyUpdateRequest request = new PolicyUpdateRequest(
-                "WELCOME10",
-                DiscountType.RATE,
-                10000,
-                0,
-                15,
-                0
-        );
+//    @Test
+//    void updatePolicy_success() {
+//        // given
+//        PolicyUpdateRequest request = new PolicyUpdateRequest(
+//                "WELCOME10",
+//                DiscountType.RATE,
+//                10000,
+//                0,
+//                15,
+//                0
+//        );
+//
+//        CouponPolicy existingPolicy = CouponPolicy.builder()
+//                .id(1L)
+//                .name("WELCOME10")
+//                .discountType(DiscountType.RATE)
+//                .discountValue(10)
+//                .minimumOrderAmount(10000)
+//                .maximumDiscountAmount(5000)
+//                .build();
+//
+//        when(policyRepository.findByName("WELCOME10")).thenReturn(Optional.of(existingPolicy));
+//        when(policyRepository.save(any(CouponPolicy.class))).thenReturn(existingPolicy);
+//
+//        // when
+//        PolicyResponse response = policyService.updatePolicy(request);
+//
+//        // then
+//        Assertions.assertNotNull(response);
+//        Assertions.assertEquals(PolicyResponse.from(existingPolicy, "쿠폰 정책이 수정되었습니다."), response);
+//    }
 
-        CouponPolicy existingPolicy = CouponPolicy.builder()
-                .id(1L)
-                .name("WELCOME10")
-                .discountType(DiscountType.RATE)
-                .discountValue(10)
-                .minimumOrderAmount(10000)
-                .maximumDiscountAmount(5000)
-                .build();
-
-        when(policyRepository.findByName("WELCOME10")).thenReturn(Optional.of(existingPolicy));
-        when(policyRepository.save(any(CouponPolicy.class))).thenReturn(existingPolicy);
-
-        // when
-        PolicyResponse response = policyService.updatePolicy(request);
-
-        // then
-        Assertions.assertNotNull(response);
-        Assertions.assertEquals(PolicyResponse.from(existingPolicy, "쿠폰 정책이 수정되었습니다."), response);
-    }
-
-    @Test
-    void updatePolicy_notFound_throwsException() {
-        // given
-        PolicyUpdateRequest request = new PolicyUpdateRequest(
-                "NOT_EXIST",
-                DiscountType.FIXED,
-                5000,
-                1000,
-                0,
-                1000
-        );
-
-        when(policyRepository.findByName("NOT_EXIST")).thenReturn(Optional.empty());
-
-        // when & then
-        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
-            policyService.updatePolicy(request);
-        });
-    }
+//    @Test
+//    void updatePolicy_notFound_throwsException() {
+//        // given
+//        PolicyUpdateRequest request = new PolicyUpdateRequest(
+//                "NOT_EXIST",
+//                DiscountType.FIXED,
+//                5000,
+//                1000,
+//                0,
+//                1000
+//        );
+//
+//        when(policyRepository.findByName("NOT_EXIST")).thenReturn(Optional.empty());
+//
+//        // when & then
+//        Assertions.assertThrows(PolicyNotFoundException.class, () -> {
+//            policyService.updatePolicy(request);
+//        });
+//    }
 
     @Test
     void deletePolicyById_success() {

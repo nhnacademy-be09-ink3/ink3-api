@@ -3,6 +3,7 @@ package shop.ink3.api.coupon.coupon.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +17,6 @@ import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
-import shop.ink3.api.coupon.coupon.entity.TriggerType;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 
 @RestController
@@ -24,6 +24,7 @@ import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 @RequestMapping("/api/coupons")
 public class CouponController {
 
+    @Autowired
     private final CouponServiceImpl couponService;
 
     /** 쿠폰 생성 */
@@ -34,14 +35,6 @@ public class CouponController {
         CouponResponse coupon = couponService.createCoupon(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(coupon));
-    }
-
-    /** 트리거 타입으로 쿠폰 조회 */
-    @GetMapping("/trigger/{triggerType}")
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getByTriggerType(
-            @PathVariable TriggerType triggerType) {
-        List<CouponResponse> list = couponService.getCouponByTriggerType(triggerType);
-        return ResponseEntity.ok(CommonResponse.success(list));
     }
 
     /** 이슈 타입으로 쿠폰 조회 */
@@ -64,7 +57,7 @@ public class CouponController {
     @GetMapping("/name/{couponName}")
     public ResponseEntity<CommonResponse<List<CouponResponse>>> getByName(
             @PathVariable String couponName) {
-        List<CouponResponse> list = couponService.getCouponByCouponName(couponName);
+        List<CouponResponse> list = couponService.getCouponByName(couponName);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
@@ -82,7 +75,7 @@ public class CouponController {
         couponService.deleteCouponByName(couponName);
     }
 
-    @DeleteMapping("/name/{couponId}")
+    @DeleteMapping("/{couponId}")
     public void deleteById(
             @PathVariable long couponId
     ){

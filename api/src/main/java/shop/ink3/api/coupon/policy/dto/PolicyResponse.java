@@ -18,9 +18,9 @@ public record PolicyResponse(
         @NotNull
         DiscountType discountType,
 
-        int discount_value,
+        int discountValue,
 
-        int discount_percentage,
+        int discountPercentage,
 
         LocalDateTime createdAt,
 

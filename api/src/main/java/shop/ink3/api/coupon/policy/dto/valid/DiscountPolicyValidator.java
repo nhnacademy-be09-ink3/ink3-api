@@ -9,14 +9,20 @@ public class DiscountPolicyValidator implements ConstraintValidator<ValidDiscoun
 
     @Override
     public boolean isValid(PolicyCreateRequest request, ConstraintValidatorContext context) {
-        if (request == null) return true; // null일 경우는 다른 @NotNull로 처리하도록
+        if (request == null) return true;
+
+        DiscountType discountType = request.discountType();
+        Integer discountValue = request.discountValue();
+        Integer discountPercentage = request.discountPercentage();
 
         boolean valid = true;
 
-        if (request.discountType() == DiscountType.FIXED) {
-            valid = request.discountValue() > 0 && request.discountPercentage() == 0;
-        } else if (request.discountType() == DiscountType.RATE) {
-            valid = request.discountPercentage() > 0 && request.discountValue() == 0;
+        if (discountType == DiscountType.FIXED) {
+            valid = (discountValue != null && discountValue > 0) &&
+                    (discountPercentage != null && discountPercentage == 0);
+        } else if (discountType == DiscountType.RATE) {
+            valid = (discountPercentage != null && discountPercentage > 0) &&
+                    (discountValue != null && discountValue == 0);
         }
 
         if (!valid) {
@@ -27,5 +33,6 @@ public class DiscountPolicyValidator implements ConstraintValidator<ValidDiscoun
 
         return valid;
     }
+
 }
 

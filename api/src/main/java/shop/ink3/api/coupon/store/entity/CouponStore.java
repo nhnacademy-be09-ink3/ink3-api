@@ -41,12 +41,14 @@ public class CouponStore {
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LocalDateTime createdAt; // 저장소 생성 일자(issuedAt)
+    private CouponStatus status;
 
     @Column
-    private LocalDateTime usedAt;
+    private LocalDateTime usedAt; // 쿠폰 사용 일자
 
-    @Column(nullable = false) @Enumerated(EnumType.STRING)
-    private CouponStatus couponStatus;
+    @Column(nullable = false)
+    private LocalDateTime issuedAt; // 발급 일자
+
 }

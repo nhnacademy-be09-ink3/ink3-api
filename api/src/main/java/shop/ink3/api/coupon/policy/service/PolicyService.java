@@ -2,9 +2,12 @@ package shop.ink3.api.coupon.policy.service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
@@ -17,6 +20,13 @@ import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 @Service
 public class PolicyService {
     private final PolicyRepository policyRepository;
+
+    public List<PolicyResponse> getPolicy() {
+        List<CouponPolicy> policies = policyRepository.findAll();
+        return policies.stream()
+                .map(policy -> PolicyResponse.from(policy, "정책 조회 성공"))
+                .collect(Collectors.toList());
+    }
 
     public PolicyResponse getPolicyById(long policyId) {
         CouponPolicy policy = policyRepository.findById(policyId)
@@ -42,11 +52,13 @@ public class PolicyService {
         CouponPolicy policy = CouponPolicy.builder()
                 .name(req.name())
                 .discountType(req.discountType())
-                .discountValue(req.discountValue())
                 .minimumOrderAmount(req.minimumOrderAmount())
+                .discountValue(req.discountValue())
+                .discountPercentage(req.discountPercentage()) // ← 빠졌던 부분
                 .maximumDiscountAmount(req.maximumDiscountAmount())
-                .createdAt(req.createdAt())    // 수정된 부분
+                .createdAt(req.createdAt())
                 .build();
+
 
         CouponPolicy saved = policyRepository.save(policy);
         return PolicyResponse.from(saved, "쿠폰 정책 생성 완료");
@@ -55,15 +67,20 @@ public class PolicyService {
 
 
     @Transactional
-    public PolicyResponse updatePolicy(PolicyUpdateRequest policyUpdateRequest) {
-        CouponPolicy policy = policyRepository.findByName(policyUpdateRequest.name())
+    public PolicyResponse updatePolicy(Long id, PolicyUpdateRequest request) {
+        CouponPolicy policy = policyRepository.findById(id)
                 .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
 
-        policy.update(policyUpdateRequest.name(), policyUpdateRequest.discountType(),
-                policyUpdateRequest.minimumOrderAmount(),
-                policyUpdateRequest.discountValue(),
-                policyUpdateRequest.maximumDiscountAmount());
-        return PolicyResponse.from(policyRepository.save(policy),"쿠폰 정책이 수정되었습니다.");
+        policy.update(
+                request.name(),
+                request.discountType(),
+                request.minimumOrderAmount(),
+                request.discountValue(),
+                request.discountPercentage(),
+                request.maximumDiscountAmount()
+        );
+        CouponPolicy saved = policyRepository.save(policy);
+        return PolicyResponse.from(policy, "쿠폰 정책이 수정되었습니다.");
     }
 
     @Transactional

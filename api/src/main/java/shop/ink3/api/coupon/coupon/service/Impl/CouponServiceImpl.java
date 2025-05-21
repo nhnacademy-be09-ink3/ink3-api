@@ -1,5 +1,8 @@
 package shop.ink3.api.coupon.coupon.service.Impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,8 @@ import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
+import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
+import shop.ink3.api.coupon.coupon.dto.CouponResponse.CategoryInfo;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.entity.IssueType;
 import shop.ink3.api.coupon.coupon.entity.TriggerType;
@@ -21,7 +26,11 @@ import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.coupon.service.CouponService;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
+import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.repository.UserCouponRepository;
+import shop.ink3.api.user.user.entity.User;
+import shop.ink3.api.user.user.repository.UserRepository;
 
 @Transactional
 @RequiredArgsConstructor
@@ -32,44 +41,68 @@ public class CouponServiceImpl implements CouponService {
     private final PolicyRepository policyRepository;
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
 
     @Override
     public CouponResponse createCoupon(CouponCreateRequest req) {
-
         Coupon coupon = Coupon.builder()
-                .couponName(req.couponName())
-                .triggerType(req.triggerType())
+                .name(req.name())
                 .issueType(req.issueType())
-                .couponCode(req.CouponCode())
                 .couponPolicy(policyRepository.findById(req.policyId()).orElse(null))
-                .issueDate(req.issueDate())
-                .expiredDate(req.expirationDate())
+                .issuableFrom(req.issuableFrom())
+                .expiresAt(req.expiresAt())
                 .build();
-        if(req.triggerType() == TriggerType.BOOK) {
+
+        if (!req.bookIdList().isEmpty()) {
             List<Book> books = bookRepository.findAllById(req.bookIdList());
+            if (books.size() != req.bookIdList().size()) {
+                throw new IllegalArgumentException("존재하지 않는 book ID가 포함되어 있습니다.");
+            }
             coupon.addBookCoupon(books);
-        } else if(req.triggerType() == TriggerType.CATEGORY) {
-            List<Category>categories = categoryRepository.findAllById(req.categoryIdList());
+        }
+
+        if (!req.categoryIdList().isEmpty()) {
+            List<Category> categories = categoryRepository.findAllById(req.categoryIdList());
+            if (categories.size() != req.categoryIdList().size()) {
+                throw new IllegalArgumentException("존재하지 않는 category ID가 포함되어 있습니다.");
+            }
             coupon.addCategoryCoupon(categories);
         }
 
         couponRepository.save(coupon);
-        return CouponResponse.from(coupon, req.bookIdList(), req.categoryIdList());
+        List<BookInfo> books = coupon.getBookCoupons().stream()
+                .map(bc -> new CouponResponse.BookInfo(bc.getBook().getId(), bc.getBook().getTitle()))
+                .toList();
+        List<CategoryInfo> categories = coupon.getCategoryCoupons().stream()
+                .map(cc -> new CouponResponse.CategoryInfo(cc.getCategory().getId(), cc.getCategory().getName()))
+                .toList();
+
+        return CouponResponse.from(coupon, books, categories);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<CouponResponse> getCouponByTriggerType(TriggerType triggerType) {
-        List<Coupon> coupons = couponRepository.findAllByTriggerType(triggerType).orElseThrow(()->new CouponNotFoundException(triggerType.name()));
 
-        return getCouponResponses(coupons);
-    }
+
 
     private List<CouponResponse> getCouponResponses(List<Coupon> coupons) {
         return coupons.stream()
-                .map(this::getCouponResponse)
+                .map(coupon -> {
+                    List<BookInfo> books = coupon.getBookCoupons().stream()
+                            .map(bc -> new CouponResponse.BookInfo(
+                                    bc.getBook().getId(),
+                                    bc.getBook().getTitle()))
+                            .collect(Collectors.toList());
+
+                    List<CategoryInfo> categories = coupon.getCategoryCoupons().stream()
+                            .map(cc -> new CouponResponse.CategoryInfo(
+                                    cc.getCategory().getId(),
+                                    cc.getCategory().getName()))
+                            .collect(Collectors.toList());
+
+                    return CouponResponse.from(coupon, books, categories);
+                })
                 .collect(Collectors.toList());
     }
+
 
 
     @Override
@@ -92,20 +125,24 @@ public class CouponServiceImpl implements CouponService {
         List<BookCoupon> bookCoupons = coupon.getBookCoupons();
         List<CategoryCoupon> categoryCoupons = coupon.getCategoryCoupons();
 
-        List<Long> bookIds = bookCoupons.stream()
-                .map(bc -> bc.getBook().getId())
+        List<BookInfo> bookIds = bookCoupons.stream()
+                .map(bc -> new CouponResponse.BookInfo(
+                        bc.getBook().getId(),
+                        bc.getBook().getTitle()))
                 .collect(Collectors.toList());
 
-        List<Long> categoryIds = categoryCoupons.stream()
-                .map(cc -> cc.getCategory().getId())
+        List<CategoryInfo> categoryIds = categoryCoupons.stream()
+                .map(cc -> new CouponResponse.CategoryInfo(
+                        cc.getCategory().getId(),
+                        cc.getCategory().getName()))
                 .collect(Collectors.toList());
         return CouponResponse.from(coupon, bookIds, categoryIds);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CouponResponse> getCouponByCouponName(String couponName) {
-        List<Coupon> coupons = couponRepository.findAllByCouponName(couponName);
+    public List<CouponResponse> getCouponByName(String couponName) {
+        List<Coupon> coupons = couponRepository.findAllByName(couponName);
         if (coupons.isEmpty()) {
             throw new CouponNotFoundException(couponName + " 쿠폰을 찾을 수 없습니다.");
         }
@@ -130,7 +167,7 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public void deleteCouponByName(String couponName) {
         // 존재 여부 체크 등 필요 시 추가
-        couponRepository.deleteByCouponName(couponName);
+        couponRepository.deleteByName(couponName);
     }
 
 
@@ -142,6 +179,33 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public void issueCategoryCoupons(Long couponId, Long categoryId) {
 
+    }
+
+    @Transactional
+    public List<Long> issueBirthdayCoupons(List<Long> userIds, Long couponId, LocalDate issuedDate) {
+        int year = issuedDate.getYear();
+
+        List<Long> issuedUsers = new ArrayList<>();
+        List<CouponStore> couponsToIssue = new ArrayList<>();
+
+        for (Long userId : userIds) {
+            boolean alreadyIssued = userCouponStore.existsByUserIdAndCouponIdAndYear(userId, couponId, year);
+
+            if (!alreadyIssued) {
+                User user = userRepository.getReferenceById(userId);
+                Coupon coupon = couponRepository.getReferenceById(couponId);
+                couponsToIssue.add(CouponStore.builder()
+                        .user(user)
+                        .coupon(coupon)
+                        .status(CouponStatus.READY)
+                        .issuedAt(LocalDateTime.now())
+                        .build());
+                issuedUsers.add(userId);
+            }
+        }
+
+        userCouponStore.saveAll(couponsToIssue);
+        return issuedUsers;
     }
 
     @Override

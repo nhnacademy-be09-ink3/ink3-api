@@ -45,15 +45,15 @@ public class CouponStoreController {
 
 
     /** fix 예정 */
-    // 유저 ID로 미사용 쿠폰 조회
-//    @GetMapping("/user/{userId}/unused")
-//    public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getUnusedStores(@PathVariable Long userId) {
-//        List<CouponStore> storeList = couponStoreService.getUnusedStoresByUserId(userId);
-//        List<CouponStoreResponse> responseList = storeList.stream()
-//                .map(CouponStoreResponse::fromEntity)
-//                .toList();
-//        return ResponseEntity.ok(CommonResponse.success(responseList));
-//    }
+     //유저 ID로 미사용 쿠폰 조회
+    @GetMapping("/user/{userId}/unused")
+    public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getUnusedStores(@PathVariable Long userId) {
+        List<CouponStore> storeList = couponStoreService.getUnusedStoresByUserId(userId);
+        List<CouponStoreResponse> responseList = storeList.stream()
+                .map(CouponStoreResponse::fromEntity)
+                .toList();
+        return ResponseEntity.ok(CommonResponse.success(responseList));
+    }
 
     // 쿠폰 ID로 전체 조회
     @GetMapping("/coupon/{couponId}")

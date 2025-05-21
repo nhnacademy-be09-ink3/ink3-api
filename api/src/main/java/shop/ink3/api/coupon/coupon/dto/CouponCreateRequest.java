@@ -10,14 +10,13 @@ import shop.ink3.api.coupon.coupon.entity.TriggerType;
 
 public record CouponCreateRequest(
         @NotNull Long policyId,
-        @NotBlank String couponName,
-        @NotNull TriggerType triggerType,
+        @NotBlank String name,
         @NotNull IssueType issueType,
-        String CouponCode,
-        @NotNull LocalDateTime issueDate,
-        @NotNull LocalDateTime expirationDate,
+        @NotNull LocalDateTime issuableFrom,
+        @NotNull LocalDateTime expiresAt,
+
+        TriggerType triggerType,
 
         List<Long> bookIdList,
         List<Long> categoryIdList
-
 ) { }

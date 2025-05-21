@@ -46,9 +46,9 @@ public class CouponStoreService {
         CouponStore store = CouponStore.builder()
                 .user(user)
                 .coupon(coupon)
-                .createdAt(LocalDateTime.now())
-                .couponStatus(CouponStatus.READY)
+                .status(CouponStatus.READY)
                 .usedAt(null)
+                .issuedAt(LocalDateTime.now())
                 .build();
 
         userCouponRepository.save(store);
@@ -70,17 +70,17 @@ public class CouponStoreService {
 
     /** fix 예정 */
     /** 4) 미사용 쿠폰만 조회 */
-//    @Transactional(readOnly = true)
-//    public List<CouponStore> getUnusedStoresByUserId(Long userId) {
-//        return userCouponRepository.findByUserIdAndIsUsedFalse(userId);
-//    }
+    @Transactional(readOnly = true)
+    public List<CouponStore> getUnusedStoresByUserId(Long userId) {
+
+        return userCouponRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
+    }
 
     /** 5) 사용 여부 업데이트 */
     public CouponStore updateStore(Long storeId, CouponStoreUpdateRequest req) {
         CouponStore store = userCouponRepository.findById(storeId)
                 .orElseThrow(() -> new CouponStoreNotFoundException(storeId + " coupon not found"));
-
-        store.setCouponStatus(req.couponStatus());
+        store.setStatus(req.couponStatus());
         store.setUsedAt(req.usedAt());
 
         return store;

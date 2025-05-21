@@ -38,19 +38,16 @@ public class Coupon {
     private Long id;
 
     @Column(name = "name", nullable = false, length = 100)
-    private String couponName;
-
-    @Enumerated(EnumType.STRING)
-    private TriggerType triggerType;
+    private String name;
 
     @Enumerated(EnumType.STRING)
     private IssueType issueType;
 
-    private String couponCode;
+    private LocalDateTime issuableFrom;
 
-    private LocalDateTime issueDate;
+    private LocalDateTime expiresAt;
 
-    private LocalDateTime expiredDate;
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "coupon_policy_id")

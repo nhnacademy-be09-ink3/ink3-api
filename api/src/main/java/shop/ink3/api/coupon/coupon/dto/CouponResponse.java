@@ -11,30 +11,30 @@ import shop.ink3.api.coupon.coupon.entity.TriggerType;
 public record CouponResponse(
         Long couponId,
         Long policyId,
-        String couponName,
-        TriggerType triggerType,
+        String name,
         IssueType issueType,
-        String couponCode,
-        LocalDateTime issuedAt,
-        LocalDateTime expirationDate,
-        List<Long> books,
-        List<Long> categories
+        LocalDateTime issuableFrom,
+        LocalDateTime expiresAt,
+        LocalDateTime createdAt,
+        List<BookInfo> books,
+        List<CategoryInfo> categories
 ) {
     public static CouponResponse from(Coupon coupon,
-                                      List<Long> books,
-                                      List<Long> categories) {
+                                      List<BookInfo> books,
+                                      List<CategoryInfo> categories) {
         return new CouponResponse(
                 coupon.getId(),
                 coupon.getCouponPolicy().getId(),
-                coupon.getCouponName(),
-                coupon.getTriggerType(),
+                coupon.getName(),
                 coupon.getIssueType(),
-                coupon.getCouponCode(),
-                coupon.getIssueDate(),
-                coupon.getExpiredDate(),
+                coupon.getIssuableFrom(),
+                coupon.getExpiresAt(),
+                coupon.getCreatedAt(),
                 books == null ? List.of() : books,
                 categories == null ? List.of() : categories
         );
     }
-}
 
+    public record BookInfo(Long id, String title) {}
+    public record CategoryInfo(Long id, String name) {}
+}

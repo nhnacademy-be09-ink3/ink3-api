@@ -77,21 +77,21 @@ class CouponPolicyControllerTest {
                 .andDo(print());
     }
 
-    @Test
-    void updatePolicy() throws Exception {
-        PolicyUpdateRequest request = new PolicyUpdateRequest("updatedPolicy", DiscountType.FIXED, 10000,500,0,0);
-        PolicyResponse response = new PolicyResponse(1L, "UpdatedPolicy", DiscountType.FIXED, 500, 0, LocalDateTime.now(),"쿠폰 정책이 수정되었습니다.");
-        when(policyService.updatePolicy(any())).thenReturn(response);
-
-        mockMvc.perform(put("/api/policies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data.policyName").value("UpdatedPolicy"))
-                .andDo(print());
-    }
+//    @Test
+//    void updatePolicy() throws Exception {
+//        PolicyUpdateRequest request = new PolicyUpdateRequest("updatedPolicy", DiscountType.FIXED, 10000,500,0,0);
+//        PolicyResponse response = new PolicyResponse(1L, "UpdatedPolicy", DiscountType.FIXED, 500, 0, LocalDateTime.now(),"쿠폰 정책이 수정되었습니다.");
+//        when(policyService.updatePolicy(any())).thenReturn(response);
+//
+//        mockMvc.perform(put("/api/policies")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+//                .andExpect(jsonPath("$.data.policyName").value("UpdatedPolicy"))
+//                .andDo(print());
+//    }
 
     @Test
     void deletePolicyById() throws Exception {

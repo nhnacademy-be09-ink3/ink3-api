@@ -9,19 +9,21 @@ import shop.ink3.api.coupon.store.entity.CouponStatus;
 public record CouponStoreResponse(
         Long storeId,
         Long userId,
+        String userName,
         Long couponId,
-        LocalDateTime createdAt,
-        CouponStatus couponStatus,
-        LocalDateTime usedAt
+        String couponName,
+        CouponStatus status,
+        LocalDateTime issuedAt
 ) {
     public static CouponStoreResponse fromEntity(shop.ink3.api.coupon.store.entity.CouponStore cs) {
         return new CouponStoreResponse(
                 cs.getId(),
                 cs.getUser().getId(),
+                cs.getUser().getName(),
                 cs.getCoupon().getId(),
-                cs.getCreatedAt(),
-                cs.getCouponStatus(),
-                cs.getUsedAt()
+                cs.getCoupon().getName(),
+                cs.getStatus(),
+                cs.getIssuedAt()
         );
     }
 }

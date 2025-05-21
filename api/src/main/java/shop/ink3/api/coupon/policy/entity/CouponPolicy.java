@@ -40,11 +40,12 @@ public class CouponPolicy {
     private int maximumDiscountAmount;
     private LocalDateTime createdAt;
 
-    public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue, Integer maximumDiscountAmount) {
+    public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue, Integer discountPercentage,Integer maximumDiscountAmount) {
         this.name = name;
         this.discountType = discountType;
         this.minimumOrderAmount = minimumOrderAmount;
         this.discountValue = discountValue;
+        this.discountPercentage = discountPercentage;
         this.maximumDiscountAmount = maximumDiscountAmount;
     }
 }
