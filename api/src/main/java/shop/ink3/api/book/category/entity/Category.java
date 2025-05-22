@@ -27,9 +27,12 @@ public class Category {
     @Length(max=20)
     private String name;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "parent_id")
     private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    private List<Category> children = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "category",

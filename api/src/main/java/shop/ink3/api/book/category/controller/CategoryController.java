@@ -3,6 +3,7 @@ package shop.ink3.api.book.category.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,7 @@ import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.category.dto.CategoryUpdateRequest;
 import shop.ink3.api.book.category.service.CategoryService;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
@@ -50,9 +52,9 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<CategoryResponse>>> getAllCategories() {
+    public ResponseEntity<CommonResponse<PageResponse<CategoryResponse>>> getAllCategories(Pageable pageable) {
         return ResponseEntity.ok(
-                CommonResponse.success(categoryService.getAllCategories())
+                CommonResponse.success(categoryService.getAllCategories(pageable))
         );
     }
 

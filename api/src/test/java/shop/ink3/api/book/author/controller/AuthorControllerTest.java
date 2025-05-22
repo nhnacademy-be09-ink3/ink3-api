@@ -52,9 +52,6 @@ class AuthorControllerTest {
         Author author = Author.builder()
                 .id(1L)
                 .name("testAuthor")
-                .birth(LocalDate.of(1961, 9, 18))
-                .nationality("France")
-                .biography("testBiography")
                 .build();
         AuthorResponse response = AuthorResponse.from(author);
         when(authorService.getAuthor(1L)).thenReturn(response);
@@ -66,9 +63,6 @@ class AuthorControllerTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.name").value("testAuthor"))
-                .andExpect(jsonPath("$.data.birth").value("1961-09-18"))
-                .andExpect(jsonPath("$.data.nationality").value("France"))
-                .andExpect(jsonPath("$.data.biography").value("testBiography"))
                 .andDo(print());
     }
 
@@ -119,17 +113,11 @@ class AuthorControllerTest {
     @Test
     void createAuthor() throws Exception {
         AuthorCreateRequest request = new AuthorCreateRequest(
-                "testAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "testBiography"
+                "testAuthor"
         );
         AuthorResponse response = new AuthorResponse(
                 1L,
-                "testAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "testBiography"
+                "testAuthor"
         );
         when(authorService.createAuthor(request)).thenReturn(response);
         mockMvc.perform(post("/api/books/authors")
@@ -147,17 +135,11 @@ class AuthorControllerTest {
     @Test
     void updateAuthor() throws Exception {
         AuthorUpdateRequest request = new AuthorUpdateRequest(
-                "newAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "newBiography"
+                "newAuthor"
         );
         AuthorResponse response = new AuthorResponse(
                 1L,
-                "newAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "newBiography"
+                "newAuthor"
         );
         when(authorService.updateAuthor(1L, request)).thenReturn(response);
         mockMvc.perform(put("/api/books/authors/1")
@@ -175,10 +157,7 @@ class AuthorControllerTest {
     @Test
     void updateAuthorWithNotFound() throws Exception {
         AuthorUpdateRequest request = new AuthorUpdateRequest(
-                "newAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "newBiography"
+                "newAuthor"
         );
         when(authorService.updateAuthor(1L, request)).thenThrow(new AuthorNotFoundException(1L));
         mockMvc.perform(put("/api/books/authors/1")

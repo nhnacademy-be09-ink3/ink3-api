@@ -39,9 +39,6 @@ class AuthorServiceTest {
         Author author = Author.builder()
                 .id(1L)
                 .name("testAuthor")
-                .birth(LocalDate.of(1961, 9, 18))
-                .nationality("France")
-                .biography("testBiography")
                 .build();
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
         AuthorResponse response = authorService.getAuthor(1L);
@@ -61,16 +58,10 @@ class AuthorServiceTest {
                 Author.builder()
                         .id(1L)
                         .name("testAuthor1")
-                        .birth(LocalDate.of(1961, 9, 18))
-                        .nationality("France")
-                        .biography("testBiography1")
                         .build(),
                 Author.builder()
                         .id(2L)
                         .name("testAuthor2")
-                        .birth(LocalDate.of(1970, 11, 27))
-                        .nationality("Korea")
-                        .biography("testBiography2")
                         .build()
         );
         Pageable pageable = PageRequest.of(0, 10);
@@ -88,27 +79,19 @@ class AuthorServiceTest {
         Assertions.assertEquals(1, response.totalPages());
         Assertions.assertEquals("testAuthor1", response.content().get(0).name());
         Assertions.assertEquals("testAuthor2", response.content().get(1).name());
-        Assertions.assertEquals("France", response.content().get(0).nationality());
-        Assertions.assertEquals("Korea", response.content().get(1).nationality());
         verify(authorRepository, times(1)).findAll(pageable);
     }
 
     @Test
     void createAuthor() {
         AuthorCreateRequest request = new AuthorCreateRequest(
-                "testAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "testBiography"
+                "testAuthor"
         );
         when(authorRepository.save(any(Author.class))).thenAnswer(inv -> inv.getArgument(0));
         AuthorResponse response = authorService.createAuthor(request);
         Assertions.assertNotNull(response);
         Assertions.assertAll(
-                () -> Assertions.assertEquals(request.name(), response.name()),
-                () -> Assertions.assertEquals(request.birth(), response.birth()),
-                () -> Assertions.assertEquals(request.nationality(), response.nationality()),
-                () -> Assertions.assertEquals(request.biography(), response.biography())
+                () -> Assertions.assertEquals(request.name(), response.name())
         );
     }
 
@@ -117,15 +100,9 @@ class AuthorServiceTest {
         Author author = Author.builder()
                 .id(1L)
                 .name("testAuthor")
-                .birth(LocalDate.of(1970, 11, 27))
-                .nationality("Korea")
-                .biography("testBiography")
                 .build();
         AuthorUpdateRequest request = new AuthorUpdateRequest(
-                "newAuthor",
-                LocalDate.of(1970, 11, 27),
-                "Korea",
-                "newBiography"
+                "newAuthor"
         );
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
         when(authorRepository.save(any(Author.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -133,20 +110,14 @@ class AuthorServiceTest {
         Assertions.assertNotNull(response);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(1L, response.id()),
-                () -> Assertions.assertEquals(request.name(), response.name()),
-                () -> Assertions.assertEquals(request.birth(), response.birth()),
-                () -> Assertions.assertEquals(request.nationality(), response.nationality()),
-                () -> Assertions.assertEquals(request.biography(), response.biography())
+                () -> Assertions.assertEquals(request.name(), response.name())
         );
     }
 
     @Test
     void updateAuthorWithNotFound() {
         AuthorUpdateRequest request = new AuthorUpdateRequest(
-                "newAuthor",
-                LocalDate.of(1970, 11, 27),
-                "Korea",
-                "newBiography"
+                "newAuthor"
         );
         when(authorRepository.findById(1L)).thenThrow(new AuthorNotFoundException(1L));
         Assertions.assertThrows(AuthorNotFoundException.class, () -> authorService.updateAuthor(1L, request));

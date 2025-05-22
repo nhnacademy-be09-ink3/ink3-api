@@ -18,6 +18,6 @@ public record BookUpdateRequest(
         String thumbnailUrl,
         Long publisherId,
         List<Long> categoryIds,
-        List<Long> authorIds,
+        List<AuthorRoleRequest> authors,
         List<Long> tagIds
 ) {}

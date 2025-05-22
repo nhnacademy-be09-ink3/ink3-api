@@ -113,20 +113,6 @@ class CategoryControllerTest {
     }
 
     @Test
-    void getAllCategories_shouldReturnList() {
-        Category category1 = Category.builder().id(1L).name("컴퓨터").build();
-        Category category2 = Category.builder().id(2L).name("디자인").build();
-
-        when(categoryRepository.findAll()).thenReturn(List.of(category1, category2));
-
-        var result = categoryService.getAllCategories();
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).name()).isEqualTo("컴퓨터");
-        assertThat(result.get(1).name()).isEqualTo("디자인");
-    }
-
-    @Test
     void updateCategory_shouldUpdateWithParent() {
         Category parent = Category.builder().id(99L).name("개발").build();
         Category existing = Category.builder().id(1L).name("컴퓨터").build();

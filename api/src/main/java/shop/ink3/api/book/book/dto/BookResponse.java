@@ -5,6 +5,7 @@ import shop.ink3.api.book.book.entity.BookStatus;
 
 import java.time.LocalDate;
 import java.util.List;
+import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 
 public record BookResponse(
         Long id,
@@ -23,7 +24,7 @@ public record BookResponse(
         String thumbnailUrl,
         List<String> categoryNames,
         List<String> authorNames,
-        List<String> tagNames
+        List<String> tagName
 ) {
     public static BookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
@@ -54,7 +55,7 @@ public record BookResponse(
                         .toList(),
                 book.getBookAuthors()
                         .stream()
-                        .map(ba -> ba.getAuthor().getName())
+                        .map(ba -> ba.getAuthor().getName() + " (" + ba.getRole() + ")")
                         .toList(),
                 book.getBookTags()
                         .stream()

@@ -97,8 +97,8 @@ public class Book {
         category.addBookCategory(bookCategory);
     }
 
-    public void addBookAuthor(Author author) {
-        BookAuthor bookAuthor = new BookAuthor(this, author);
+    public void addBookAuthor(Author author, String role) {
+        BookAuthor bookAuthor = new BookAuthor(this, author, role);
         this.bookAuthors.add(bookAuthor);
         author.addBookAuthor(bookAuthor);
     }
