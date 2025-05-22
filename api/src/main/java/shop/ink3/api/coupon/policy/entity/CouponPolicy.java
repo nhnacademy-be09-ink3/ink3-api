@@ -30,11 +30,12 @@ public class CouponPolicy {
     @Column(nullable = false, length = 20)
     private String name;
 
+    private int minimumOrderAmount;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false, length = 20)
     private DiscountType discountType;
 
-    private int minimumOrderAmount;
     private int discountValue;
     private int discountPercentage;
     private int maximumDiscountAmount;

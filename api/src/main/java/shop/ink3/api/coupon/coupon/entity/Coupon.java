@@ -37,6 +37,10 @@ public class Coupon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "coupon_policy_id")
+    private CouponPolicy couponPolicy;
+
     @Column(nullable = false, length = 100)
     private String name;
 
@@ -48,10 +52,6 @@ public class Coupon {
     private LocalDateTime expiresAt;
 
     private LocalDateTime createdAt;
-
-    @ManyToOne
-    @JoinColumn(name = "coupon_policy_id")
-    private CouponPolicy couponPolicy;
 
     @Builder.Default
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
