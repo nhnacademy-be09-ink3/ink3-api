@@ -124,8 +124,8 @@ class CartControllerTest {
         mockMvc.perform(post("/carts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cartRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.quantity").value(100));
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.quantity").value(100));
     }
 
     @Test
@@ -135,9 +135,9 @@ class CartControllerTest {
 
         mockMvc.perform(put("/carts/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(cartRequest)))
+                .content(objectMapper.writeValueAsString(new CartUpdateRequest(100))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.quantity").value(100));
+            .andExpect(jsonPath("$.data.quantity").value(100));
     }
 
     @Test
@@ -155,7 +155,7 @@ class CartControllerTest {
     @Test
     @DisplayName("장바구니 전체 삭제")
     void deleteCarts() throws Exception {
-        mockMvc.perform(delete("/carts/user/1"))
+        mockMvc.perform(delete("/carts/users/1"))
             .andExpect(status().isOk());
     }
 
