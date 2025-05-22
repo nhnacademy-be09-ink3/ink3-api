@@ -32,7 +32,6 @@ import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
-import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
@@ -404,60 +403,6 @@ class UserControllerTest {
     void withdrawUserWithNotFound() throws Exception {
         doThrow(new UserNotFoundException(1L)).when(userService).withdrawUser(1L);
         mockMvc.perform(patch("/users/1/withdraw"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
-                .andDo(print());
-    }
-
-    @Test
-    void earnPoints() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
-        doNothing().when(userService).earnPoint(1L, request);
-        mockMvc.perform(post("/users/1/points/earn")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent())
-                .andDo(print());
-    }
-
-    @Test
-    void earnPointsWithNotFound() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
-        doThrow(new UserNotFoundException(1L)).when(userService).earnPoint(1L, request);
-        mockMvc.perform(post("/users/1/points/earn")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
-                .andDo(print());
-    }
-
-    @Test
-    void usePoints() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
-        doNothing().when(userService).usePoint(1L, request);
-        mockMvc.perform(post("/users/1/points/use")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent())
-                .andDo(print());
-    }
-
-    @Test
-    void usePointsWithNotFound() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
-        doThrow(new UserNotFoundException(1L)).when(userService).usePoint(1L, request);
-        mockMvc.perform(post("/users/1/points/use")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))

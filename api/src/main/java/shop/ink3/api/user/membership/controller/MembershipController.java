@@ -1,5 +1,6 @@
 package shop.ink3.api.user.membership.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,8 @@ public class MembershipController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<MembershipResponse>> createMembership(
-            @RequestBody MembershipCreateRequest request) {
+            @RequestBody @Valid MembershipCreateRequest request
+    ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(membershipService.createMembership(request)));
@@ -52,7 +54,7 @@ public class MembershipController {
     @PutMapping("/{membershipId}")
     public ResponseEntity<CommonResponse<MembershipResponse>> updateMembership(
             @PathVariable long membershipId,
-            @RequestBody MembershipUpdateRequest request
+            @RequestBody @Valid MembershipUpdateRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.update(membershipService.updateMembership(membershipId, request)));
     }

@@ -79,6 +79,15 @@ public class OrderController {
                         orderService.getOrderListByDate(dateRequest, pageable)));
     }
 
+
+    @GetMapping("/point/{pointHistoryId}")
+    public ResponseEntity<CommonResponse<OrderResponse>> getOrderByPointHistoryId(@PathVariable long pointHistoryId){
+        return ResponseEntity.ok(
+                CommonResponse.success(orderService.getOrderByPointHistoryId(pointHistoryId)));
+    }
+
+
+
     @PostMapping("/status")
     public ResponseEntity<CommonResponse<PageResponse<OrderResponse>>> getOrderListByStatus(
             @RequestBody OrderStatusRequest statusRequest,

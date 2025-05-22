@@ -1,7 +1,20 @@
 spring:
   application:
     name: shop-service
+  config:
+    import: optional:configserver:https://ink3.shop/config/
+  rabbitmq:
+    host: s4.java21.net
+    port: 5672
+    username: admin
+    password: nhnacademy123!
+  cloud:
+    bus:
+      enabled: true
 
-server:
-  servlet:
-    context-path: /shop
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - busrefresh

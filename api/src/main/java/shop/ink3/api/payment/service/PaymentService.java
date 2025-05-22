@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
@@ -14,7 +15,6 @@ import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.orderBook.service.OrderBookService;
-import shop.ink3.api.order.shipment.service.ShipmentService;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
 import shop.ink3.api.payment.entity.Payment;
@@ -26,6 +26,9 @@ import shop.ink3.api.payment.paymentUtil.processor.PaymentProcessor;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentProcessorResolver;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentResponseParserResolver;
 import shop.ink3.api.payment.repository.PaymentRepository;
+import shop.ink3.api.user.point.eventListener.PointEventListener;
+import shop.ink3.api.user.point.eventListener.PointHistoryAfterCancelPaymentEven;
+import shop.ink3.api.user.point.eventListener.PointHistoryAfterPaymentEven;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private final OrderBookService orderBookService;
-    private final ShipmentService shipmentService;
+    private final PointEventListener pointEventListener;
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
 
@@ -52,21 +55,31 @@ public class PaymentService {
         PaymentParser paymentParser = paymentResponseParserResolver.getPaymentParser(
                 String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), PARSER));
         Payment payment = paymentParser.paymentResponseParser(confirmRequest.orderId(), paymentApproveResponse);
+
+        //TODO : 포인트를 리스너로 분리하여 사용할지, MQ로 분리하여 처리할지.
+        pointEventListener.handlePointHistoryAfterPayment(
+                new PointHistoryAfterPaymentEven(confirmRequest.orderId(),confirmRequest.amount())
+        );
         return payment;
     }
 
     // 결제 취소
     @Transactional(propagation = Propagation.REQUIRED)
-    public void cancelPayment(long orderId){
+    public void cancelPayment(long orderId, long userId){
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
         // 결제 취소 가능 여부 확인
         if(!order.getStatus().equals(OrderStatus.CONFIRMED)){
             throw new PaymentCancelNotAllowedException();
         }
-        //TODO : 금액 환불 -> 포인트 내역 추가 (아직 로직 없음)
+        //TODO : 금액 환불 -> 포인트 내역 추가 / 포인트를 리스너로 분리하여 사용할지, MQ로 분리하여 처리할지.
+        OrderResponse orderResponse = orderService.getOrder(orderId);
+        pointEventListener.handlePointHistoryAfterCancelPayment(
+                new PointHistoryAfterCancelPaymentEven(orderResponse.getId(), orderResponse.getPointHistoryId())
+        );
 
         //TODO : 사용된 쿠폰 재발급 (아직 로직 없음)
+
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);

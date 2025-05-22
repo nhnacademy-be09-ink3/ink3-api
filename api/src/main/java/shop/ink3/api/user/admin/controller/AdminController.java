@@ -1,5 +1,6 @@
 package shop.ink3.api.user.admin.controller;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -52,7 +53,7 @@ public class AdminController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<AdminResponse>> createAdmin(@RequestBody AdminCreatedRequest request) {
+    public ResponseEntity<CommonResponse<AdminResponse>> createAdmin(@RequestBody @Valid AdminCreatedRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(adminService.createAdmin(request)));
@@ -61,7 +62,7 @@ public class AdminController {
     @PutMapping("/{adminId}")
     public ResponseEntity<CommonResponse<AdminResponse>> updateAdmin(
             @PathVariable long adminId,
-            @RequestBody AdminUpdateRequest request
+            @RequestBody @Valid AdminUpdateRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.update(adminService.updateAdmin(adminId, request)));
     }
@@ -69,7 +70,7 @@ public class AdminController {
     @PatchMapping("/{adminId}/password")
     public ResponseEntity<Void> updateAdminPassword(
             @PathVariable long adminId,
-            @RequestBody AdminPasswordUpdateRequest request
+            @RequestBody @Valid AdminPasswordUpdateRequest request
     ) {
         adminService.updateAdminPassword(adminId, request);
         return ResponseEntity.noContent().build();
