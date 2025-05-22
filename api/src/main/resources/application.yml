@@ -11,6 +11,11 @@ spring:
   cloud:
     bus:
       enabled: true
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
 management:
   endpoints:
@@ -18,3 +23,8 @@ management:
       exposure:
         include:
           - busrefresh
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace

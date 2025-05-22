@@ -13,13 +13,13 @@ import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
 import shop.ink3.api.coupon.policy.service.PolicyService;
 
 @RestController
-@RequestMapping("/api/policies")
+@RequestMapping("/policies")
 @RequiredArgsConstructor
 public class PolicyController {
 
     private final PolicyService policyService;
 
-    // 전체 정책 조회
+    // 정책 전체 조회
     @GetMapping
     public ResponseEntity<CommonResponse<List<PolicyResponse>>> getAll() {
         return ResponseEntity.ok(CommonResponse.success(policyService.getPolicy()));
@@ -32,7 +32,7 @@ public class PolicyController {
     }
 
     // 정책 이름으로 조회
-    @GetMapping("/policyName/{name}")
+    @GetMapping("/by-name/{name}")
     public ResponseEntity<CommonResponse<PolicyResponse>> getPolicyByName(@PathVariable String name) {
         return ResponseEntity.ok(CommonResponse.success(policyService.getPolicyByName(name)));
     }
@@ -44,15 +44,13 @@ public class PolicyController {
                 .body(CommonResponse.create(policyService.createPolicy(request)));
     }
 
-    // 정책 수정
+    // 정책 수정 (ID 기반)
     @PutMapping("/{policyId}")
     public ResponseEntity<CommonResponse<PolicyResponse>> updatePolicy(
             @PathVariable Long policyId,
             @RequestBody PolicyUpdateRequest request) {
-
         return ResponseEntity.ok(CommonResponse.update(policyService.updatePolicy(policyId, request)));
     }
-
 
     // 정책 ID로 삭제
     @DeleteMapping("/{policyId}")
@@ -60,11 +58,11 @@ public class PolicyController {
         return ResponseEntity.ok(CommonResponse.success(policyService.deletePolicyById(policyId)));
     }
 
-
     // 정책 이름으로 삭제
-    @DeleteMapping("/policyName/{name}")
+    @DeleteMapping("/by-name/{name}")
     public ResponseEntity<CommonResponse<PolicyResponse>> deletePolicyByName(@PathVariable String name) {
         return ResponseEntity.ok(CommonResponse.success(policyService.deletePolicyByName(name)));
     }
 }
+
 

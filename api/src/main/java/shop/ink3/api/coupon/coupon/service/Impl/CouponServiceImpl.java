@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -79,35 +80,17 @@ public class CouponServiceImpl implements CouponService {
         return CouponResponse.from(coupon, books, categories);
     }
 
-
-
-
     private List<CouponResponse> getCouponResponses(List<Coupon> coupons) {
         return coupons.stream()
-                .map(coupon -> {
-                    List<BookInfo> books = coupon.getBookCoupons().stream()
-                            .map(bc -> new CouponResponse.BookInfo(
-                                    bc.getBook().getId(),
-                                    bc.getBook().getTitle()))
-                            .collect(Collectors.toList());
-
-                    List<CategoryInfo> categories = coupon.getCategoryCoupons().stream()
-                            .map(cc -> new CouponResponse.CategoryInfo(
-                                    cc.getCategory().getId(),
-                                    cc.getCategory().getName()))
-                            .collect(Collectors.toList());
-
-                    return CouponResponse.from(coupon, books, categories);
-                })
+                .map(this::getCouponResponse)
                 .collect(Collectors.toList());
     }
-
-
 
     @Override
     @Transactional(readOnly = true)
     public List<CouponResponse> getCouponByIssueType(IssueType issueType) {
-        List<Coupon> coupons = couponRepository.findAllByIssueType(issueType).orElseThrow(()->new CouponNotFoundException(issueType.name()));
+        List<Coupon> coupons = couponRepository.findAllByIssueTypeWithFetch(issueType)
+                .orElseThrow(() -> new CouponNotFoundException(issueType.name()));
 
         return getCouponResponses(coupons);
     }
@@ -115,14 +98,15 @@ public class CouponServiceImpl implements CouponService {
     @Override
     @Transactional(readOnly = true)
     public CouponResponse getCouponById(long id) {
-        Coupon coupon = couponRepository.findById(id).orElseThrow(()->new CouponNotFoundException(id + " 쿠폰을 찾을 수 없습니다."));
+        Coupon coupon = couponRepository.findByIdWithFetch(id)
+                .orElseThrow(() -> new CouponNotFoundException(id + " 쿠폰을 찾을 수 없습니다."));
 
         return getCouponResponse(coupon);
     }
 
     private CouponResponse getCouponResponse(Coupon coupon) {
-        List<BookCoupon> bookCoupons = coupon.getBookCoupons();
-        List<CategoryCoupon> categoryCoupons = coupon.getCategoryCoupons();
+        Set<BookCoupon> bookCoupons = coupon.getBookCoupons();
+        Set<CategoryCoupon> categoryCoupons = coupon.getCategoryCoupons();
 
         List<BookInfo> bookIds = bookCoupons.stream()
                 .map(bc -> new CouponResponse.BookInfo(
@@ -141,34 +125,26 @@ public class CouponServiceImpl implements CouponService {
     @Override
     @Transactional(readOnly = true)
     public List<CouponResponse> getCouponByName(String couponName) {
-        List<Coupon> coupons = couponRepository.findAllByName(couponName);
+        List<Coupon> coupons = couponRepository.findAllByNameWithFetch(couponName).orElseThrow(
+                ()-> new CouponNotFoundException(couponName + " not found")
+        );
         if (coupons.isEmpty()) {
             throw new CouponNotFoundException(couponName + " 쿠폰을 찾을 수 없습니다.");
         }
         return getCouponResponses(coupons);
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public List<CouponResponse> getAllCoupons() {
-        List<Coupon> coupons = couponRepository.findAll();
-
+        List<Coupon> coupons = couponRepository.findAllWithAssociations();
         return getCouponResponses(coupons);
     }
 
     @Override
     public void deleteCouponById(Long couponId) {
-        // 존재 여부 체크 등 필요 시 추가
         couponRepository.deleteById(couponId);
     }
-
-    @Override
-    public void deleteCouponByName(String couponName) {
-        // 존재 여부 체크 등 필요 시 추가
-        couponRepository.deleteByName(couponName);
-    }
-
 
     @Override
     public void issueBookCoupons(Long couponId, Long bookId) {

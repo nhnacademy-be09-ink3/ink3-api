@@ -13,8 +13,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,18 +54,13 @@ public class Coupon {
     private CouponPolicy couponPolicy;
 
     @Builder.Default
-    @OneToMany(
-            mappedBy = "coupon",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<BookCoupon> bookCoupons = new ArrayList<>();
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BookCoupon> bookCoupons = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(
-            mappedBy = "coupon",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<CategoryCoupon> categoryCoupons = new ArrayList<>();
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CategoryCoupon> categoryCoupons = new HashSet<>();
+
 
     public void addBookCoupon(List<Book> bookList) {
         for(Book book : bookList) {

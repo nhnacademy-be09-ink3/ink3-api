@@ -27,9 +27,6 @@ public interface CouponService {
     // 쿠폰 삭제 by 쿠폰 아이디
     void deleteCouponById(Long couponId);
 
-    // 쿠폰 삭제 by 쿠폰 이름
-    void deleteCouponByName(String couponName);
-
     // 📘 도서 관련 쿠폰
     void issueBookCoupons(Long userId, Long bookId);
 

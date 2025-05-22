@@ -21,42 +21,36 @@ import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/coupons")
+@RequestMapping("/coupons")
 public class CouponController {
 
-    @Autowired
     private final CouponServiceImpl couponService;
 
     /** 쿠폰 생성 */
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<CommonResponse<CouponResponse>> create(@RequestBody @Valid CouponCreateRequest request) {
-
-
         CouponResponse coupon = couponService.createCoupon(request);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(coupon));
     }
 
     /** 이슈 타입으로 쿠폰 조회 */
-    @GetMapping("/issue/{issueType}")
+    @GetMapping("/by-issue-type/{issueType}")
     public ResponseEntity<CommonResponse<List<CouponResponse>>> getByIssueType(
             @PathVariable IssueType issueType) {
         List<CouponResponse> list = couponService.getCouponByIssueType(issueType);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
-    /** ID로 단건 조회 */
+    /** ID로 쿠폰 단건 조회 */
     @GetMapping("/{couponId}")
-    public ResponseEntity<CommonResponse<CouponResponse>> getById(
-            @PathVariable long couponId) {
+    public ResponseEntity<CommonResponse<CouponResponse>> getById(@PathVariable long couponId) {
         CouponResponse resp = couponService.getCouponById(couponId);
         return ResponseEntity.ok(CommonResponse.success(resp));
     }
 
     /** 이름으로 쿠폰 조회 */
-    @GetMapping("/name/{couponName}")
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getByName(
-            @PathVariable String couponName) {
+    @GetMapping("/by-name/{couponName}")
+    public ResponseEntity<CommonResponse<List<CouponResponse>>> getByName(@PathVariable String couponName) {
         List<CouponResponse> list = couponService.getCouponByName(couponName);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
@@ -68,22 +62,13 @@ public class CouponController {
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
-    @DeleteMapping("/name/{couponName}")
-    public void deleteByName(
-            @PathVariable String couponName
-    ){
-        couponService.deleteCouponByName(couponName);
-    }
-
+    /** 쿠폰 ID로 삭제 */
     @DeleteMapping("/{couponId}")
-    public void deleteById(
-            @PathVariable long couponId
-    ){
+    public ResponseEntity<CommonResponse<Void>> deleteById(@PathVariable long couponId) {
         couponService.deleteCouponById(couponId);
+        return ResponseEntity.ok(CommonResponse.success(null));
     }
-
-
-
 }
+
 
 

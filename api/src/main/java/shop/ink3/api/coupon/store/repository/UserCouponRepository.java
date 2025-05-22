@@ -17,7 +17,6 @@ public interface UserCouponRepository extends JpaRepository<CouponStore, Long> {
     @EntityGraph(attributePaths = {"coupon"})
     List<CouponStore> findByCouponId(Long couponId);
 
-    /** fix 예정 */
     @EntityGraph(attributePaths = {"coupon"})
     List<CouponStore> findByUserIdAndStatus(Long userId, CouponStatus status);
 
