@@ -24,7 +24,7 @@ public record BookResponse(
         String thumbnailUrl,
         List<String> categoryNames,
         List<String> authorNames,
-        List<String> tagName
+        List<String> tagNames
 ) {
     public static BookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
