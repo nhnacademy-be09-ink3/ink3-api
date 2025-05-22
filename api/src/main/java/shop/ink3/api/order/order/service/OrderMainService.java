@@ -12,7 +12,7 @@ import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.service.RefundService;
 import shop.ink3.api.order.shipment.service.ShipmentService;
-import shop.ink3.api.payment.dto.OrderFormCreateRequest;
+import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 
 @RequiredArgsConstructor
 @Service
@@ -26,12 +26,12 @@ public class OrderMainService {
     // 결제 시 주문서 생성 (주문 관련 데이터 저장)
     @Transactional(propagation = Propagation.REQUIRED)
     public OrderResponse createOrderForm(OrderFormCreateRequest request){
-        OrderResponse order = orderService.createOrder(request.orderCreateRequest());
+        OrderResponse orderResponse = orderService.createOrder(request.orderCreateRequest());
         orderBookService.createOrderBook(request.createRequestList());
         shipmentService.createShipment(request.shipmentCreateRequest());
-        // 비회원일 경우 저장해줘야함
-        return order;
+        return orderResponse;
     }
+    //TODO 비회원일 경우 저장해줘야함
 
     // 반품 생성
     @Transactional(propagation = Propagation.REQUIRED)
@@ -47,4 +47,5 @@ public class OrderMainService {
         orderService.updateOrderStatus(request.getOrderId(), new OrderStatusUpdateRequest(OrderStatus.REFUNDED));
         return refund;
     }
+    //TODO 비회원일 경우도 되돌려줘야함
 }

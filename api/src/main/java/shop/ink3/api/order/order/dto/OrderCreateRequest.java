@@ -15,8 +15,8 @@ import shop.ink3.api.coupon.store.entity.CouponStore;
 @AllArgsConstructor
 @Getter
 public class OrderCreateRequest {
-    private long userId;
-    private long couponStoreId;
+    private Long userId;
+    private Long couponStoreId;
     @NotBlank
     @Length(max = 20)
     private String ordererName;

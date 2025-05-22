@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusRequest;
@@ -24,7 +23,7 @@ import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
 import shop.ink3.api.order.order.service.OrderMainService;
 import shop.ink3.api.order.order.service.OrderService;
-import shop.ink3.api.payment.dto.OrderFormCreateRequest;
+import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 
 @RequiredArgsConstructor
 @RestController
