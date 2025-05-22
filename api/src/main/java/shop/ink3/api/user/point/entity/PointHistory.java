@@ -42,5 +42,14 @@ public class PointHistory {
     private PointHistoryStatus status;
 
     @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public void update(int delta, PointHistoryStatus status, String description) {
+        this.delta = delta;
+        this.status = status;
+        this.description = description;
+    }
 }

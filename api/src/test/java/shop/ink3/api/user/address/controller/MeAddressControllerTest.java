@@ -34,23 +34,23 @@ import shop.ink3.api.user.address.exception.AddressNotFoundException;
 import shop.ink3.api.user.address.service.AddressService;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 
-@WebMvcTest(AddressController.class)
-class AddressControllerTest {
+@WebMvcTest(MeAddressController.class)
+class MeAddressControllerTest {
     @MockitoBean
     AddressService addressService;
 
     @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
     MockMvc mockMvc;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Test
-    void getAddress() throws Exception {
+    void getCurrentUserAddress() throws Exception {
         Address address = Address.builder().id(1L).build();
         AddressResponse response = AddressResponse.from(address);
         when(addressService.getAddress(1L, 1L)).thenReturn(response);
-        mockMvc.perform(get("/users/1/addresses/1"))
+        mockMvc.perform(get("/users/me/addresses/1").header("X-User-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -61,9 +61,9 @@ class AddressControllerTest {
     }
 
     @Test
-    void getAddressWithNotFound() throws Exception {
+    void getCurrentUserAddressWithNotFound() throws Exception {
         when(addressService.getAddress(1L, 1L)).thenThrow(new AddressNotFoundException(1L));
-        mockMvc.perform(get("/users/1/addresses/1"))
+        mockMvc.perform(get("/users/me/addresses/1").header("X-User-Id", 1))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -74,7 +74,7 @@ class AddressControllerTest {
     }
 
     @Test
-    void getAddresses() throws Exception {
+    void getCurrentUserAddresses() throws Exception {
         PageResponse<AddressResponse> response = new PageResponse<>(
                 List.of(
                         AddressResponse.from(Address.builder().id(1L).build()),
@@ -83,7 +83,8 @@ class AddressControllerTest {
                 0, 2, 2L, 1, false, false
         );
         when(addressService.getAddresses(anyLong(), any())).thenReturn(response);
-        mockMvc.perform(get("/users/1/addresses")
+        mockMvc.perform(get("/users/me/addresses")
+                        .header("X-User-Id", 1)
                         .param("page", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -101,7 +102,7 @@ class AddressControllerTest {
     }
 
     @Test
-    void createAddress() throws Exception {
+    void createCurrentUserAddress() throws Exception {
         AddressCreateRequest request = new AddressCreateRequest(
                 "test",
                 "11111",
@@ -120,7 +121,8 @@ class AddressControllerTest {
                 .build();
         AddressResponse response = AddressResponse.from(address);
         when(addressService.createAddress(1L, request)).thenReturn(response);
-        mockMvc.perform(post("/users/1/addresses")
+        mockMvc.perform(post("/users/me/addresses")
+                        .header("X-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -133,7 +135,7 @@ class AddressControllerTest {
     }
 
     @Test
-    void createAddressWithUserNotFound() throws Exception {
+    void createCurrentUserAddressWithUserNotFound() throws Exception {
         AddressCreateRequest request = new AddressCreateRequest(
                 "test",
                 "11111",
@@ -142,7 +144,8 @@ class AddressControllerTest {
                 "test"
         );
         when(addressService.createAddress(1L, request)).thenThrow(new UserNotFoundException(1L));
-        mockMvc.perform(post("/users/1/addresses")
+        mockMvc.perform(post("/users/me/addresses")
+                        .header("X-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -155,7 +158,7 @@ class AddressControllerTest {
     }
 
     @Test
-    void createAddressWithOverLimit() throws Exception {
+    void createCurrentUserAddressWithOverLimit() throws Exception {
         AddressCreateRequest request = new AddressCreateRequest(
                 "test",
                 "11111",
@@ -165,7 +168,8 @@ class AddressControllerTest {
         );
         when(addressService.createAddress(1L, request))
                 .thenThrow(new IllegalStateException("You have exceeded the maximum number of addresses."));
-        mockMvc.perform(post("/users/1/addresses")
+        mockMvc.perform(post("/users/me/addresses")
+                        .header("X-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -178,7 +182,7 @@ class AddressControllerTest {
     }
 
     @Test
-    void updateAddress() throws Exception {
+    void updateCurrentUserAddress() throws Exception {
         AddressUpdateRequest request = new AddressUpdateRequest(
                 "test",
                 "11111",
@@ -188,7 +192,8 @@ class AddressControllerTest {
         );
         when(addressService.updateAddress(1L, 1L, request))
                 .thenReturn(AddressResponse.from(Address.builder().id(1L).build()));
-        mockMvc.perform(put("/users/1/addresses/1")
+        mockMvc.perform(put("/users/me/addresses/1")
+                        .header("X-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -201,7 +206,7 @@ class AddressControllerTest {
     }
 
     @Test
-    void updateAddressWithNotFound() throws Exception {
+    void updateCurrentUserAddressWithNotFound() throws Exception {
         AddressUpdateRequest request = new AddressUpdateRequest(
                 "test",
                 "11111",
@@ -210,7 +215,8 @@ class AddressControllerTest {
                 "test"
         );
         when(addressService.updateAddress(anyLong(), anyLong(), any())).thenThrow(new AddressNotFoundException(1L));
-        mockMvc.perform(put("/users/1/addresses/1")
+        mockMvc.perform(put("/users/me/addresses/1")
+                        .header("X-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -223,17 +229,17 @@ class AddressControllerTest {
     }
 
     @Test
-    void setDefaultAddress() throws Exception {
+    void setCurrentUserDefaultAddress() throws Exception {
         doNothing().when(addressService).setDefaultAddress(1L, 1L);
-        mockMvc.perform(patch("/users/1/addresses/1/default"))
+        mockMvc.perform(patch("/users/me/addresses/1/default").header("X-User-Id", 1))
                 .andExpect(status().isNoContent())
                 .andDo(print());
     }
 
     @Test
-    void setDefaultAddressWithNotFound() throws Exception {
+    void setCurrentUserDefaultAddressWithNotFound() throws Exception {
         doThrow(new AddressNotFoundException(1L)).when(addressService).setDefaultAddress(1L, 1L);
-        mockMvc.perform(patch("/users/1/addresses/1/default"))
+        mockMvc.perform(patch("/users/me/addresses/1/default").header("X-User-Id", 1))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -244,17 +250,17 @@ class AddressControllerTest {
     }
 
     @Test
-    void deleteAddress() throws Exception {
+    void deleteCurrentUserAddress() throws Exception {
         doNothing().when(addressService).deleteAddress(1L, 1L);
-        mockMvc.perform(delete("/users/1/addresses/1"))
+        mockMvc.perform(delete("/users/me/addresses/1").header("X-User-Id", 1))
                 .andExpect(status().isNoContent())
                 .andDo(print());
     }
 
     @Test
-    void deleteAddressWithNotFound() throws Exception {
+    void deleteCurrentUserAddressWithNotFound() throws Exception {
         doThrow(new AddressNotFoundException(1L)).when(addressService).deleteAddress(1L, 1L);
-        mockMvc.perform(delete("/users/1/addresses/1"))
+        mockMvc.perform(delete("/users/me/addresses/1").header("X-User-Id", 1))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
