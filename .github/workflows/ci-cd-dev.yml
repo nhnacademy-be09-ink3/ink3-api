@@ -129,7 +129,7 @@ jobs:
           echo $! > app.pid
 
       - name: Wait for application to start
-        run: sleep 15
+        run: sleep 30
 
       - name: Check health endpoint
         run: curl --fail http://localhost:10270/shop/actuator/health
