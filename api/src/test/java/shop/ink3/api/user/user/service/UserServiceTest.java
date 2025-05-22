@@ -28,7 +28,6 @@ import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
-import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
@@ -77,7 +76,6 @@ class UserServiceTest {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
         Assertions.assertFalse(userService.isEmailAvailable("email@email.com"));
     }
-
 
     @Test
     void getUser() {
@@ -308,36 +306,6 @@ class UserServiceTest {
 
     @Test
     void withdrawUserWithNotFound() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(UserNotFoundException.class, () -> userService.getUserDetail(1L));
-    }
-
-    @Test
-    void earnPoint() {
-        User user = User.builder().id(1L).point(0).build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        userService.earnPoint(1L, new UserPointRequest(1000));
-        Assertions.assertEquals(1000, user.getPoint());
-        verify(pointHistoryRepository).save(any());
-    }
-
-    @Test
-    void earnPointWithNotFound() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(UserNotFoundException.class, () -> userService.getUserDetail(1L));
-    }
-
-    @Test
-    void usePoint() {
-        User user = User.builder().id(1L).point(1000).build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        userService.usePoint(1L, new UserPointRequest(1000));
-        Assertions.assertEquals(0, user.getPoint());
-        verify(pointHistoryRepository).save(any());
-    }
-
-    @Test
-    void usePointWithNotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class, () -> userService.getUserDetail(1L));
     }

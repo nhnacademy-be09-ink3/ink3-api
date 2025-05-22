@@ -12,4 +12,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     Page<Address> findAllByUserId(long userId, Pageable pageable);
 
     Optional<Address> findByIdAndUserId(long addressId, long userId);
+
+    int countByUserId(long userId);
 }

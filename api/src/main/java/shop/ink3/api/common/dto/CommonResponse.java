@@ -38,12 +38,12 @@ public record CommonResponse<T>(
                 .build();
     }
 
-    public static <T> CommonResponse<T> error(HttpStatus status, String message) {
+    public static <T> CommonResponse<T> error(HttpStatus status, String message, T data) {
         return CommonResponse.<T>builder()
                 .status(status.value())
                 .message(message)
                 .timestamp(LocalDateTime.now())
-                .data(null)
+                .data(data)
                 .build();
     }
 }
