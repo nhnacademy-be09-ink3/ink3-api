@@ -39,7 +39,7 @@ class CouponPolicyControllerTest {
         PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0, LocalDateTime.now(),"쿠폰 정책 조회 완료");
         when(policyService.getPolicyById(1L)).thenReturn(response);
 
-        mockMvc.perform(get("/api/policies/1"))
+        mockMvc.perform(get("/policies/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -53,7 +53,7 @@ class CouponPolicyControllerTest {
         PolicyResponse response = new PolicyResponse(1L, "TestPolicy", DiscountType.FIXED, 1000, 0, LocalDateTime.now(),"쿠폰 정책 생성 완료");
         when(policyService.getPolicyByName("TestPolicy")).thenReturn(response);
 
-        mockMvc.perform(get("/api/policies/policyName/TestPolicy"))
+        mockMvc.perform(get("/policies/by-name/TestPolicy"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -67,7 +67,7 @@ class CouponPolicyControllerTest {
         PolicyResponse response = new PolicyResponse(1L, "NewPolicy", DiscountType.RATE, 0, 10, LocalDateTime.now(),"쿠폰 정책 생성 완료");
         when(policyService.createPolicy(any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/policies")
+        mockMvc.perform(post("/policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -98,7 +98,7 @@ class CouponPolicyControllerTest {
         PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0, LocalDateTime.now(), "쿠폰 정책 생성 완료");
         when(policyService.deletePolicyById(1L)).thenReturn(response);
 
-        mockMvc.perform(delete("/api/policies/1"))
+        mockMvc.perform(delete("/policies/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -106,16 +106,4 @@ class CouponPolicyControllerTest {
                 .andDo(print());
     }
 
-    @Test
-    void deletePolicyByName() throws Exception {
-        PolicyResponse response = new PolicyResponse(1L, "DeletedPolicy", DiscountType.FIXED, 100, 0, LocalDateTime.now(),"쿠폰 정책 생성 완료");
-        when(policyService.deletePolicyByName("DeletedPolicy")).thenReturn(response);
-
-        mockMvc.perform(delete("/api/policies/policyName/DeletedPolicy"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data.policyName").value("DeletedPolicy"))
-                .andDo(print());
-    }
 }
