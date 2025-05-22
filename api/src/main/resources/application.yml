@@ -1,15 +1,20 @@
 spring:
   application:
     name: shop-service
+  config:
+    import: optional:configserver:https://ink3.shop/config/
+  rabbitmq:
+    host: s4.java21.net
+    port: 5672
+    username: admin
+    password: nhnacademy123!
+  cloud:
+    bus:
+      enabled: true
 
-payment:
-  toss:
-    client_key : "temp"
-    secret_key : "temp"
-    confirm_url : "https://api.tosspayments.com/v1/payments/confirm"
-    success_url : "http://localhost:8080/payment/success"
-    fail_url : "http://localhost:8080/payment/fail"
-
-server:
-  servlet:
-    context-path: /shop
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - busrefresh
