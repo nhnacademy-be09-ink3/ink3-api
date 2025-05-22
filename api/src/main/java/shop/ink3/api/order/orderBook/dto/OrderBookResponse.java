@@ -6,11 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.coupon.store.entity.CouponStore;
-import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.packaging.entity.Packaging;
-import shop.ink3.api.review.entity.Review;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

@@ -14,8 +14,6 @@ import shop.ink3.api.order.refundPolicy.dto.RefundPolicyUpdateRequest;
 import shop.ink3.api.order.refundPolicy.entity.RefundPolicy;
 import shop.ink3.api.order.refundPolicy.exception.RefundPolicyNotFoundException;
 import shop.ink3.api.order.refundPolicy.repository.RefundPolicyRepository;
-import shop.ink3.api.order.shippingPolicy.entity.ShippingPolicy;
-import shop.ink3.api.order.shippingPolicy.exception.ShippingPolicyNotFoundException;
 
 @RequiredArgsConstructor
 @Service

@@ -1,9 +1,8 @@
 package shop.ink3.api.book.category.dto;
 
-import shop.ink3.api.book.category.entity.Category;
-
 import java.util.ArrayList;
 import java.util.List;
+import shop.ink3.api.book.category.entity.Category;
 
 public record CategoryResponse(
         Long id,
