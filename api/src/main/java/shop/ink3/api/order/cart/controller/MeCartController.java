@@ -34,6 +34,16 @@ public class MeCartController {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(cartService.addCartItem(cartRequest)));
     }
 
+    @PostMapping("/merge-guest")
+    public ResponseEntity<Void> mergeGuestCart(@RequestBody List<MeCartRequest> guestItems,
+        @RequestHeader("X-User-Id") Long userId) {
+        for (MeCartRequest item : guestItems) {
+            CartRequest request = new CartRequest(userId, item.bookId(), item.quantity());
+            cartService.addCartItem(request);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{cartId}")
     public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable Long cartId, @RequestBody CartUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(cartService.updateCartQuantity(cartId, request)));
