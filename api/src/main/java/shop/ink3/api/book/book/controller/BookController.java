@@ -1,7 +1,5 @@
 package shop.ink3.api.book.book.controller;
 
-import jakarta.ws.rs.GET;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,7 +17,6 @@ import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookRegisterRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
-import shop.ink3.api.book.book.dto.BookSearchRequest;
 import shop.ink3.api.book.book.external.aladin.AladinClient;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.service.BookService;
@@ -28,7 +25,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/books")
+@RequestMapping("/books")
 public class BookController {
     private final BookService bookService;
     private final AladinClient aladinClient;
@@ -62,50 +59,15 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
-     // ISBN을 통해 알라딘 API에서 도서정보 등록
-    @PostMapping("/register-by-isbn")
-    public ResponseEntity<CommonResponse<BookResponse>> registerByIsbn(@RequestParam String isbn) {
-        return ResponseEntity.ok(CommonResponse.success(bookService.registerBookByIsbn(isbn)));
-    }
-
-    // Keyword로 알라딘 API의 도서 리스트 조회
-    @GetMapping("/register")
+    // Keyword로 알라딘 API의 도서 리스트 조회, /aladin?keyword=도서
+    @GetMapping("/aladin")
     public ResponseEntity<CommonResponse<PageResponse<AladinBookResponse>>> getBooksByKeyword(@RequestParam String keyword, Pageable pageable) {
         return ResponseEntity.ok(CommonResponse.success(aladinClient.fetchBookByKeyword(keyword, pageable)));
     }
 
     // 알라딘 API에서 Keyword로 조회한 도서 리스트에서 하나의 도서를 선택하고 자체적으로 설정할 내용 입력하여 도서 등록
-    @PostMapping("register")
+    @PostMapping("/register")
     public ResponseEntity<CommonResponse<BookResponse>> registerBook(@RequestBody BookRegisterRequest request) {
         return ResponseEntity.ok(CommonResponse.success(bookService.registerBook(request)));
-    }
-
-
-
-
-    /*
-     * 검색은 따로 작성
-     */
-
-    // 도서 제목으로 도서 목록 조회 API
-
-    @GetMapping("/title/{title}")
-    public ResponseEntity<List<BookResponse>> getBooksByTitle(@PathVariable String title) {
-        return ResponseEntity.ok(bookService.findAllByTitle(title));
-    }
-
-    // 저자 이름으로 도서 목록 조회 API
-
-    @GetMapping("/author/{author}")
-    public ResponseEntity<List<BookResponse>> getBooksByAuthor(@PathVariable String author) {
-        return ResponseEntity.ok(bookService.findAllByAuthor(author));
-    }
-
-    // 도서검색 API (제목 또는 저자 기반검색)
-
-    @GetMapping("/search")
-    public ResponseEntity<PageResponse<BookResponse>> searchBooks(
-            @ModelAttribute BookSearchRequest request) {
-        return ResponseEntity.ok(bookService.searchBooks(request));
     }
 }

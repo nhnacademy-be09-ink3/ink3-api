@@ -7,17 +7,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.author.repository.AuthorRepository;
-import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
-import shop.ink3.api.book.book.dto.BookSearchRequest;
-import shop.ink3.api.book.book.dto.BookUpdateRequest;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
-import shop.ink3.api.book.book.enums.BookSortType;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
-import shop.ink3.api.book.book.exception.DuplicateIsbnException;
 import shop.ink3.api.book.book.external.aladin.AladinClient;
-import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.repository.CategoryRepository;
@@ -25,9 +19,6 @@ import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.book.publisher.repository.PublisherRepository;
 import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.repository.TagRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -102,33 +93,33 @@ class BookServiceTest {
 //        assertThat(response.title()).isEqualTo("Title");
 //    }
 
-    @Test
-    void registerBookByIsbn_shouldSucceed() {
-        String isbn = "9876543210000";
-        AladinBookResponse dto = new AladinBookResponse(
-                "알라딘책", "desc", "toc", "작가", "출판사", "2024-01-01", isbn,
-                30000, "cover", "IT > 웹 > 자바"
-        );
-
-        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
-        given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
-        given(publisherRepository.findByName("출판사")).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
-        given(authorRepository.findByName("작가")).willReturn(Optional.of(Author.builder().name("작가").build()));
-        given(categoryRepository.findByName("자바")).willReturn(Optional.of(Category.builder().name("자바").build()));
-        given(tagRepository.findByName(any())).willReturn(Optional.empty());
-        given(tagRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-        given(bookRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-
-        BookResponse response = bookService.registerBookByIsbn(isbn);
-        assertThat(response.title()).isEqualTo("알라딘책");
-    }
-
-    @Test
-    void registerBookByIsbn_whenDuplicate_shouldThrowException() {
-        given(bookRepository.existsByIsbn("123")).willReturn(true);
-        assertThatThrownBy(() -> bookService.registerBookByIsbn("123"))
-                .isInstanceOf(DuplicateIsbnException.class);
-    }
+//    @Test
+//    void registerBookByIsbn_shouldSucceed() {
+//        String isbn = "9876543210000";
+//        AladinBookResponse dto = new AladinBookResponse(
+//                "알라딘책", "desc", "toc", "작가", "출판사", "2024-01-01", isbn,
+//                30000, "cover", "IT > 웹 > 자바"
+//        );
+//
+//        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
+//        given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
+//        given(publisherRepository.findByName("출판사")).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
+//        given(authorRepository.findByName("작가")).willReturn(Optional.of(Author.builder().name("작가").build()));
+//        given(categoryRepository.findByName("자바")).willReturn(Optional.of(Category.builder().name("자바").build()));
+//        given(tagRepository.findByName(any())).willReturn(Optional.empty());
+//        given(tagRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+//        given(bookRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+//
+//        BookResponse response = bookService.registerBookByIsbn(isbn);
+//        assertThat(response.title()).isEqualTo("알라딘책");
+//    }
+//
+//    @Test
+//    void registerBookByIsbn_whenDuplicate_shouldThrowException() {
+//        given(bookRepository.existsByIsbn("123")).willReturn(true);
+//        assertThatThrownBy(() -> bookService.registerBookByIsbn("123"))
+//                .isInstanceOf(DuplicateIsbnException.class);
+//    }
 
     @Test
     void findById_shouldReturnBook() {
@@ -159,52 +150,52 @@ class BookServiceTest {
                 .isInstanceOf(BookNotFoundException.class);
     }
 
-    @Test
-    void searchBooks_byTitle_shouldReturnPage() {
-        Book book = Book.builder()
-                .id(1L).title("검색책").originalPrice(10000).salePrice(9000)
-                .publishedAt(LocalDate.now()).status(BookStatus.AVAILABLE)
-                .publisher(Publisher.builder().name("출판사").build())
-                .build();
+//    @Test
+//    void searchBooks_byTitle_shouldReturnPage() {
+//        Book book = Book.builder()
+//                .id(1L).title("검색책").originalPrice(10000).salePrice(9000)
+//                .publishedAt(LocalDate.now()).status(BookStatus.AVAILABLE)
+//                .publisher(Publisher.builder().name("출판사").build())
+//                .build();
+//
+//        List<Book> books = List.of(book);
+//        Page<Book> page = new PageImpl<>(books, PageRequest.of(0, 10), 1);
+//
+//        given(bookRepository.findByTitleContainingIgnoreCase(eq("검색"), any())).willReturn(page);
+//
+//        BookSearchRequest request = new BookSearchRequest("검색", null, null, null, null, null, BookSortType.TITLE_ASC, 0,
+//                10);
+//        var result = bookService.searchBooks(request);
+//
+//        assertThat(result.content()).hasSize(1);
+//        assertThat(result.content().get(0).title()).isEqualTo("검색책");
+//        assertThat(result.content().get(0).originalPrice()).isEqualTo(10000);
+//        assertThat(result.content().get(0).salePrice()).isEqualTo(9000);
+//    }
 
-        List<Book> books = List.of(book);
-        Page<Book> page = new PageImpl<>(books, PageRequest.of(0, 10), 1);
-
-        given(bookRepository.findByTitleContainingIgnoreCase(eq("검색"), any())).willReturn(page);
-
-        BookSearchRequest request = new BookSearchRequest("검색", null, null, null, null, null, BookSortType.TITLE_ASC, 0,
-                10);
-        var result = bookService.searchBooks(request);
-
-        assertThat(result.content()).hasSize(1);
-        assertThat(result.content().get(0).title()).isEqualTo("검색책");
-        assertThat(result.content().get(0).originalPrice()).isEqualTo(10000);
-        assertThat(result.content().get(0).salePrice()).isEqualTo(9000);
-    }
-
-    @Test
-    void searchBooks_byAuthor_shouldReturnPage() {
-        Book book = Book.builder()
-                .id(1L).title("저자책").originalPrice(10000).salePrice(9000)
-                .publishedAt(LocalDate.now()).status(BookStatus.AVAILABLE)
-                .publisher(Publisher.builder().name("출판사").build())
-                .build();
-
-        List<Book> books = List.of(book);
-        Page<Book> page = new PageImpl<>(books, PageRequest.of(0, 10), 1);
-
-        given(bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(eq("홍길동"), any())).willReturn(
-                page);
-
-        BookSearchRequest request = new BookSearchRequest(null, "홍길동", null, null, null, null, BookSortType.TITLE_ASC,
-                0, 10);
-        var result = bookService.searchBooks(request);
-
-        assertThat(result.content()).hasSize(1);
-        assertThat(result.content().get(0).title()).isEqualTo("저자책");
-        assertThat(result.content().get(0).originalPrice()).isEqualTo(10000);
-        assertThat(result.content().get(0).salePrice()).isEqualTo(9000);
-    }
+//    @Test
+//    void searchBooks_byAuthor_shouldReturnPage() {
+//        Book book = Book.builder()
+//                .id(1L).title("저자책").originalPrice(10000).salePrice(9000)
+//                .publishedAt(LocalDate.now()).status(BookStatus.AVAILABLE)
+//                .publisher(Publisher.builder().name("출판사").build())
+//                .build();
+//
+//        List<Book> books = List.of(book);
+//        Page<Book> page = new PageImpl<>(books, PageRequest.of(0, 10), 1);
+//
+//        given(bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(eq("홍길동"), any())).willReturn(
+//                page);
+//
+//        BookSearchRequest request = new BookSearchRequest(null, "홍길동", null, null, null, null, BookSortType.TITLE_ASC,
+//                0, 10);
+//        var result = bookService.searchBooks(request);
+//
+//        assertThat(result.content()).hasSize(1);
+//        assertThat(result.content().get(0).title()).isEqualTo("저자책");
+//        assertThat(result.content().get(0).originalPrice()).isEqualTo(10000);
+//        assertThat(result.content().get(0).salePrice()).isEqualTo(9000);
+//    }
 
     @Test
     void deleteBook_shouldSucceed() {
@@ -250,26 +241,26 @@ class BookServiceTest {
 //                .isInstanceOf(shop.ink3.api.book.book.exception.InvalidCategorySelectionException.class);
 //    }
 
-    @Test
-    void registerBookByIsbn_withCategoryWithoutDelimiter_shouldSucceed() {
-        String isbn = "isbn-delimiter";
-        AladinBookResponse dto = new AladinBookResponse(
-                "title", "desc", "toc", "작가", "출판사", "2024-01-01", isbn,
-                30000, "cover", "카테고리단일"
-        );
-
-        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
-        given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
-        given(publisherRepository.findByName(any())).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
-        given(authorRepository.findByName(any())).willReturn(Optional.of(Author.builder().name("작가").build()));
-        given(categoryRepository.findByName(any())).willReturn(Optional.of(Category.builder().name("카테고리단일").build()));
-        given(tagRepository.findByName(any())).willReturn(Optional.empty());
-        given(tagRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-        given(bookRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-
-        BookResponse response = bookService.registerBookByIsbn(isbn);
-        assertThat(response.title()).isEqualTo("title");
-    }
+//    @Test
+//    void registerBookByIsbn_withCategoryWithoutDelimiter_shouldSucceed() {
+//        String isbn = "isbn-delimiter";
+//        AladinBookResponse dto = new AladinBookResponse(
+//                "title", "desc", "toc", "작가", "출판사", "2024-01-01", isbn,
+//                30000, "cover", "카테고리단일"
+//        );
+//
+//        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
+//        given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
+//        given(publisherRepository.findByName(any())).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
+//        given(authorRepository.findByName(any())).willReturn(Optional.of(Author.builder().name("작가").build()));
+//        given(categoryRepository.findByName(any())).willReturn(Optional.of(Category.builder().name("카테고리단일").build()));
+//        given(tagRepository.findByName(any())).willReturn(Optional.empty());
+//        given(tagRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+//        given(bookRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+//
+//        BookResponse response = bookService.registerBookByIsbn(isbn);
+//        assertThat(response.title()).isEqualTo("title");
+//    }
 
 
 //    @Test
@@ -304,21 +295,21 @@ class BookServiceTest {
 //        assertThat(response.title()).isEqualTo("new title");
 //    }
 
-    @Test
-    void searchBooks_whenNoTitleAndAuthor_shouldReturnAll() {
-        Book book = Book.builder().id(1L).title("모두조회").originalPrice(10000).salePrice(9000)
-                .publishedAt(LocalDate.now()).status(BookStatus.AVAILABLE)
-                .publisher(Publisher.builder().name("출판사").build())
-                .build();
-        Page<Book> page = new PageImpl<>(List.of(book), PageRequest.of(0, 10), 1);
-
-        given(bookRepository.findAll(any(PageRequest.class))).willReturn(page);
-
-        BookSearchRequest request = new BookSearchRequest(null, null, null, null, null, null, BookSortType.TITLE_ASC, 0,
-                10);
-        var result = bookService.searchBooks(request);
-        assertThat(result.content()).hasSize(1);
-    }
+//    @Test
+//    void searchBooks_whenNoTitleAndAuthor_shouldReturnAll() {
+//        Book book = Book.builder().id(1L).title("모두조회").originalPrice(10000).salePrice(9000)
+//                .publishedAt(LocalDate.now()).status(BookStatus.AVAILABLE)
+//                .publisher(Publisher.builder().name("출판사").build())
+//                .build();
+//        Page<Book> page = new PageImpl<>(List.of(book), PageRequest.of(0, 10), 1);
+//
+//        given(bookRepository.findAll(any(PageRequest.class))).willReturn(page);
+//
+//        BookSearchRequest request = new BookSearchRequest(null, null, null, null, null, null, BookSortType.TITLE_ASC, 0,
+//                10);
+//        var result = bookService.searchBooks(request);
+//        assertThat(result.content()).hasSize(1);
+//    }
 
 //    @Test
 //    void updateBook_whenAuthorNotFound_shouldThrowException() {
@@ -384,25 +375,25 @@ class BookServiceTest {
 //                .isInstanceOf(shop.ink3.api.book.tag.exception.TagNotFoundException.class);
 //    }
 
-    @Test
-    void registerBookByIsbn_whenCategoryNameNull_shouldSucceedWithoutCategory() {
-        String isbn = "no-category";
-        AladinBookResponse dto = new AladinBookResponse(
-                "title", "desc", "toc", "작가", "출판사", "2024-01-01", isbn,
-                30000, "cover", null
-        );
-
-        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
-        given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
-        given(publisherRepository.findByName(any())).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
-        given(authorRepository.findByName(any())).willReturn(Optional.of(Author.builder().name("작가").build()));
-        given(tagRepository.findByName(any())).willReturn(Optional.empty());
-        given(tagRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-        given(bookRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-
-        BookResponse response = bookService.registerBookByIsbn(isbn);
-        assertThat(response.title()).isEqualTo("title");
-    }
+//    @Test
+//    void registerBookByIsbn_whenCategoryNameNull_shouldSucceedWithoutCategory() {
+//        String isbn = "no-category";
+//        AladinBookResponse dto = new AladinBookResponse(
+//                "title", "desc", "toc", "작가", "출판사", "2024-01-01", isbn,
+//                30000, "cover", null
+//        );
+//
+//        given(bookRepository.existsByIsbn(isbn)).willReturn(false);
+//        given(aladinClient.fetchBookByIsbn(isbn)).willReturn(dto);
+//        given(publisherRepository.findByName(any())).willReturn(Optional.of(Publisher.builder().name("출판사").build()));
+//        given(authorRepository.findByName(any())).willReturn(Optional.of(Author.builder().name("작가").build()));
+//        given(tagRepository.findByName(any())).willReturn(Optional.empty());
+//        given(tagRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+//        given(bookRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+//
+//        BookResponse response = bookService.registerBookByIsbn(isbn);
+//        assertThat(response.title()).isEqualTo("title");
+//    }
 
     private Book createBasicBook() {
         return Book.builder()
@@ -428,31 +419,31 @@ class BookServiceTest {
                 ));
     }
 
-    @Test
-    void findAllByTitle_shouldReturnBooks() {
-        Book book = createBasicBook();
-        given(bookRepository.getBooksByTitle("제목")).willReturn(List.of(book));
-
-        List<BookResponse> result = bookService.findAllByTitle("제목");
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).title()).isEqualTo("기본책");
-        assertThat(result.get(0).originalPrice()).isEqualTo(10000);
-        assertThat(result.get(0).salePrice()).isEqualTo(9000);
-    }
-
-    @Test
-    void findAllByAuthor_shouldReturnBooks() {
-        Book book = createBasicBook();
-        given(bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase("작가")).willReturn(List.of(book));
-
-        List<BookResponse> result = bookService.findAllByAuthor("작가");
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).title()).isEqualTo("기본책");
-        assertThat(result.get(0).originalPrice()).isEqualTo(10000);
-        assertThat(result.get(0).salePrice()).isEqualTo(9000);
-    }
+//    @Test
+//    void findAllByTitle_shouldReturnBooks() {
+//        Book book = createBasicBook();
+//        given(bookRepository.getBooksByTitle("제목")).willReturn(List.of(book));
+//
+//        List<BookResponse> result = bookService.findAllByTitle("제목");
+//
+//        assertThat(result).hasSize(1);
+//        assertThat(result.get(0).title()).isEqualTo("기본책");
+//        assertThat(result.get(0).originalPrice()).isEqualTo(10000);
+//        assertThat(result.get(0).salePrice()).isEqualTo(9000);
+//    }
+//
+//    @Test
+//    void findAllByAuthor_shouldReturnBooks() {
+//        Book book = createBasicBook();
+//        given(bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase("작가")).willReturn(List.of(book));
+//
+//        List<BookResponse> result = bookService.findAllByAuthor("작가");
+//
+//        assertThat(result).hasSize(1);
+//        assertThat(result.get(0).title()).isEqualTo("기본책");
+//        assertThat(result.get(0).originalPrice()).isEqualTo(10000);
+//        assertThat(result.get(0).salePrice()).isEqualTo(9000);
+//    }
 
     @Test
     void extractKeywords_shouldHandleNullAndEmptyStrings() throws Exception {

@@ -23,31 +23,30 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/categories")
+@RequestMapping("/categories")
 public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<CategoryResponse>> createCategory(
-            @RequestBody CategoryCreateRequest categoryCreateRequest) {
+    public ResponseEntity<CommonResponse<CategoryResponse>> createCategory(@RequestBody CategoryCreateRequest categoryCreateRequest) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(categoryService.createCategory(categoryCreateRequest)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{categoryId}")
     public ResponseEntity<CommonResponse<CategoryResponse>> updateCategory(
-            @PathVariable Long id,
+            @PathVariable Long categoryId,
             @RequestBody @Valid CategoryUpdateRequest categoryUpdateRequest) {
         return ResponseEntity.ok(
-                CommonResponse.success(categoryService.updateCategory(id, categoryUpdateRequest))
+                CommonResponse.success(categoryService.updateCategory(categoryId, categoryUpdateRequest))
         );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CommonResponse<CategoryResponse>> getCategory(@PathVariable Long id) {
+    @GetMapping("/{categoryId}")
+    public ResponseEntity<CommonResponse<CategoryResponse>> getCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(
-                CommonResponse.success(categoryService.getCategoryById(id))
+                CommonResponse.success(categoryService.getCategoryById(categoryId))
         );
     }
 
@@ -58,9 +57,9 @@ public class CategoryController {
         );
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
+        categoryService.deleteCategory(categoryId);
         return ResponseEntity.noContent().build();
     }
 
@@ -68,6 +67,4 @@ public class CategoryController {
     public ResponseEntity<CommonResponse<List<CategoryResponse>>> getCategoryTree() {
         return ResponseEntity.ok(CommonResponse.success(categoryService.getCategoryTree()));
     }
-
-
 }

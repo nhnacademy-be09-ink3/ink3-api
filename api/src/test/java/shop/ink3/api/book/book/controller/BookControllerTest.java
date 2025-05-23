@@ -1,29 +1,19 @@
 package shop.ink3.api.book.book.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
-import shop.ink3.api.book.book.dto.BookSearchRequest;
-import shop.ink3.api.book.book.dto.BookUpdateRequest;
 import shop.ink3.api.book.book.entity.BookStatus;
-import shop.ink3.api.book.book.exception.InvalidCategorySelectionException;
 import shop.ink3.api.book.book.service.BookService;
-import shop.ink3.api.common.dto.PageResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
 class BookControllerTest {

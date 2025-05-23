@@ -6,12 +6,8 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -28,19 +24,14 @@ import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookRegisterRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
-import shop.ink3.api.book.book.dto.BookSearchRequest;
 import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
-import shop.ink3.api.book.book.enums.BookSortType;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
 import shop.ink3.api.book.book.exception.InvalidCategoryDepthException;
 import shop.ink3.api.book.book.exception.InvalidCategorySelectionException;
 import shop.ink3.api.book.book.external.aladin.AladinClient;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.repository.BookRepository;
-import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
-import shop.ink3.api.book.bookCategory.entity.BookCategory;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
@@ -196,68 +187,12 @@ public class BookService {
         bookRepository.delete(book);
     }
 
-    // 알라딘 ISBN 기반으로 도서 등록
-    public BookResponse registerBookByIsbn(String isbn13) {
-        // 중복 ISBN 체크
-        if (bookRepository.existsByIsbn(isbn13)) {
-            throw new DuplicateIsbnException(isbn13);
-        }
-
-        AladinBookResponse dto = aladinClient.fetchBookByIsbn(isbn13);
-
-        Publisher publisher = publisherRepository.findByName(dto.publisher())
-                .orElseGet(() -> publisherRepository.save(Publisher.builder().name(dto.publisher()).build()));
-
-        // 도서 객체 생성
-        Book book = Book.builder()
-                .title(dto.title())
-                .description(dto.description())
-                .contents(dto.toc())
-                .publisher(publisher)
-                .publishedAt(LocalDate.parse(dto.pubDate()))
-                .isbn(dto.isbn13())
-                .originalPrice(dto.priceStandard())
-                .thumbnailUrl(dto.cover())
-                .isPackable(true)
-                .status(BookStatus.AVAILABLE)
-                .build();
-
-        List<AuthorDto> authorDtos = parseAuthors(dto.author());
-        for (AuthorDto authorDto : authorDtos) {
-            Author author = authorRepository.findByName(authorDto.name())
-                    .orElseGet(() -> authorRepository.save(Author.builder().name(authorDto.name()).build()));
-            book.addBookAuthor(author, authorDto.role());
-        }
-
-        // 카테고리 파싱 및 연결
-        String rawCategoryName = dto.categoryName();
-        String finalCategoryName = rawCategoryName;
-        if (rawCategoryName != null && rawCategoryName.contains(">")) {
-            String[] parts = rawCategoryName.split(">");
-            finalCategoryName = parts[parts.length - 1].trim();
-        }
-
-        if (finalCategoryName != null && !finalCategoryName.isBlank()) {
-            String categoryNameToUse = finalCategoryName;
-            Category category = categoryRepository.findByName(categoryNameToUse)
-                    .orElseGet(() -> categoryRepository.save(Category.builder().name(categoryNameToUse).build()));
-            book.addBookCategory(category);
-        }
-
-        // 자동 태그 생성 및 연결 (제목, 설명 기반)
-        List<String> keywords = extractKeywords(dto.title(), dto.description());
-        for (String keyword : keywords) {
-            Tag tag = tagRepository.findByName(keyword)
-                    .orElseGet(() -> tagRepository.save(Tag.builder().name(keyword).build()));
-            book.addBookTag(tag);
-        }
-
-        return BookResponse.from(bookRepository.save(book));
-    }
-
     // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
     public BookResponse registerBook(BookRegisterRequest request) {
         AladinBookResponse dto = request.aladinBookResponse();
+        if (bookRepository.existsByIsbn(dto.isbn13())) {
+            throw new DuplicateIsbnException(dto.isbn13());
+        }
 
         Publisher publisher = publisherRepository.findByName(dto.publisher())
                 .orElseGet(() -> publisherRepository.save(Publisher.builder().name(dto.publisher()).build()));
@@ -297,23 +232,6 @@ public class BookService {
         }
 
         return BookResponse.from(book);
-    }
-
-    // 텍스트에서 키워드 추출 (태그용)
-    private List<String> extractKeywords(String... texts) {
-        Set<String> result = new LinkedHashSet<>();
-        for (String text : texts) {
-            if (text == null) continue;
-            String[] words = text.split("[\\s,./()\\[\\]\\-]+");
-            for (String word : words) {
-                if (word.length() >= 2 && word.length() <= 15) {
-                    result.add(word.toLowerCase());
-                }
-                if (result.size() >= 5) break;
-            }
-            if (result.size() >= 5) break;
-        }
-        return result.stream().toList();
     }
 
     // 카테고리는 최소 2단계
@@ -373,57 +291,5 @@ public class BookService {
                     });
         }
         return parent;
-    }
-
-
-
-
-
-    /*
-     * 검색은 따로 작성
-     */
-
-    // 제목 기반 검색
-    public List<BookResponse> findAllByTitle(String title) {
-        return bookRepository.getBooksByTitle(title).stream()
-                .map(BookResponse::from)
-                .toList();
-    }
-
-    // 저자 이름으로 검색
-    public List<BookResponse> findAllByAuthor(String author) {
-        return bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(author).stream()
-                .map(BookResponse::from)
-                .toList();
-    }
-
-    public PageResponse<BookResponse> searchBooks(BookSearchRequest request) {
-        String title = request.title();
-        String author = request.author();
-        BookSortType sortType = request.sort();
-        int page = request.page() != null ? request.page() : 0;
-        int size = request.size() != null ? request.size() : 10;
-
-        //정렬조건
-        Sort sortOption = switch (sortType) {
-            case TITLE_ASC -> Sort.by("title").ascending();
-            case PUBLISHED_AT_DESC -> Sort.by("publishedAt").descending();
-            case PRICE_ASC -> Sort.by("originalPrice").ascending();
-            case PRICE_DESC -> Sort.by("originalPrice").descending();
-            default -> Sort.unsorted();
-        };
-
-        Pageable pageable = PageRequest.of(page, size, sortOption);
-
-        Page<Book> bookPage;
-        if (title != null && !title.isBlank()) {
-            bookPage = bookRepository.findByTitleContainingIgnoreCase(title, pageable);
-        } else if (author != null && !author.isBlank()) {
-            bookPage = bookRepository.findDistinctByBookAuthorsAuthorNameContainingIgnoreCase(author, pageable);
-        } else {
-            bookPage = bookRepository.findAll(pageable);
-        }
-
-        return PageResponse.from(bookPage.map(BookResponse::from));
     }
 }

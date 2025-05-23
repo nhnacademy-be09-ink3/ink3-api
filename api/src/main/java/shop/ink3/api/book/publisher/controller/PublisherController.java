@@ -22,7 +22,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/publishers")
+@RequestMapping("/publishers")
 public class PublisherController {
 
     private final PublisherService publisherService;
@@ -32,14 +32,28 @@ public class PublisherController {
         return ResponseEntity.ok(CommonResponse.success(publisherService.getPublishers(pageable)));
     }
 
-    @GetMapping("/id/{publisherId}")
-    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherById(@PathVariable Long publisherId) {
-        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(publisherId)));
-    }
+//    @GetMapping("/id")
+//    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherById(@RequestParam Long publisherId) {
+//        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(publisherId)));
+//    }
+//
+//    @GetMapping("/name")
+//    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@RequestParam String publisherName) {
+//        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(publisherName)));
+//    }
 
-    @GetMapping("/name/{publisherName}")
-    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@PathVariable String publisherName) {
-        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(publisherName)));
+    @GetMapping("/detail")
+    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisher(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String name) {
+
+        if (id != null) {
+            return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(id)));
+        } else if (name != null) {
+            return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(name)));
+        } else {
+            throw new IllegalArgumentException("Either id or name must be provided");
+        }
     }
 
     @PostMapping

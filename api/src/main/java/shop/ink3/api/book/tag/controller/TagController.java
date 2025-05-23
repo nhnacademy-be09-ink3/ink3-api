@@ -1,6 +1,5 @@
 package shop.ink3.api.book.tag.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.book.tag.dto.TagCreateRequest;
 import shop.ink3.api.book.tag.dto.TagUpdateRequest;
@@ -22,7 +22,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/tags")
+@RequestMapping("/tags")
 public class TagController {
     private final TagService tagService;
 
@@ -31,14 +31,28 @@ public class TagController {
         return ResponseEntity.ok(CommonResponse.success(tagService.getTags(pageable)));
     }
 
-    @GetMapping("/tagId/{tagId}")
-    public ResponseEntity<CommonResponse<TagResponse>> getTagById(@PathVariable Long tagId) {
-        return ResponseEntity.ok(CommonResponse.success(tagService.getTagById(tagId)));
-    }
+//    @GetMapping("/id")
+//    public ResponseEntity<CommonResponse<TagResponse>> getTagById(@RequestParam Long tagId) {
+//        return ResponseEntity.ok(CommonResponse.success(tagService.getTagById(tagId)));
+//    }
+//
+//    @GetMapping("/name")
+//    public ResponseEntity<CommonResponse<TagResponse>> getTagByName(@RequestParam String tagName) {
+//        return ResponseEntity.ok(CommonResponse.success(tagService.getTagByName(tagName)));
+//    }
 
-    @GetMapping("/tagName/{tagName}")
-    public ResponseEntity<CommonResponse<TagResponse>> getTagByName(@PathVariable String tagName) {
-        return ResponseEntity.ok(CommonResponse.success(tagService.getTagByName(tagName)));
+    @GetMapping("/detail")
+    public ResponseEntity<CommonResponse<TagResponse>> getTag(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String name) {
+
+        if (id != null) {
+            return ResponseEntity.ok(CommonResponse.success(tagService.getTagById(id)));
+        } else if (name != null) {
+            return ResponseEntity.ok(CommonResponse.success(tagService.getTagByName(name)));
+        } else {
+            throw new IllegalArgumentException("Either id or name must be provided");
+        }
     }
 
     @PostMapping
