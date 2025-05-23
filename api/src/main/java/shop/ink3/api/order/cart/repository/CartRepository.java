@@ -8,4 +8,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     List<Cart> findByUserId(Long userId);
 
     void deleteAllByUserId(Long userId);
+
+    Cart findByUserIdAndBookId(Long userId, Long bookId);
 }
