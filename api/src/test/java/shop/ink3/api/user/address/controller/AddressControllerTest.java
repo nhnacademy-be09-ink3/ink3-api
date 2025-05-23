@@ -32,6 +32,7 @@ import shop.ink3.api.user.address.dto.AddressUpdateRequest;
 import shop.ink3.api.user.address.entity.Address;
 import shop.ink3.api.user.address.exception.AddressNotFoundException;
 import shop.ink3.api.user.address.service.AddressService;
+import shop.ink3.api.user.user.exception.UserNotFoundException;
 
 @WebMvcTest(AddressController.class)
 class AddressControllerTest {
@@ -128,6 +129,51 @@ class AddressControllerTest {
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.data.id").value(1L))
+                .andDo(print());
+    }
+
+    @Test
+    void createAddressWithUserNotFound() throws Exception {
+        AddressCreateRequest request = new AddressCreateRequest(
+                "test",
+                "11111",
+                "test",
+                "test",
+                "test"
+        );
+        when(addressService.createAddress(1L, request)).thenThrow(new UserNotFoundException(1L));
+        mockMvc.perform(post("/users/1/addresses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
+                .andDo(print());
+    }
+
+    @Test
+    void createAddressWithOverLimit() throws Exception {
+        AddressCreateRequest request = new AddressCreateRequest(
+                "test",
+                "11111",
+                "test",
+                "test",
+                "test"
+        );
+        when(addressService.createAddress(1L, request))
+                .thenThrow(new IllegalStateException("You have exceeded the maximum number of addresses."));
+        mockMvc.perform(post("/users/1/addresses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data").value(Matchers.nullValue()))
                 .andDo(print());
     }
 

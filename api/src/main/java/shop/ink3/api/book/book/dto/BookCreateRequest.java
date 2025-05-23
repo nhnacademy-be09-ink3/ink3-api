@@ -1,8 +1,8 @@
 package shop.ink3.api.book.book.dto;
 
-import shop.ink3.api.book.book.entity.BookStatus;
 import java.time.LocalDate;
 import java.util.List;
+import shop.ink3.api.book.book.entity.BookStatus;
 
 public record BookCreateRequest(
         String isbn,

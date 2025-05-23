@@ -1,5 +1,6 @@
 package shop.ink3.api.user.address.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,7 @@ public class AddressController {
     @PostMapping
     public ResponseEntity<CommonResponse<AddressResponse>> createAddress(
             @PathVariable long userId,
-            @RequestBody AddressCreateRequest request
+            @RequestBody @Valid AddressCreateRequest request
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -56,7 +57,7 @@ public class AddressController {
     public ResponseEntity<CommonResponse<AddressResponse>> updateAddress(
             @PathVariable long userId,
             @PathVariable long addressId,
-            @RequestBody AddressUpdateRequest request
+            @RequestBody @Valid AddressUpdateRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.update(addressService.updateAddress(userId, addressId, request)));
     }

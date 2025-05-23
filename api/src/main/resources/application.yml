@@ -1,15 +1,20 @@
 spring:
   application:
     name: shop-service
+  config:
+    import: optional:configserver:https://ink3.shop/config/
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+  cloud:
+    bus:
+      enabled: true
 
-payment:
-  toss:
-    client_key : "temp"
-    secret_key : "temp"
-    confirm_url : "https://api.tosspayments.com/v1/payments/confirm"
-    success_url : "http://localhost:8080/payment/success"
-    fail_url : "http://localhost:8080/payment/fail"
-
-server:
-  servlet:
-    context-path: /shop
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - busrefresh

@@ -1,6 +1,8 @@
 package shop.ink3.api.user.user.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,8 +13,6 @@ import shop.ink3.api.user.common.exception.WithdrawnException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
-import shop.ink3.api.user.point.entity.PointHistory;
-import shop.ink3.api.user.point.entity.PointHistoryStatus;
 import shop.ink3.api.user.point.repository.PointHistoryRepository;
 import shop.ink3.api.user.social.entity.Social;
 import shop.ink3.api.user.social.repository.SocialRepository;
@@ -22,12 +22,10 @@ import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
-import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
-import shop.ink3.api.user.user.exception.InsufficientPointException;
 import shop.ink3.api.user.user.exception.SocialUserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
@@ -88,6 +86,11 @@ public class UserService {
             throw new WithdrawnException(user.getId());
         }
         return UserAuthResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getUsersByBirthday(LocalDate birthday) {
+        return userRepository.findAllByBirthday(birthday).stream().map(UserResponse::from).toList();
     }
 
     public UserResponse createUser(UserCreateRequest request) {
@@ -167,37 +170,6 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.withdraw();
         userRepository.save(user);
-    }
-
-    public void earnPoint(long userId, UserPointRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        user.earnPoint(request.amount());
-        userRepository.save(user);
-        pointHistoryRepository.save(
-                PointHistory.builder()
-                        .user(user)
-                        .delta(request.amount())
-                        .status(PointHistoryStatus.EARN)
-                        .createdAt(LocalDateTime.now())
-                        .build()
-        );
-    }
-
-    public void usePoint(long userId, UserPointRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        if (user.getPoint() < request.amount()) {
-            throw new InsufficientPointException();
-        }
-        user.usePoint(request.amount());
-        userRepository.save(user);
-        pointHistoryRepository.save(
-                PointHistory.builder()
-                        .user(user)
-                        .delta(request.amount())
-                        .status(PointHistoryStatus.USE)
-                        .createdAt(LocalDateTime.now())
-                        .build()
-        );
     }
 
     public void updateMembership(long userId, UserMembershipUpdateRequest request) {
