@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
+import shop.ink3.api.coupon.store.repository.UserCouponRepository;
 import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
@@ -36,6 +38,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final UserCouponRepository userCouponRepository;
 
     // 생성
     @Transactional
@@ -46,9 +49,12 @@ public class OrderService {
                     .orElseThrow(()->new UserNotFoundException(request.getUserId()));
         }
 
-        //TODO : 조회 한 쿠폰 객체 넣어주기
+        //TODO 논의사항 = 쿠폰 적용 방식 (특정 도서/카테고리 쿠폰 1개로 하나의 도서만 적용   OR    여러개 도서에 적용)
         CouponStore couponStore = null;
-
+        if(request.getCouponStoreId() != null) {
+            couponStore = userCouponRepository.findById(request.getCouponStoreId())
+                    .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
+        }
         Order order = Order.builder()
                 .user(user)
                 .couponStore(couponStore)
@@ -64,8 +70,7 @@ public class OrderService {
         return OrderResponse.from(saveOrder);
     }
 
-    //TODO 마무리 확인
-    // 포인트 히스토리 내용 저장
+    // 주문에 포인트 히스토리 내용 저장
     @Transactional
     public OrderResponse savePointHistoryInOrder(long orderId, long pointHistoryId){
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));

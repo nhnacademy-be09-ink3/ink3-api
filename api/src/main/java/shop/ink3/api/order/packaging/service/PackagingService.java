@@ -13,8 +13,6 @@ import shop.ink3.api.order.packaging.dto.PackagingUpdateRequest;
 import shop.ink3.api.order.packaging.entity.Packaging;
 import shop.ink3.api.order.packaging.exception.PackagingNotFoundException;
 import shop.ink3.api.order.packaging.repository.PackagingRepository;
-import shop.ink3.api.order.shippingPolicy.entity.ShippingPolicy;
-import shop.ink3.api.order.shippingPolicy.exception.ShippingPolicyNotFoundException;
 
 @RequiredArgsConstructor
 @Service

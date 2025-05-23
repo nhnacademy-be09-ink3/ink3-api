@@ -42,6 +42,9 @@ public class Payment {
     private Integer usedPoint;
 
     @Column(nullable = false)
+    private Integer discountPrice;
+
+    @Column(nullable = false)
     private Integer paymentAmount;
 
     @Column(nullable = false)

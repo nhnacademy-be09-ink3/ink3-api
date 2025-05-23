@@ -27,7 +27,8 @@ public class PointEventListener {
     @EventListener
     public void handlePointHistoryAfterPayment(PointHistoryAfterPaymentEven event) {
         try {
-            //TODO 포인트 정책 확인 후 포인트 CreateRequest 생성 -> 적립량 고려
+            //TODO 포인트 정책 적용 필요
+            int temp_PointAccumulateRate = 0;
             int pointAmount = event.amount();
             PointHistoryCreateRequest request = new PointHistoryCreateRequest(pointAmount,
                     PointHistoryStatus.EARN, POINT_PAYMENT_DESCRIPTION);

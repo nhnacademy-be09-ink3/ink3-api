@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.service.OrderMainService;
 import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
@@ -25,6 +26,7 @@ import shop.ink3.api.order.refund.service.RefundService;
 @RequestMapping("/refunds")
 public class RefundController {
     private final RefundService refundService;
+    private final OrderMainService orderMainService;
 
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<RefundResponse>> getRefund(
@@ -39,14 +41,12 @@ public class RefundController {
         return ResponseEntity.ok(CommonResponse.success(refundService.getUserRefundList(userId, pageable)));
     }
 
-
-
     @PostMapping
     public ResponseEntity<CommonResponse<RefundResponse>> createRefund(
             @RequestBody RefundCreateRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(CommonResponse.create(refundService.createRefund(request)));
+                .body(CommonResponse.create(orderMainService.createRefund(request)));
     }
 
     @PutMapping("/{orderId}")

@@ -11,7 +11,10 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
+import shop.ink3.api.coupon.store.repository.UserCouponRepository;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.exception.InsufficientBookStockException;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
@@ -33,11 +36,13 @@ public class OrderBookService {
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
     private final PackagingRepository packagingRepository;
+    private final UserCouponRepository userCouponRepository;
 
     // 생성
     @Transactional
     public void createOrderBook(List<OrderBookCreateRequest> requestList) {
-        long orderId = requestList.get(0).getOrderId();
+        long orderId = requestList.getFirst().getOrderId();
+
         for (OrderBookCreateRequest request : requestList) {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new OrderNotFoundException(orderId));
@@ -53,11 +58,12 @@ public class OrderBookService {
             book.decreaseQuantity(request.getQuantity());
             bookRepository.save(book);
 
-            //TODO : 객체 채워야함.
+            //TODO 논의사항 = 쿠폰 적용 방식 (특정 도서/카테고리 쿠폰 1개로 하나의 도서만 적용   OR    여러개 도서에 적용)
             CouponStore couponStore = null;
-            //TODO : 쿠폰에 대한  할인 금액을 계산해줘야한다.
-            //TODO : price도 계산해줘야한다.
-            int discountPrice = 0;
+            if(request.getCouponStoreId() != null) {
+                couponStore = userCouponRepository.findById(request.getCouponStoreId())
+                        .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
+            }
 
             OrderBook orderBook = OrderBook.builder()
                     .order(order)
@@ -66,7 +72,6 @@ public class OrderBookService {
                     .couponStore(couponStore)
                     .price(request.getPrice())
                     .quantity(request.getQuantity())
-                    .discountPrice(discountPrice)
                     .build();
             orderBookRepository.save(orderBook);
         }
@@ -94,8 +99,8 @@ public class OrderBookService {
         Packaging packaging = (Objects.isNull(request.getPackagingId())) ? null
                 : packagingRepository.findById(request.getPackagingId())
                         .orElseThrow(() -> new PackagingNotFoundException(request.getPackagingId()));
-        //TODO : 객체 넣어줘야함
-        CouponStore couponStore = null;
+        CouponStore couponStore = userCouponRepository.findById(request.getCouponStoreId())
+                .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
         orderBook.update(request, packaging, couponStore);
         return OrderBookResponse.from(orderBookRepository.save(orderBook));
     }

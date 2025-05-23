@@ -6,18 +6,13 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.order.order.dto.OrderResponse;
-import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.entity.Order;
-import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
-import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
@@ -48,7 +43,7 @@ public class RefundService {
         RefundPolicy refundPolicy = refundPolicyRepository.findByIsAvailableTrue();
         Shipment shipment = shipmentRepository.findByOrder_Id(request.getOrderId())
                 .orElseThrow(ShipmentNotFoundException::new);
-        Order order = orderRepository.findById(request.getOrderId())
+        orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new OrderNotFoundException(request.getOrderId()));
 
         LocalDate deliveredDate = shipment.getDeliveredAt().toLocalDate();

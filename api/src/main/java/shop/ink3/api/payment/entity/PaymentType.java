@@ -1,7 +1,6 @@
 package shop.ink3.api.payment.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 public enum PaymentType {
     TOSS, KAKAOPAY, NAVERPAY;

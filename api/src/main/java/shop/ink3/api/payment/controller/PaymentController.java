@@ -3,6 +3,7 @@ package shop.ink3.api.payment.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +49,13 @@ public class PaymentController {
             @PathVariable long orderId,
             @RequestHeader("X-User-Id") long userId){
         paymentService.cancelPayment(orderId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 결제 내역 삭제
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<CommonResponse<Void>> deletePayment(@PathVariable long orderId){
+        paymentService.deletePayment(orderId);
         return ResponseEntity.noContent().build();
     }
 }

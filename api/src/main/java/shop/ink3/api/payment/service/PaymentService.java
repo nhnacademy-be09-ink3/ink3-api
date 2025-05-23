@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,6 @@ import shop.ink3.api.payment.paymentUtil.processor.PaymentProcessor;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentProcessorResolver;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentResponseParserResolver;
 import shop.ink3.api.payment.repository.PaymentRepository;
-import shop.ink3.api.user.point.eventListener.PointEventListener;
 import shop.ink3.api.user.point.eventListener.PointHistoryAfterCancelPaymentEven;
 import shop.ink3.api.user.point.eventListener.PointHistoryAfterPaymentEven;
 
@@ -38,9 +38,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private final OrderBookService orderBookService;
-    private final PointEventListener pointEventListener;
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String PARSER = "PARSER";
     private static final String PROCESSOR = "PROCESSOR";
@@ -56,8 +56,9 @@ public class PaymentService {
                 String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), PARSER));
         Payment payment = paymentParser.paymentResponseParser(confirmRequest.orderId(), paymentApproveResponse);
 
-        //TODO : 포인트를 리스너로 분리하여 사용할지, MQ로 분리하여 처리할지.
-        pointEventListener.handlePointHistoryAfterPayment(
+        //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
+        // 포인트 적립
+        eventPublisher.publishEvent(
                 new PointHistoryAfterPaymentEven(confirmRequest.orderId(),confirmRequest.amount())
         );
         return payment;
@@ -72,14 +73,13 @@ public class PaymentService {
         if(!order.getStatus().equals(OrderStatus.CONFIRMED)){
             throw new PaymentCancelNotAllowedException();
         }
-        //TODO : 금액 환불 -> 포인트 내역 추가 / 포인트를 리스너로 분리하여 사용할지, MQ로 분리하여 처리할지.
+        //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
+        // 금액 환불 to point (포인트 내역 추가)
         OrderResponse orderResponse = orderService.getOrder(orderId);
-        pointEventListener.handlePointHistoryAfterCancelPayment(
+        eventPublisher.publishEvent(
                 new PointHistoryAfterCancelPaymentEven(orderResponse.getId(), orderResponse.getPointHistoryId())
         );
-
-        //TODO : 사용된 쿠폰 재발급 (아직 로직 없음)
-
+        //TODO : 사용된 쿠폰 재발급
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);

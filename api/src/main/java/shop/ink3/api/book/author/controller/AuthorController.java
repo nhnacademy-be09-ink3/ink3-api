@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.book.author.dto.AuthorCreateRequest;
 import shop.ink3.api.book.author.dto.AuthorResponse;
 import shop.ink3.api.book.author.dto.AuthorUpdateRequest;
-import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.author.service.AuthorService;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
