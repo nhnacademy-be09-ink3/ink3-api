@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<CommonResponse<Void>> handleAlreadyExistsException(AlreadyExistsException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage(), null));
     }
 
     @ExceptionHandler(value = {
