@@ -1,6 +1,7 @@
 package shop.ink3.api.book.bookTag.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,15 +23,21 @@ import shop.ink3.api.book.tag.entity.Tag;
 @Getter
 @Table(name = "book_tags")
 public class BookTag {
+
+    public BookTag(Book book, Tag tag) {
+        this.book = book;
+        this.tag = tag;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
 }

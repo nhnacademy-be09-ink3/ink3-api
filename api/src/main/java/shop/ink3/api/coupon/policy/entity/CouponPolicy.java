@@ -30,30 +30,23 @@ public class CouponPolicy {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
     private int minimumOrderAmount;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type", nullable = false, length = 20)
     private DiscountType discountType;
 
     private int discountValue;
-
     private int discountPercentage;
-
     private int maximumDiscountAmount;
+    private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime validDays;
-
-    public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue,
-                       Integer maximumDiscountAmount,
-                       LocalDateTime valid_days) {
+    public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue, Integer discountPercentage,Integer maximumDiscountAmount) {
         this.name = name;
         this.discountType = discountType;
         this.minimumOrderAmount = minimumOrderAmount;
         this.discountValue = discountValue;
+        this.discountPercentage = discountPercentage;
         this.maximumDiscountAmount = maximumDiscountAmount;
-        this.validDays = valid_days;
     }
 }

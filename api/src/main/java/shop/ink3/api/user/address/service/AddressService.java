@@ -16,25 +16,30 @@ import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class AddressService {
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public AddressResponse getAddress(long userId, long addressId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));
         return AddressResponse.from(address);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<AddressResponse> getAddresses(long userId, Pageable pageable) {
         Page<Address> addresses = addressRepository.findAllByUserId(userId, pageable);
         return PageResponse.from(addresses.map(AddressResponse::from));
     }
 
-    @Transactional
     public AddressResponse createAddress(long userId, AddressCreateRequest request) {
+        if (addressRepository.countByUserId(userId) >= 10) {
+            throw new IllegalStateException("You have exceeded the maximum number of addresses.");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Address address = Address.builder()
                 .name(request.name())
@@ -48,7 +53,6 @@ public class AddressService {
         return AddressResponse.from(addressRepository.save(address));
     }
 
-    @Transactional
     public AddressResponse updateAddress(long userId, long addressId, AddressUpdateRequest request) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));
@@ -62,7 +66,6 @@ public class AddressService {
         return AddressResponse.from(addressRepository.save(address));
     }
 
-    @Transactional
     public void setDefaultAddress(long userId, long addressId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));
@@ -76,7 +79,6 @@ public class AddressService {
         addressRepository.save(address);
     }
 
-    @Transactional
     public void deleteAddress(long userId, long addressId) {
         Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new AddressNotFoundException(addressId));

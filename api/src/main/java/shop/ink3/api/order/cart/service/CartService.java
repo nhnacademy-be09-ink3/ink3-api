@@ -1,0 +1,119 @@
+package shop.ink3.api.order.cart.service;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.common.exception.BookNotFoundException;
+import shop.ink3.api.order.cart.dto.CartRequest;
+import shop.ink3.api.order.cart.dto.CartResponse;
+import shop.ink3.api.order.cart.dto.CartUpdateRequest;
+import shop.ink3.api.order.cart.entity.Cart;
+import shop.ink3.api.order.cart.repository.CartRepository;
+import shop.ink3.api.order.common.exception.CartNotFoundException;
+import shop.ink3.api.user.user.entity.User;
+import shop.ink3.api.user.user.exception.UserNotFoundException;
+import shop.ink3.api.user.user.repository.UserRepository;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class CartService {
+    private static final String CART_KEY_PREFIX = "cart:user:";
+
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
+    private final CartRepository cartRepository;
+
+    public CartResponse addCartItem(CartRequest request) {
+        User user = userRepository.findById(request.userId()).orElseThrow(() -> new UserNotFoundException(request.userId()));
+        Book book = bookRepository.findById(request.bookId()).orElseThrow(() -> new BookNotFoundException(request.bookId()));
+
+        Cart cart = cartRepository.findByUserIdAndBookId(user.getId(), book.getId());
+
+        if (Objects.nonNull(cart)) {
+            cart.updateQuantity(cart.getQuantity() + request.quantity());
+        } else {
+            cart = Cart.builder()
+                .user(user)
+                .book(book)
+                .quantity(request.quantity())
+                .build();
+        }
+        Cart savedCart = cartRepository.save(cart);
+        CartResponse response = CartResponse.from(savedCart);
+        cacheCart(savedCart, response);
+
+        return response;
+    }
+
+    public CartResponse updateCartQuantity(Long cartId, CartUpdateRequest request) {
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
+
+        cart.updateQuantity(request.quantity());
+        cartRepository.save(cart);
+
+        CartResponse response = CartResponse.from(cart);
+        cacheCart(cart, response);
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CartResponse> getCartItemsByUserId(Long userId) {
+        String key = CART_KEY_PREFIX + userId;
+        List<CartResponse> cacheCarts = hashOps().values(key);
+        if (!cacheCarts.isEmpty()) {
+            return cacheCarts;
+        }
+
+        List<Cart> carts = cartRepository.findByUserId(userId);
+        List<CartResponse> responses = carts.stream()
+            .map(CartResponse::from)
+            .toList();
+
+        for (int i = 0; i < carts.size(); i++) {
+            cacheCart(carts.get(i), responses.get(i));
+        }
+
+        return responses;
+    }
+
+    public void deleteCartItems(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException(userId);
+        }
+
+        cartRepository.deleteAllByUserId(userId);
+        String key = CART_KEY_PREFIX + userId;
+        redisTemplate.delete(key);
+    }
+
+    public void deleteCartItem(Long cartId) {
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException(cartId));
+
+        cartRepository.deleteById(cartId);
+
+        String key = CART_KEY_PREFIX + cart.getUser().getId();
+        hashOps().delete(key, cartId.toString());
+    }
+
+    private HashOperations<String, String, CartResponse> hashOps() {
+        return redisTemplate.opsForHash();
+    }
+
+    private void cacheCart(Cart cart, CartResponse response) {
+        String key = CART_KEY_PREFIX + cart.getUser().getId();
+        hashOps().put(key, cart.getId().toString(), response);
+        redisTemplate.expire(key, Duration.ofDays(3));
+    }
+}

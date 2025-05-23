@@ -17,14 +17,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.cart.entity.Cart;
-import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.review.entity.Review;
 import shop.ink3.api.user.membership.entity.Membership;
 
@@ -74,7 +72,7 @@ public class User {
     @JoinColumn(name = "membership_id", nullable = false)
     private Membership membership;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<Cart> carts = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
@@ -113,6 +111,10 @@ public class User {
     }
 
     public void usePoint(int amount) {
+        this.point -= amount;
+    }
+
+    public void cancelPoint(int amount) {
         this.point -= amount;
     }
 

@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,7 +17,6 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.packaging.entity.Packaging;
-import shop.ink3.api.review.entity.Review;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -47,12 +45,16 @@ public class OrderBook {
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
 
-    @OneToOne(mappedBy = "orderBook")
-    private Review review;
-
     @Column(name = "price", nullable = false)
-    private int price;
+    private Integer price;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
+
+    public void updateCoupon(CouponStore coupon) {
+        this.couponStore = coupon;
+    }
+
+    public void updateQuantity(int quantity) {
+    }
 }

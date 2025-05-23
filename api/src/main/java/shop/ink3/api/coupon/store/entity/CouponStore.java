@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.user.user.entity.User;
 
@@ -24,6 +26,7 @@ import shop.ink3.api.user.user.entity.User;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 @Table(name = "coupon_stores")
 public class CouponStore {
     @Id
@@ -39,18 +42,11 @@ public class CouponStore {
     private Coupon coupon;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    private CouponStatus status;
 
-    @Column(nullable = false)
     private LocalDateTime usedAt;
 
     @Column(nullable = false)
-    private LocalDateTime validFrom;
-
-    @Column(nullable = false)
-    private LocalDateTime validUntil;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CouponStatus status;
+    private LocalDateTime issuedAt;
 }

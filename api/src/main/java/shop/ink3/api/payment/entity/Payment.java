@@ -2,6 +2,8 @@ package shop.ink3.api.payment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,5 +39,15 @@ public class Payment {
     private String paymentKey;
 
     @Column(nullable = false)
-    private int paymentAmount;
+    private Integer paymentAmount;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType;
+
+    @Column(nullable = false)
+    private LocalDateTime requestAt;
+
+    @Column(nullable = true)
+    private LocalDateTime approvedAt;
 }

@@ -1,7 +1,5 @@
 package shop.ink3.api.review.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,13 +8,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.user.user.entity.User;
 
+@Builder
 @Entity
 @Table(name = "reviews")
 @Getter
@@ -41,7 +42,7 @@ public class Review {
 
     private LocalDateTime createdAt;
 
-    public Review(User user, OrderBook orderBook, String title, String content, int rating, LocalDateTime createdAt) {
+    public Review(User user, OrderBook orderBook, String title, String content, int rating) {
         this.user = user;
         this.orderBook = orderBook;
         this.title = title;
