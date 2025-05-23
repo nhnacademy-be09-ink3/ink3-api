@@ -38,17 +38,19 @@ class MeCartControllerTest {
     private ObjectMapper objectMapper;
 
     private User user;
-    private Book book;
+    private Book book1;
+    private Book book2;
     private CartRequest cartRequest;
     private CartResponse cartResponse;
 
     @BeforeEach
     void setUp() {
         user = User.builder().id(1L).name("user").build();
-        book = Book.builder().id(1L).title("책").originalPrice(20000).salePrice(18000).build();
+        book1 = Book.builder().id(1L).title("책").originalPrice(20000).salePrice(18000).build();
+        book2 = Book.builder().id(2L).title("책2").originalPrice(20000).salePrice(18000).build();
 
-        cartRequest = new CartRequest(user.getId(), book.getId(), 2);
-        cartResponse = new CartResponse(1L, user.getId(), book.getId(), book.getTitle(),
+        cartRequest = new CartRequest(user.getId(), book1.getId(), 2);
+        cartResponse = new CartResponse(1L, user.getId(), book1.getId(), book1.getTitle(),
             20000, 18000, 10, "url", 2);
     }
 
@@ -60,9 +62,24 @@ class MeCartControllerTest {
         mockMvc.perform(post("/me/carts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", user.getId())
-                .content(objectMapper.writeValueAsString(new MeCartRequest(book.getId(), 2))))
+                .content(objectMapper.writeValueAsString(new MeCartRequest(book1.getId(), 2))))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.data.bookId").value(book.getId()));
+            .andExpect(jsonPath("$.data.bookId").value(book1.getId()));
+    }
+
+    @Test
+    @DisplayName("비회원 장바구니 병합")
+    void mergeGuestCart() throws Exception {
+        List<MeCartRequest> guestItems = List.of(
+            new MeCartRequest(book1.getId(), 2),
+            new MeCartRequest(book2.getId(), 1)
+        );
+
+        mockMvc.perform(post("/me/carts/merge-guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-User-Id", user.getId())
+                .content(objectMapper.writeValueAsString(guestItems)))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -106,4 +123,3 @@ class MeCartControllerTest {
             .andExpect(status().isOk());
     }
 }
-
