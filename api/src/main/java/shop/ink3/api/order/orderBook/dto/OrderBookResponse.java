@@ -20,7 +20,6 @@ public class OrderBookResponse {
     private String packagingName;
     private Integer packagingPrice;
     private String couponName;
-    private Integer discountPrice;
     private Integer price;
     private Integer quantity;
 
@@ -37,7 +36,6 @@ public class OrderBookResponse {
                 orderBook.getPackaging() != null ? orderBook.getPackaging().getName() : null,
                 orderBook.getPackaging() != null ? orderBook.getPackaging().getPrice() : null,
                 orderBook.getCouponStore() != null ? orderBook.getCouponStore().getCoupon().getName() : null,
-                orderBook.getDiscountPrice(),
                 orderBook.getPrice(),
                 orderBook.getQuantity()
         );

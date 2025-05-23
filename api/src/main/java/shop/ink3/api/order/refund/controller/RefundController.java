@@ -37,7 +37,7 @@ public class RefundController {
     @GetMapping("/me")
     public ResponseEntity<CommonResponse<PageResponse<RefundResponse>>> getUserRefundList(
             HttpServletRequest request, Pageable pageable) {
-        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
+        long userId = Long.parseLong(request.getHeader("X-User-Id"));
         return ResponseEntity.ok(CommonResponse.success(refundService.getUserRefundList(userId, pageable)));
     }
 

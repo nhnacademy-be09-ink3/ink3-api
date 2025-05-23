@@ -77,24 +77,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientBookStockException.class)
-    public ResponseEntity<CommonResponse<Void>> handleInsufficientBookStockException(InsufficientBookStockException e) {
+    public ResponseEntity<CommonResponse<String>> handleInsufficientBookStockException(InsufficientBookStockException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.CONFLICT, "Book stock insufficient.",e.getMessage()));
     }
 
     @ExceptionHandler(PaymentParserFailException.class)
-    public ResponseEntity<CommonResponse<Void>> handlePaymentParserFailException(PaymentParserFailException e) {
+    public ResponseEntity<CommonResponse<String>> handlePaymentParserFailException(PaymentParserFailException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, "Payment parsing error.",e.getMessage()));
     }
 
     @ExceptionHandler(PaymentProcessorFailException.class)
-    public ResponseEntity<CommonResponse<Void>> handlePaymentProcessorFailException(PaymentProcessorFailException e) {
+    public ResponseEntity<CommonResponse<String>> handlePaymentProcessorFailException(PaymentProcessorFailException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, "Payment processor Approve fail error.",e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

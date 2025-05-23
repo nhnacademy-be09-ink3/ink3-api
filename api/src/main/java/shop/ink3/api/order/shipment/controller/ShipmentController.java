@@ -31,7 +31,6 @@ import shop.ink3.api.user.address.service.AddressService;
 @RequestMapping("/shipments")
 public class ShipmentController {
     private final ShipmentService shipmentService;
-    private final AddressService addressService;
 
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<ShipmentResponse>> getShipment(
@@ -45,7 +44,7 @@ public class ShipmentController {
             @RequestParam String orderStatus,
             HttpServletRequest request,
             Pageable pageable) {
-        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
+        long userId = Long.parseLong(request.getHeader("X-User-Id"));
         return ResponseEntity
                 .ok(CommonResponse.success(
                         shipmentService.getShipmentListByOrderStatus(

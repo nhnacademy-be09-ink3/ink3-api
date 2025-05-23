@@ -45,7 +45,8 @@ class ShipmentServiceTest {
     @DisplayName("배송 정보 조회 - 성공")
     void getShipment_성공() {
         // given
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.of(shipment));
 
         // when
@@ -73,10 +74,12 @@ class ShipmentServiceTest {
     @DisplayName("배송 상태에 따른 배송 정보 리스트 조회 - 성공")
     void getShipmentListByOrderStatus_성공() {
         // given
+        Order order1 = Order.builder().id(1L).build();
+        Order order2 = Order.builder().id(2L).build();
         Pageable pageable = PageRequest.of(0, 2);
         List<Shipment> list = List.of(
-                Shipment.builder().id(1L).build(),
-                Shipment.builder().id(2L).build()
+                Shipment.builder().id(1L).order(order1).build(),
+                Shipment.builder().id(2L).order(order2).build()
         );
         Page<Shipment> page = new PageImpl<>(list, pageable, list.size());
         when(shipmentRepository.findByOrder_UserIdAndOrder_Status(anyLong(),any(), any())).thenReturn(page);
@@ -120,7 +123,8 @@ class ShipmentServiceTest {
     @DisplayName("배송 수정 - 성공")
     void updateShipment_성공() {
         // given
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         ShipmentUpdateRequest request = new ShipmentUpdateRequest(
                 "수령인",
                 "01000000000",
@@ -192,7 +196,8 @@ class ShipmentServiceTest {
     @DisplayName("배송 완료 시간 업데이트 - 성공")
     void updateShipmentDeliveredAt_성공() {
         // given
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         LocalDateTime deliveredAt = LocalDateTime.now();
         when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.of(shipment));
         when(shipmentRepository.save(any())).thenReturn(shipment);
