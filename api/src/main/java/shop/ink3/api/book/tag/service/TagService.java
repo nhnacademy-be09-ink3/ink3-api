@@ -51,10 +51,13 @@ public class TagService {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new TagNotFoundException(tagId));
 
-        tag.updateTagName(request.name());
-        Tag updated = tagRepository.save(tag);
+        String tagName = request.name();
+        if (tagRepository.existsByName(tagName)) {
+            throw new TagAlreadyExistsException(tagName);
+        }
 
-        return TagResponse.from(updated);
+        tag.updateTagName(tagName);
+        return TagResponse.from(tagRepository.save(tag));
     }
 
     public void deleteTag(Long tagId) {

@@ -45,9 +45,10 @@ class CategoryControllerTest {
     void createCategory_whenNameExists_shouldThrowException() {
         when(categoryRepository.existsByName("컴퓨터")).thenReturn(true);
 
-        assertThatThrownBy(() ->
-                categoryService.createCategory(new CategoryCreateRequest("컴퓨터", null))
-        ).isInstanceOf(CategoryAlreadyExistsException.class);
+        CategoryCreateRequest request = new CategoryCreateRequest("컴퓨터", null);
+
+        assertThatThrownBy(() -> categoryService.createCategory(request))
+                .isInstanceOf(CategoryAlreadyExistsException.class);
     }
 
     @Test
@@ -66,9 +67,10 @@ class CategoryControllerTest {
     void updateCategory_whenNotFound_shouldThrowException() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                categoryService.updateCategory(1L, new CategoryUpdateRequest("프로그래밍", null))
-        ).isInstanceOf(CategoryNotFoundException.class);
+        CategoryUpdateRequest request = new CategoryUpdateRequest("프로그래밍", null);
+
+        assertThatThrownBy(() -> categoryService.updateCategory(1L, request))
+                .isInstanceOf(CategoryNotFoundException.class);
     }
 
     @Test
@@ -100,7 +102,7 @@ class CategoryControllerTest {
     @Test
     void getCategoryTree_shouldBuildTree() {
         Category parent = Category.builder().id(1L).name("컴퓨터").build();
-        Category child = Category.builder().id(2L).name("프로그래밍").category(parent).build();
+        Category child = Category.builder().id(2L).name("프로그래밍").parent(parent).build();
 
         when(categoryRepository.findAll()).thenReturn(List.of(parent, child));
 
@@ -108,20 +110,6 @@ class CategoryControllerTest {
         assertThat(tree).hasSize(1);
         assertThat(tree.get(0).children()).hasSize(1);
         assertThat(tree.get(0).children().get(0).name()).isEqualTo("프로그래밍");
-    }
-
-    @Test
-    void getAllCategories_shouldReturnList() {
-        Category category1 = Category.builder().id(1L).name("컴퓨터").build();
-        Category category2 = Category.builder().id(2L).name("디자인").build();
-
-        when(categoryRepository.findAll()).thenReturn(List.of(category1, category2));
-
-        var result = categoryService.getAllCategories();
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).name()).isEqualTo("컴퓨터");
-        assertThat(result.get(1).name()).isEqualTo("디자인");
     }
 
     @Test
@@ -147,9 +135,10 @@ class CategoryControllerTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                categoryService.updateCategory(1L, new CategoryUpdateRequest("프로그래밍", 99L))
-        ).isInstanceOf(CategoryNotFoundException.class);
+        CategoryUpdateRequest request = new CategoryUpdateRequest("프로그래밍", 99L);
+
+        assertThatThrownBy(() -> categoryService.updateCategory(1L, new CategoryUpdateRequest("프로그래밍", 99L)))
+                .isInstanceOf(CategoryNotFoundException.class);
     }
 
     @Test

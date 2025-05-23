@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.category.dto.CategoryCreateRequest;
@@ -13,6 +15,7 @@ import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.exception.CategoryAlreadyExistsException;
 import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
+import shop.ink3.api.common.dto.PageResponse;
 
 @Transactional
 @RequiredArgsConstructor
@@ -61,7 +64,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
 
-        if (categoryRepository.existsByCategory(category)) {
+        if (categoryRepository.existsByParent(category)) {
             throw new IllegalStateException("하위 카테고리가 존재하여 삭제할 수 없습니다.");
         }
 
@@ -76,10 +79,9 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream()
-                .map(CategoryResponse::from)
-                .toList();
+    public PageResponse<CategoryResponse> getAllCategories(Pageable pageable) {
+        Page<Category> categories = categoryRepository.findAll(pageable);
+        return PageResponse.from(categories.map(CategoryResponse::from));
     }
 
     @Transactional(readOnly = true)
@@ -92,8 +94,8 @@ public class CategoryService {
         }
 
         for (Category category : categories) {
-            if (category.getCategory() != null) {
-                Long parentId = category.getCategory().getId();
+            if (category.getParent() != null) {
+                Long parentId = category.getParent().getId();
                 CategoryResponse parentDto = idToDto.get(parentId);
                 CategoryResponse childDto = idToDto.get(category.getId());
                 parentDto.children().add(childDto);
@@ -101,7 +103,7 @@ public class CategoryService {
         }
 
         return categories.stream()
-                .filter(c -> c.getCategory() == null)
+                .filter(c -> c.getParent() == null)
                 .map(c -> idToDto.get(c.getId()))
                 .toList();
     }
@@ -112,7 +114,7 @@ public class CategoryService {
             if (current.getId() != null && current.getId().equals(category.getId())) {
                 throw new IllegalArgumentException("자기 자신 또는 하위 카테고리를 부모로 설정할 수 없습니다.");
             }
-            current = current.getCategory();
+            current = current.getParent();
         }
     }
 }

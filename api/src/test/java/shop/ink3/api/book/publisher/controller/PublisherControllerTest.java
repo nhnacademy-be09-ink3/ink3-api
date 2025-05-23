@@ -37,7 +37,7 @@ import shop.ink3.api.book.publisher.service.PublisherService;
 import shop.ink3.api.common.dto.PageResponse;
 
 @WebMvcTest(PublisherController.class)
-public class PublisherControllerTest {
+class PublisherControllerTest {
     @MockitoBean
     PublisherService publisherService;
 
@@ -61,7 +61,7 @@ public class PublisherControllerTest {
         PageResponse<PublisherResponse> response = PageResponse.from(page);
 
         when(publisherService.getPublishers(any(Pageable.class))).thenReturn(response);
-        mockMvc.perform(get("/api/books/publishers")
+        mockMvc.perform(get("/publishers")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -88,7 +88,7 @@ public class PublisherControllerTest {
                 .build();
         PublisherResponse response = PublisherResponse.from(publisher);
         when(publisherService.getPublisherById(1L)).thenReturn(response);
-        mockMvc.perform(get("/api/books/publishers/id/1"))
+        mockMvc.perform(get("/publishers/detail?id=1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -102,7 +102,7 @@ public class PublisherControllerTest {
     @Test
     void getPublisherByIdWithNotFound() throws Exception {
         when(publisherService.getPublisherById(1L)).thenThrow(new PublisherNotFoundException(1L));
-        mockMvc.perform(get("/api/books/publishers/id/1"))
+        mockMvc.perform(get("/publishers/detail?id=1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -120,7 +120,7 @@ public class PublisherControllerTest {
                 .build();
         PublisherResponse response = PublisherResponse.from(publisher);
         when(publisherService.getPublisherByName("testPublisher2")).thenReturn(response);
-        mockMvc.perform(get("/api/books/publishers/name/testPublisher2"))
+        mockMvc.perform(get("/publishers/detail?name=testPublisher2"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -134,7 +134,7 @@ public class PublisherControllerTest {
     @Test
     void getPublisherByNameWithNotFound() throws Exception {
         when(publisherService.getPublisherByName("testPublisher2")).thenThrow(new PublisherNotFoundException(2L));
-        mockMvc.perform(get("/api/books/publishers/name/testPublisher2"))
+        mockMvc.perform(get("/publishers/detail?name=testPublisher2"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -149,7 +149,7 @@ public class PublisherControllerTest {
         PublisherCreateRequest request = new PublisherCreateRequest("testPublisher");
         PublisherResponse response = new PublisherResponse(1L, "testPublisher");
         when(publisherService.createPublisher(request)).thenReturn(response);
-        mockMvc.perform(post("/api/books/publishers")
+        mockMvc.perform(post("/publishers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -167,7 +167,7 @@ public class PublisherControllerTest {
         PublisherUpdateRequest request = new PublisherUpdateRequest("newPublisher");
         PublisherResponse response = new PublisherResponse(1L, "newPublisher");
         when(publisherService.updatePublisher(1L, request)).thenReturn(response);
-        mockMvc.perform(put("/api/books/publishers/1")
+        mockMvc.perform(put("/publishers/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -184,7 +184,7 @@ public class PublisherControllerTest {
     void updatePublisherWithNotFound() throws Exception {
         PublisherUpdateRequest request = new PublisherUpdateRequest("newPublisher");
         when(publisherService.updatePublisher(1L, request)).thenThrow(new PublisherNotFoundException(1L));
-        mockMvc.perform(put("/api/books/publishers/1")
+        mockMvc.perform(put("/publishers/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -199,7 +199,7 @@ public class PublisherControllerTest {
     @Test
     void deletePublisher() throws Exception {
         doNothing().when(publisherService).deletePublisher(1L);
-        mockMvc.perform(delete("/api/books/publishers/1"))
+        mockMvc.perform(delete("/publishers/1"))
                 .andExpect(status().isNoContent())
                 .andDo(print());
     }
@@ -207,7 +207,7 @@ public class PublisherControllerTest {
     @Test
     void deleteAuthorWithNotFound() throws Exception {
         doThrow(new AuthorNotFoundException(1L)).when(publisherService).deletePublisher(1L);
-        mockMvc.perform(delete("/api/books/publishers/1"))
+        mockMvc.perform(delete("/publishers/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))

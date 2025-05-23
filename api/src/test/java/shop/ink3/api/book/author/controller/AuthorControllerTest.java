@@ -37,7 +37,7 @@ import shop.ink3.api.book.author.service.AuthorService;
 import shop.ink3.api.common.dto.PageResponse;
 
 @WebMvcTest(AuthorController.class)
-public class AuthorControllerTest {
+class AuthorControllerTest {
     @MockitoBean
     AuthorService authorService;
 
@@ -52,13 +52,10 @@ public class AuthorControllerTest {
         Author author = Author.builder()
                 .id(1L)
                 .name("testAuthor")
-                .birth(LocalDate.of(1961, 9, 18))
-                .nationality("France")
-                .biography("testBiography")
                 .build();
         AuthorResponse response = AuthorResponse.from(author);
         when(authorService.getAuthor(1L)).thenReturn(response);
-        mockMvc.perform(get("/api/books/authors/1"))
+        mockMvc.perform(get("/authors/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -66,16 +63,13 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.name").value("testAuthor"))
-                .andExpect(jsonPath("$.data.birth").value("1961-09-18"))
-                .andExpect(jsonPath("$.data.nationality").value("France"))
-                .andExpect(jsonPath("$.data.biography").value("testBiography"))
                 .andDo(print());
     }
 
     @Test
     void getAuthorWithNotFound() throws Exception {
         when(authorService.getAuthor(1L)).thenThrow(new AuthorNotFoundException(1L));
-        mockMvc.perform(get("/api/books/authors/1"))
+        mockMvc.perform(get("/authors/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -99,7 +93,7 @@ public class AuthorControllerTest {
         PageResponse<AuthorResponse> response = PageResponse.from(page);
 
         when(authorService.getAuthors(any(Pageable.class))).thenReturn(response);
-        mockMvc.perform(get("/api/books/authors")
+        mockMvc.perform(get("/authors")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -119,20 +113,14 @@ public class AuthorControllerTest {
     @Test
     void createAuthor() throws Exception {
         AuthorCreateRequest request = new AuthorCreateRequest(
-                "testAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "testBiography"
+                "testAuthor"
         );
         AuthorResponse response = new AuthorResponse(
                 1L,
-                "testAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "testBiography"
+                "testAuthor"
         );
         when(authorService.createAuthor(request)).thenReturn(response);
-        mockMvc.perform(post("/api/books/authors")
+        mockMvc.perform(post("/authors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -147,20 +135,14 @@ public class AuthorControllerTest {
     @Test
     void updateAuthor() throws Exception {
         AuthorUpdateRequest request = new AuthorUpdateRequest(
-                "newAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "newBiography"
+                "newAuthor"
         );
         AuthorResponse response = new AuthorResponse(
                 1L,
-                "newAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "newBiography"
+                "newAuthor"
         );
         when(authorService.updateAuthor(1L, request)).thenReturn(response);
-        mockMvc.perform(put("/api/books/authors/1")
+        mockMvc.perform(put("/authors/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -175,13 +157,10 @@ public class AuthorControllerTest {
     @Test
     void updateAuthorWithNotFound() throws Exception {
         AuthorUpdateRequest request = new AuthorUpdateRequest(
-                "newAuthor",
-                LocalDate.of(1961, 9, 18),
-                "France",
-                "newBiography"
+                "newAuthor"
         );
         when(authorService.updateAuthor(1L, request)).thenThrow(new AuthorNotFoundException(1L));
-        mockMvc.perform(put("/api/books/authors/1")
+        mockMvc.perform(put("/authors/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -196,7 +175,7 @@ public class AuthorControllerTest {
     @Test
     void deleteAuthor() throws Exception {
         doNothing().when(authorService).deleteAuthor(1L);
-        mockMvc.perform(delete("/api/books/authors/1"))
+        mockMvc.perform(delete("/authors/1"))
                 .andExpect(status().isNoContent())
                 .andDo(print());
     }
@@ -204,7 +183,7 @@ public class AuthorControllerTest {
     @Test
     void deleteAuthorWithNotFound() throws Exception {
         doThrow(new AuthorNotFoundException(1L)).when(authorService).deleteAuthor(1L);
-        mockMvc.perform(delete("/api/books/authors/1"))
+        mockMvc.perform(delete("/authors/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))

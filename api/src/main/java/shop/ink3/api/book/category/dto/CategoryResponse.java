@@ -14,7 +14,7 @@ public record CategoryResponse(
         return new CategoryResponse(
                 category.getId(),
                 category.getName(),
-                category.getCategory() != null ? category.getCategory().getId() : null,
+                category.getParent() != null ? category.getParent().getId() : null,
                 new ArrayList<>()
         );
     }

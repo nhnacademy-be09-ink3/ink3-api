@@ -1,7 +1,10 @@
 package shop.ink3.api.book.book.external.aladin;
 
-import shop.ink3.api.book.book.external.aladin.dto.AladinBookDto;
+import org.springframework.data.domain.Pageable;
+import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
+import shop.ink3.api.common.dto.PageResponse;
 
 public interface AladinClient {
-    AladinBookDto fetchBookByIsbn(String isbn13);
+    AladinBookResponse fetchBookByIsbn(String isbn13);
+    PageResponse<AladinBookResponse> fetchBookByKeyword(String keyword, Pageable pageable);
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.exception.AlreadyExistsException;
 import shop.ink3.api.common.exception.NotFoundException;
 import shop.ink3.api.order.order.exception.InsufficientBookStockException;
 import shop.ink3.api.payment.exception.PaymentParserFailException;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(CommonResponse.error(HttpStatus.NOT_FOUND, e.getMessage(), null));
+    }
+
+    @ExceptionHandler(value = {AlreadyExistsException.class})
+    public ResponseEntity<CommonResponse<Void>> handleAlreadyExistsException(AlreadyExistsException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(CommonResponse.error(HttpStatus.CONFLICT, e.getMessage(), null));
     }
 
     @ExceptionHandler(value = {

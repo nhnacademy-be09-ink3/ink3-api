@@ -51,7 +51,12 @@ public class PublisherService {
 
     public PublisherResponse updatePublisher(Long publisherId, PublisherUpdateRequest publisherUpdateRequest) {
         Publisher publisher = publisherRepository.findById(publisherId).orElseThrow(() -> new PublisherNotFoundException(publisherId));
-        publisher.updatePublisherName(publisherUpdateRequest.name());
+        String publisherName = publisherUpdateRequest.name();
+        if (publisherRepository.existsByName(publisherName)) {
+            throw new PublisherAlreadyExistsException(publisherName);
+        }
+
+        publisher.updatePublisherName(publisherName);
         return PublisherResponse.from(publisherRepository.save(publisher));
     }
 

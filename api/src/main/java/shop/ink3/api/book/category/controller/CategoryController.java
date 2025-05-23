@@ -3,6 +3,7 @@ package shop.ink3.api.book.category.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,47 +19,47 @@ import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.category.dto.CategoryUpdateRequest;
 import shop.ink3.api.book.category.service.CategoryService;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/categories")
+@RequestMapping("/categories")
 public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<CategoryResponse>> createCategory(
-            @RequestBody CategoryCreateRequest categoryCreateRequest) {
+    public ResponseEntity<CommonResponse<CategoryResponse>> createCategory(@RequestBody CategoryCreateRequest categoryCreateRequest) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(categoryService.createCategory(categoryCreateRequest)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{categoryId}")
     public ResponseEntity<CommonResponse<CategoryResponse>> updateCategory(
-            @PathVariable Long id,
+            @PathVariable Long categoryId,
             @RequestBody @Valid CategoryUpdateRequest categoryUpdateRequest) {
         return ResponseEntity.ok(
-                CommonResponse.success(categoryService.updateCategory(id, categoryUpdateRequest))
+                CommonResponse.success(categoryService.updateCategory(categoryId, categoryUpdateRequest))
         );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CommonResponse<CategoryResponse>> getCategory(@PathVariable Long id) {
+    @GetMapping("/{categoryId}")
+    public ResponseEntity<CommonResponse<CategoryResponse>> getCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(
-                CommonResponse.success(categoryService.getCategoryById(id))
+                CommonResponse.success(categoryService.getCategoryById(categoryId))
         );
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<CategoryResponse>>> getAllCategories() {
+    public ResponseEntity<CommonResponse<PageResponse<CategoryResponse>>> getAllCategories(Pageable pageable) {
         return ResponseEntity.ok(
-                CommonResponse.success(categoryService.getAllCategories())
+                CommonResponse.success(categoryService.getAllCategories(pageable))
         );
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<CommonResponse> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
+        categoryService.deleteCategory(categoryId);
         return ResponseEntity.noContent().build();
     }
 
@@ -66,6 +67,4 @@ public class CategoryController {
     public ResponseEntity<CommonResponse<List<CategoryResponse>>> getCategoryTree() {
         return ResponseEntity.ok(CommonResponse.success(categoryService.getCategoryTree()));
     }
-
-
 }
