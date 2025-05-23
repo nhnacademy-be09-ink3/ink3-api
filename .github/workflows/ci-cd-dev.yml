@@ -4,7 +4,18 @@ on:
   push:
     branches:
       - dev
-
+      
+env:
+  RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
+  RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
+  RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+  RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+  EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  TTB_KEY: ${{ secrets.TTB_KEY }}
+  REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+  
 jobs:
   build:
     name: Build JAR
@@ -45,11 +56,6 @@ jobs:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
     needs: build
-    env:
-      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
-      RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
-      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
-      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
 
     steps:
       - name: Checkout code
@@ -89,12 +95,6 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
-    env:
-      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
-      RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
-      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
-      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-
     services:
       redis:
         image: redis
@@ -161,16 +161,6 @@ jobs:
     name: Deploy to Linux Server
     runs-on: ubuntu-latest
     needs: test
-    env:
-      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
-      RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
-      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
-      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-      EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      TTB_KEY: ${{ secrets.TTB_KEY }}
-      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
     steps:
       - name: Checkout code
