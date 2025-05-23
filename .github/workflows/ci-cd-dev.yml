@@ -207,5 +207,10 @@ jobs:
           script: |
             cd ~/ink3-server-dev/api-dev
             chmod +x deploy.sh
+            export EUREKA_URL=${{ secrets.DEV_EUREKA_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export TTB_KEY=${{ secrets.TTB_KEY }}
+            export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
