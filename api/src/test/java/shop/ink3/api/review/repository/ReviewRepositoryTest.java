@@ -48,7 +48,7 @@ class ReviewRepositoryTest {
         em.persist(publisher);
 
         book = Book.builder()
-            .ISBN("1234567890123")
+            .isbn("1234567890123")
             .title("책 제목")
             .contents("내용 요약")
             .description("설명")

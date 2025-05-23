@@ -1,6 +1,6 @@
 package shop.ink3.api.book.book.external.aladin.dto;
 
-public record AladinBookDto(
+public record AladinBookResponse(
         String title,
         String description,
         String toc,
@@ -9,7 +9,6 @@ public record AladinBookDto(
         String pubDate,
         String isbn13,
         int priceStandard,
-        int priceSales,
         String cover,
         String categoryName
 ) {}

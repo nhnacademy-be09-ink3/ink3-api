@@ -6,8 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +34,12 @@ public class Category {
     @Length(max=20)
     private String name;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "parent_id")
-    private Category category;
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    private List<Category> children = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "category",
@@ -52,6 +55,6 @@ public class Category {
     }
 
     public void updateParentCategory(Category category) {
-        this.category = category;
+        this.parent = category;
     }
 }

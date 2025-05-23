@@ -31,15 +31,6 @@ public class Author {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
-    private LocalDate birth;
-
-    @Column(nullable = false, length = 20)
-    private String nationality;
-
-    @Column(nullable = false)
-    private String biography;
-
     @Builder.Default
     @OneToMany(mappedBy = "author",
             orphanRemoval = true)
@@ -49,10 +40,7 @@ public class Author {
         this.bookAuthors.add(bookAuthor);
     }
 
-    public void update(String name, LocalDate birth, String nationality, String biography) {
+    public void update(String name) {
         this.name = name;
-        this.birth = birth;
-        this.nationality = nationality;
-        this.biography = biography;
     }
 }

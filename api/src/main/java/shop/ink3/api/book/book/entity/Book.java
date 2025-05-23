@@ -43,7 +43,7 @@ public class Book {
     private Long id;
 
     @Column(nullable = false, length = 20)
-    private String ISBN;
+    private String isbn;
 
     @Column(nullable = false)
     private String title;
@@ -113,8 +113,8 @@ public class Book {
         category.addBookCategory(bookCategory);
     }
 
-    public void addBookAuthor(Author author) {
-        BookAuthor bookAuthor = new BookAuthor(this, author);
+    public void addBookAuthor(Author author, String role) {
+        BookAuthor bookAuthor = new BookAuthor(this, author, role);
         this.bookAuthors.add(bookAuthor);
         author.addBookAuthor(bookAuthor);
     }
@@ -126,20 +126,20 @@ public class Book {
     }
 
     public void updateBook(
-        String ISBN,
-        String title,
-        String contents,
-        String description,
-        LocalDate publishedAt,
-        Integer originalPrice,
-        Integer salePrice,
-        Integer quantity,
-        BookStatus status,
-        boolean isPackable,
-        String thumbnailUrl,
-        Publisher publisher
+            String isbn,
+            String title,
+            String contents,
+            String description,
+            LocalDate publishedAt,
+            Integer originalPrice,
+            Integer salePrice,
+            Integer quantity,
+            BookStatus status,
+            boolean isPackable,
+            String thumbnailUrl,
+            Publisher publisher
     ) {
-        this.ISBN = ISBN;
+        this.isbn = isbn;
         this.title = title;
         this.contents = contents;
         this.description = description;

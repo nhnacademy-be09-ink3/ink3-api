@@ -2,12 +2,13 @@ package shop.ink3.api.book.book.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 
 public record BookResponse(
         Long id,
-        String ISBN,
+        String isbn,
         String title,
         String contents,
         String description,
@@ -34,7 +35,7 @@ public record BookResponse(
 
         return new BookResponse(
                 book.getId(),
-                book.getISBN(),
+                book.getIsbn(),
                 book.getTitle(),
                 book.getContents(),
                 book.getDescription(),
@@ -53,7 +54,7 @@ public record BookResponse(
                         .toList(),
                 book.getBookAuthors()
                         .stream()
-                        .map(ba -> ba.getAuthor().getName())
+                        .map(ba -> ba.getAuthor().getName() + " (" + ba.getRole() + ")")
                         .toList(),
                 book.getBookTags()
                         .stream()

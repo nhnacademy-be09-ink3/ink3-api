@@ -46,7 +46,7 @@ CREATE TABLE `publishers`
 CREATE TABLE `books`
 (
     `id`             bigint       NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `ISBN`           varchar(20)  NOT NULL,
+    `isbn`           varchar(20)  NOT NULL,
     `title`          varchar(255) NOT NULL,
     `contents`       text         NOT NULL,
     `description`    text         NOT NULL,

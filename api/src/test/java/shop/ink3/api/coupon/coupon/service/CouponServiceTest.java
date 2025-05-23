@@ -58,7 +58,7 @@ import shop.ink3.api.coupon.coupon.repository.CouponRepository;
             );
 
             Book book1 = Book.builder()
-                    .ISBN("9781234567890")
+                    .isbn("9781234567890")
                     .title("자바의 정석")
                     .contents("기초부터 실무까지 배우는 자바 프로그래밍")
                     .description("자바를 처음 배우는 개발자를 위한 최고의 입문서입니다.")
@@ -72,7 +72,7 @@ import shop.ink3.api.coupon.coupon.repository.CouponRepository;
                     .thumbnailUrl("https://example.com/thumbnail.jpg")
                     .build();
             Book book2 = Book.builder()
-                    .ISBN("97812345890")
+                    .isbn("97812345890")
                     .title("자바의 정석2")
                     .contents("기초부터 실무까지 배우는 자바 프로그래밍")
                     .description("자바를 처음 배우는 개발자를 위한 최고의 입문서입니다.")
@@ -101,7 +101,7 @@ import shop.ink3.api.coupon.coupon.repository.CouponRepository;
             Category subCategory = categoryRepository.save(
                     Category.builder()
                             .name("자바")
-                            .category(parentCategory)
+                            .parent(parentCategory)
                             .build()
             );
 
