@@ -31,16 +31,6 @@ public class TagController {
         return ResponseEntity.ok(CommonResponse.success(tagService.getTags(pageable)));
     }
 
-//    @GetMapping("/id")
-//    public ResponseEntity<CommonResponse<TagResponse>> getTagById(@RequestParam Long tagId) {
-//        return ResponseEntity.ok(CommonResponse.success(tagService.getTagById(tagId)));
-//    }
-//
-//    @GetMapping("/name")
-//    public ResponseEntity<CommonResponse<TagResponse>> getTagByName(@RequestParam String tagName) {
-//        return ResponseEntity.ok(CommonResponse.success(tagService.getTagByName(tagName)));
-//    }
-
     @GetMapping("/detail")
     public ResponseEntity<CommonResponse<TagResponse>> getTag(
             @RequestParam(required = false) Long id,

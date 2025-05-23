@@ -32,16 +32,6 @@ public class PublisherController {
         return ResponseEntity.ok(CommonResponse.success(publisherService.getPublishers(pageable)));
     }
 
-//    @GetMapping("/id")
-//    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherById(@RequestParam Long publisherId) {
-//        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(publisherId)));
-//    }
-//
-//    @GetMapping("/name")
-//    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@RequestParam String publisherName) {
-//        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(publisherName)));
-//    }
-
     @GetMapping("/detail")
     public ResponseEntity<CommonResponse<PublisherResponse>> getPublisher(
             @RequestParam(required = false) Long id,
