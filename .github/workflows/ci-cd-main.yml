@@ -10,7 +10,7 @@ env:
   RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
   RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
   RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-  EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
+  EUREKA_URL: ${{ secrets.EUREKA_URL }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   TTB_KEY: ${{ secrets.TTB_KEY }}
@@ -208,7 +208,7 @@ jobs:
           script: |
             cd ~/ink3-server/api
             chmod +x deploy.sh
-            export EUREKA_URL=${{ secrets.DEV_EUREKA_URL }}
+            export EUREKA_URL=${{ secrets.EUREKA_URL }}
             export DB_USERNAME=${{ secrets.DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export TTB_KEY=${{ secrets.TTB_KEY }}
