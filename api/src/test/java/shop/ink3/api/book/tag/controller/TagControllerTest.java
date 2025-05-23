@@ -47,7 +47,7 @@ class TagControllerTest {
 
         given(tagService.createTag(any())).willReturn(response);
 
-        mockMvc.perform(post("/api/books/tags")
+        mockMvc.perform(post("/tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -69,7 +69,7 @@ class TagControllerTest {
 
         given(tagService.getTags(any(Pageable.class))).willReturn(pageResponse);
 
-        mockMvc.perform(get("/api/books/tags")
+        mockMvc.perform(get("/tags")
                 .param("page", "0")
                 .param("size", "10"))
                 .andExpect(status().isOk())
@@ -90,7 +90,7 @@ class TagControllerTest {
 
         given(tagService.updateTag(eq(1L), any())).willReturn(response);
 
-        mockMvc.perform(put("/api/books/tags/1")
+        mockMvc.perform(put("/tags/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ class TagControllerTest {
     void deleteTag() throws Exception {
         willDoNothing().given(tagService).deleteTag(1L);
 
-        mockMvc.perform(delete("/api/books/tags/1"))
+        mockMvc.perform(delete("/tags/1"))
                 .andExpect(status().isNoContent());
     }
 
@@ -110,7 +110,7 @@ class TagControllerTest {
         TagResponse response = new TagResponse(1L, "java");
         given(tagService.getTagById(1L)).willReturn(response);
 
-        mockMvc.perform(get("/api/books/tags/tagId/1"))
+        mockMvc.perform(get("/tags/detail?id=1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("java"));
     }
@@ -120,7 +120,7 @@ class TagControllerTest {
         TagResponse response = new TagResponse(1L, "java");
         given(tagService.getTagByName("java")).willReturn(response);
 
-        mockMvc.perform(get("/api/books/tags/tagName/java"))
+        mockMvc.perform(get("/tags/detail?name=java"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("java"));
     }

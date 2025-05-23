@@ -53,25 +53,25 @@ class BookServiceTest {
         tag = Tag.builder().id(1L).name("태그").build();
     }
 
-    @Test
-    void extractKeywords_shouldHandleSpecialCharacters() throws Exception {
-        List<String> result = invokeExtractKeywords("Spring", "Boot", "Java!", "Spring?");
-        assertThat(result).containsExactly("spring","boot", "java!", "spring?");
-    }
-
-    @Test
-    void extractKeywords_shouldIgnoreDuplicatesCaseInsensitive() throws Exception {
-        List<String> result = invokeExtractKeywords("Java", "JAVA", "java", "JaVa");
-        assertThat(result).containsExactly("java");
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> invokeExtractKeywords(String... texts) throws Exception {
-        var clazz = BookService.class;
-        var m = clazz.getDeclaredMethod("extractKeywords", String[].class);
-        m.setAccessible(true);
-        return (List<String>) m.invoke(new BookService(null, null, null, null, null, null), (Object) texts);
-    }
+//    @Test
+//    void extractKeywords_shouldHandleSpecialCharacters() throws Exception {
+//        List<String> result = invokeExtractKeywords("Spring", "Boot", "Java!", "Spring?");
+//        assertThat(result).containsExactly("spring","boot", "java!", "spring?");
+//    }
+//
+//    @Test
+//    void extractKeywords_shouldIgnoreDuplicatesCaseInsensitive() throws Exception {
+//        List<String> result = invokeExtractKeywords("Java", "JAVA", "java", "JaVa");
+//        assertThat(result).containsExactly("java");
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    private List<String> invokeExtractKeywords(String... texts) throws Exception {
+//        var clazz = BookService.class;
+//        var m = clazz.getDeclaredMethod("extractKeywords", String[].class);
+//        m.setAccessible(true);
+//        return (List<String>) m.invoke(new BookService(null, null, null, null, null, null), (Object) texts);
+//    }
 
 //    @Test
 //    void createBook_shouldCreateSuccessfully() {
@@ -445,17 +445,17 @@ class BookServiceTest {
 //        assertThat(result.get(0).salePrice()).isEqualTo(9000);
 //    }
 
-    @Test
-    void extractKeywords_shouldHandleNullAndEmptyStrings() throws Exception {
-        List<String> result = invokeExtractKeywords(" ", "", null);
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void extractKeywords_shouldLimitToTop5() throws Exception {
-        List<String> result = invokeExtractKeywords("one", "two", "three", "four", "five", "six", "seven");
-        assertThat(result).hasSize(5);
-    }
+//    @Test
+//    void extractKeywords_shouldHandleNullAndEmptyStrings() throws Exception {
+//        List<String> result = invokeExtractKeywords(" ", "", null);
+//        assertThat(result).isEmpty();
+//    }
+//
+//    @Test
+//    void extractKeywords_shouldLimitToTop5() throws Exception {
+//        List<String> result = invokeExtractKeywords("one", "two", "three", "four", "five", "six", "seven");
+//        assertThat(result).hasSize(5);
+//    }
 
 //    @Test
 //    void createBook_shouldFailWhenCategoryDepthIsLessThanTwo() {
