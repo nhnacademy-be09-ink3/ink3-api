@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
+import shop.ink3.api.coupon.store.repository.UserCouponRepository;
 import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
@@ -20,6 +22,11 @@ import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
+import shop.ink3.api.order.refundPolicy.service.RefundPolicyService;
+import shop.ink3.api.user.point.dto.PointHistoryResponse;
+import shop.ink3.api.user.point.entity.PointHistory;
+import shop.ink3.api.user.point.exception.PointHistoryNotFoundException;
+import shop.ink3.api.user.point.repository.PointHistoryRepository;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
@@ -30,6 +37,8 @@ import shop.ink3.api.user.user.repository.UserRepository;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final PointHistoryRepository pointHistoryRepository;
+    private final UserCouponRepository userCouponRepository;
 
     // 생성
     @Transactional
@@ -40,9 +49,12 @@ public class OrderService {
                     .orElseThrow(()->new UserNotFoundException(request.getUserId()));
         }
 
-        // fix : 조회 한 쿠폰 객체 넣어주기
+        //TODO 논의사항 = 쿠폰 적용 방식 (특정 도서/카테고리 쿠폰 1개로 하나의 도서만 적용   OR    여러개 도서에 적용)
         CouponStore couponStore = null;
-
+        if(request.getCouponStoreId() != null) {
+            couponStore = userCouponRepository.findById(request.getCouponStoreId())
+                    .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
+        }
         Order order = Order.builder()
                 .user(user)
                 .couponStore(couponStore)
@@ -56,6 +68,16 @@ public class OrderService {
         saveOrder.setOrderUUID(generateOrderUUID(saveOrder.getId()));
         orderRepository.save(saveOrder);
         return OrderResponse.from(saveOrder);
+    }
+
+    // 주문에 포인트 히스토리 내용 저장
+    @Transactional
+    public OrderResponse savePointHistoryInOrder(long orderId, long pointHistoryId){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        PointHistory pointHistory = pointHistoryRepository.findById(pointHistoryId)
+                .orElseThrow(() -> new PointHistoryNotFoundException(pointHistoryId));
+        order.setPointHistory(pointHistory);
+        return OrderResponse.from(orderRepository.save(order));
     }
 
 
@@ -81,8 +103,7 @@ public class OrderService {
     }
 
     // 기간 별 주문 리스트 조회 (사용자)
-    public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request ,
-                                                                 Pageable pageable){
+    public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request , Pageable pageable){
         Page<Order> page = orderRepository.findByUser_IdAndOrderedAtBetween(userId, request.getStartDate(), request.getEndDate(),pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
@@ -110,13 +131,17 @@ public class OrderService {
         return PageResponse.from(pageResponse);
     }
 
+    // 포인트 ID로 주문 조회
+    public OrderResponse getOrderByPointHistoryId(long pointHistoryId){
+        Order order = orderRepository.findByPointHistory_Id(pointHistoryId);
+        return OrderResponse.from(order);
+    }
 
 
     // 수정
     @Transactional
     public OrderResponse updateOrder(long orderId,OrderUpdateRequest request){
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.update(request);
         return OrderResponse.from(orderRepository.save(order));
     }
@@ -124,19 +149,19 @@ public class OrderService {
     // 삭제
     @Transactional
     public void deleteOrder(long orderId) {
-        orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         orderRepository.deleteById(orderId);
     }
 
-    // 주문 상태 변경 (관리자에 의한)
+    // 주문 상태 변경
     @Transactional
     public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request){
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.updateStatus(request.getOrderStatus());
         return OrderResponse.from(order);
     }
+
+
 
     public static String generateOrderUUID(long orderId){
         String prefix = String.format("order-%d-",orderId);

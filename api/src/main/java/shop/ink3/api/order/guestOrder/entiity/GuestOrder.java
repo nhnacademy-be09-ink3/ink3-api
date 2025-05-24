@@ -22,7 +22,7 @@ import shop.ink3.api.order.order.entity.Order;
 @Builder
 @Entity
 @Table(name = "guest_order_accesses")
-public class GuestOrderAccess {
+public class GuestOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

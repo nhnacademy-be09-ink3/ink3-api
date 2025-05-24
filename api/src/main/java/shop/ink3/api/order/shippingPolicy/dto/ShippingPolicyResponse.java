@@ -1,13 +1,14 @@
 package shop.ink3.api.order.shippingPolicy.dto;
 
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.order.shippingPolicy.entity.ShippingPolicy;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ShippingPolicyResponse {
     private Long id;

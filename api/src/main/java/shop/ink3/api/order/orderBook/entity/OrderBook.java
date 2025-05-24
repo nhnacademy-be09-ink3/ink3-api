@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.entity.Order;
+import shop.ink3.api.order.orderBook.dto.OrderBookUpdateRequest;
 import shop.ink3.api.order.packaging.entity.Packaging;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -51,10 +52,11 @@ public class OrderBook {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    public void updateCoupon(CouponStore coupon) {
-        this.couponStore = coupon;
-    }
-
-    public void updateQuantity(int quantity) {
+    //TODO : 적용 쿠폰에 따라 할인 금액도 수정되어야함.
+    public void update(OrderBookUpdateRequest request, Packaging packaging,CouponStore couponStore) {
+        this.packaging = packaging;
+        this.couponStore = couponStore;
+        this.quantity = request.getQuantity();
+        this.price = request.getPrice();
     }
 }

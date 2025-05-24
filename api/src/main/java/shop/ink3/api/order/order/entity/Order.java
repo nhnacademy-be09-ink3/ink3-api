@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -18,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
+import shop.ink3.api.user.point.entity.PointHistory;
 import shop.ink3.api.user.user.entity.User;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,6 +40,10 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "coupon_store_id", nullable = true)
     private CouponStore couponStore;
+
+    @OneToOne
+    @JoinColumn(name = "point_history_id", nullable = true)
+    private PointHistory pointHistory;
 
     @Column(name = "order_uuid", nullable = true, length = 64, unique = true)
     private String orderUUID;
@@ -62,6 +68,10 @@ public class Order {
 
     public void setOrderUUID(String orderUUID) {
         this.orderUUID = orderUUID;
+    }
+
+    public void setPointHistory(PointHistory pointHistory) {
+        this.pointHistory = pointHistory;
     }
 
     public void updateStatus(OrderStatus orderStatus) {

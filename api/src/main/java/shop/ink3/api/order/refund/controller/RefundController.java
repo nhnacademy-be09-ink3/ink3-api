@@ -1,5 +1,6 @@
 package shop.ink3.api.order.refund.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.service.OrderMainService;
 import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
@@ -24,6 +26,7 @@ import shop.ink3.api.order.refund.service.RefundService;
 @RequestMapping("/refunds")
 public class RefundController {
     private final RefundService refundService;
+    private final OrderMainService orderMainService;
 
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<RefundResponse>> getRefund(
@@ -31,9 +34,10 @@ public class RefundController {
         return ResponseEntity.ok(CommonResponse.success(refundService.getOrderRefund(orderId)));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/me")
     public ResponseEntity<CommonResponse<PageResponse<RefundResponse>>> getUserRefundList(
-            @PathVariable long userId, Pageable pageable) {
+            HttpServletRequest request, Pageable pageable) {
+        long userId = Long.parseLong(request.getHeader("X-User-Id"));
         return ResponseEntity.ok(CommonResponse.success(refundService.getUserRefundList(userId, pageable)));
     }
 
@@ -42,7 +46,7 @@ public class RefundController {
             @RequestBody RefundCreateRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(CommonResponse.create(refundService.createRefund(request)));
+                .body(CommonResponse.create(orderMainService.createRefund(request)));
     }
 
     @PutMapping("/{orderId}")

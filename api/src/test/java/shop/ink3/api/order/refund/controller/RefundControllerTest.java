@@ -28,6 +28,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.entity.Order;
+import shop.ink3.api.order.order.service.OrderMainService;
 import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
@@ -41,6 +43,9 @@ class RefundControllerTest {
     @MockitoBean
     RefundService refundService;
 
+    @MockitoBean
+    OrderMainService orderMainService;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -51,7 +56,8 @@ class RefundControllerTest {
     @DisplayName("반품 정보 조회 - 성공")
     void getRefund_성공() throws Exception {
         // given
-        Refund refund = Refund.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Refund refund = Refund.builder().id(1L).order(order).build();
         RefundResponse response = RefundResponse.from(refund);
         when(refundService.getOrderRefund(1L)).thenReturn(response);
 
@@ -89,19 +95,22 @@ class RefundControllerTest {
     @DisplayName("사용자의 반품 정보 리스트 조회 - 성공")
     void getUserRefundList_성공() throws Exception {
         // given
+        Order order1 = Order.builder().id(1L).build();
+        Order order2 = Order.builder().id(2L).build();
         PageResponse<RefundResponse> response = new PageResponse<>(
                 List.of(
-                        RefundResponse.from(Refund.builder().id(1L).reason("테스트 사유1").details("테스트 상세1").build()),
-                        RefundResponse.from(Refund.builder().id(2L).reason("테스트 사유2").details("테스트 상세2").build())
+                        RefundResponse.from(Refund.builder().id(1L).order(order1).reason("테스트 사유1").details("테스트 상세1").build()),
+                        RefundResponse.from(Refund.builder().id(2L).order(order2).reason("테스트 사유2").details("테스트 상세2").build())
                 ),
                 0,2,2L, 1, false, false
         );
         when(refundService.getUserRefundList(anyLong(), any())).thenReturn(response);
 
         // when, then
-        mockMvc.perform(get("/refunds/user/1")
+        mockMvc.perform(get("/refunds/me")
                     .param("page", "0")
-                    .param("size", "2"))
+                    .param("size", "2")
+                    .header("X-User-Id", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -119,13 +128,15 @@ class RefundControllerTest {
     @DisplayName("반품 생성 - 성공")
     void createRefund_성공() throws Exception {
         // given
+        Order order = Order.builder().id(1L).build();
         RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
         Refund refund = Refund.builder()
+                .order(order)
                 .reason(request.getReason())
                 .details(request.getDetails())
                 .build();
         RefundResponse response = RefundResponse.from(refund);
-        when(refundService.createRefund(any())).thenReturn(response);
+        when(orderMainService.createRefund(any())).thenReturn(response);
 
         // when, then
         mockMvc.perform(post("/refunds")
@@ -145,7 +156,7 @@ class RefundControllerTest {
     void createRefund_실패() throws Exception {
         // given
         RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
-        doThrow(new RefundNotFoundException(1L)).when(refundService).createRefund(any());
+        doThrow(new RefundNotFoundException(1L)).when(orderMainService).createRefund(any());
 
         // when, then
         mockMvc.perform(post("/refunds")
@@ -166,7 +177,8 @@ class RefundControllerTest {
     void updateRefund_성공() throws Exception {
         // given
         RefundUpdateRequest request = new RefundUpdateRequest("변경 사유", "변경 상세");
-        Refund refund = Refund.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Refund refund = Refund.builder().id(1L).order(order).build();
         when(refundService.updateRefund(anyLong(),any())).thenReturn(RefundResponse.from(refund));
 
         // when, then

@@ -34,10 +34,9 @@ public class RefundPolicyController {
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<CommonResponse<PageResponse<RefundPolicyResponse>>> getActivateRefundPolicyList(
-            Pageable pageable) {
+    public ResponseEntity<CommonResponse<RefundPolicyResponse>> getActivateRefundPolicy() {
         return ResponseEntity
-                .ok(CommonResponse.success(refundPolicyService.getAvailableRefundPolicyList(pageable)));
+                .ok(CommonResponse.success(refundPolicyService.getAvailableRefundPolicy()));
     }
 
     @GetMapping

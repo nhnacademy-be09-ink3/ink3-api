@@ -9,8 +9,8 @@ import shop.ink3.api.order.order.entity.OrderStatus;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByUser_Id(long userId, Pageable pageable);
-
     Page<Order> findAll(Pageable pageable);
+    Order findByPointHistory_Id(long pointHistoryId);
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
     Page<Order> findByUser_IdAndStatus(long userId, OrderStatus status, Pageable pageable);

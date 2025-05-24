@@ -16,20 +16,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusRequest;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
+import shop.ink3.api.order.order.service.OrderMainService;
 import shop.ink3.api.order.order.service.OrderService;
+import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-
     private final OrderService orderService;
+    private final OrderMainService orderMainService;
+    private static final String HEADER_USER_ID = "X_USER_ID";
 
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<OrderResponse>> getOrder(
@@ -40,7 +42,7 @@ public class OrderController {
     @GetMapping("/me")
     public ResponseEntity<CommonResponse<PageResponse<OrderResponse>>> getOrderListByUser(
             HttpServletRequest request, Pageable pageable){
-        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
+        long userId = Long.parseLong(request.getHeader(HEADER_USER_ID));
         return ResponseEntity.ok(
                 CommonResponse.success(orderService.getOrderListByUser(userId, pageable)));
     }
@@ -50,7 +52,7 @@ public class OrderController {
             HttpServletRequest request,
             @RequestBody OrderDateRequest dateRequest,
             Pageable pageable){
-        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
+        long userId = Long.parseLong(request.getHeader(HEADER_USER_ID));
         return ResponseEntity.ok(
                 CommonResponse.success(
                         orderService.getOrderListByUserAndDate(userId, dateRequest, pageable)));
@@ -61,7 +63,7 @@ public class OrderController {
             HttpServletRequest request,
             @RequestBody OrderStatusRequest statusRequest,
             Pageable pageable){
-        long userId = Long.parseLong(request.getHeader("X_USER_ID"));
+        long userId = Long.parseLong(request.getHeader(HEADER_USER_ID));
         return ResponseEntity.ok(
                 CommonResponse.success(
                         orderService.getOrderListByUserAndStatus(userId, statusRequest, pageable)));
@@ -77,6 +79,15 @@ public class OrderController {
                         orderService.getOrderListByDate(dateRequest, pageable)));
     }
 
+
+    @GetMapping("/point/{pointHistoryId}")
+    public ResponseEntity<CommonResponse<OrderResponse>> getOrderByPointHistoryId(@PathVariable long pointHistoryId){
+        return ResponseEntity.ok(
+                CommonResponse.success(orderService.getOrderByPointHistoryId(pointHistoryId)));
+    }
+
+
+
     @PostMapping("/status")
     public ResponseEntity<CommonResponse<PageResponse<OrderResponse>>> getOrderListByStatus(
             @RequestBody OrderStatusRequest statusRequest,
@@ -86,14 +97,14 @@ public class OrderController {
                         orderService.getOrderListByStatus(statusRequest, pageable)));
     }
 
-
+    //TODO : 반환값 front-server 랑 맞춰야함
     @PostMapping
-    public ResponseEntity<CommonResponse<OrderResponse>> createOrder(
-            @RequestBody OrderCreateRequest request){
+    public ResponseEntity<CommonResponse<OrderResponse>> createOrder(@RequestBody OrderFormCreateRequest orderFormCreateRequest){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(CommonResponse.create(orderService.createOrder(request)));
+                .body(CommonResponse.create(orderMainService.createOrderForm(orderFormCreateRequest)));
     }
+
     @PutMapping("/{orderId}")
     public ResponseEntity<CommonResponse<OrderResponse>> updateOrder(
             @PathVariable long orderId,
@@ -112,8 +123,7 @@ public class OrderController {
 
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(
-            @PathVariable long orderId){
+    public ResponseEntity<Void> deleteOrder(@PathVariable long orderId){
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }

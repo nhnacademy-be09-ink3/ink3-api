@@ -11,8 +11,8 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Getter
 public class OrderCreateRequest {
-    private long userId;
-    private long couponStoreId;
+    private Long userId;
+    private Long couponStoreId;
     @NotBlank
     @Length(max = 20)
     private String ordererName;

@@ -12,13 +12,15 @@ import lombok.NoArgsConstructor;
 @Getter
 public class OrderBookCreateRequest {
     @NotNull
-    private long bookId;
-    @Nullable
-    private long packagingId;
-    @Nullable
-    private long couponStoreId;
+    private Long orderId;
     @NotNull
-    private int price;
+    private Long bookId;
+    @Nullable
+    private Long packagingId;
+    @Nullable
+    private Long couponStoreId;
     @NotNull
-    private int quantity;
+    private Integer price;
+    @NotNull
+    private Integer quantity;
 }

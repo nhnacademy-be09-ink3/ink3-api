@@ -1,5 +1,6 @@
 package shop.ink3.api.order.packaging.dto;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,7 @@ import shop.ink3.api.order.packaging.entity.Packaging;
 
 
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class PackagingResponse {
     private Long id;

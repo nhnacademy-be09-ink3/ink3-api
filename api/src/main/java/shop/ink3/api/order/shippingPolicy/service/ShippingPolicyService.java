@@ -98,4 +98,14 @@ public class ShippingPolicyService {
         }
         return optionalShippingPolicy.get();
     }
+
+    // 주문 금액에 따른 배송비
+    public Integer getShippingFee(int orderPrice){
+        ShippingPolicyResponse response = getActivateShippingPolicy();
+        if(response.getThreshold() > orderPrice){
+            return response.getFee();
+        }else{
+            return 0;
+        }
+    }
 }
