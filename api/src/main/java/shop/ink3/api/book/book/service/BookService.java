@@ -52,7 +52,6 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
-    private final AladinClient aladinClient;
 
     // 단건 조회
     @Transactional(readOnly = true)
