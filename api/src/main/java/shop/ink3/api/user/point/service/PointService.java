@@ -79,6 +79,7 @@ public class PointService {
                         .user(user)
                         .delta(request.amount())
                         .status(PointHistoryStatus.EARN)
+                        .description(request.description())
                         .createdAt(LocalDateTime.now())
                         .build()
         );
@@ -96,6 +97,7 @@ public class PointService {
                         .user(user)
                         .delta(request.amount())
                         .status(PointHistoryStatus.USE)
+                        .description(request.description())
                         .createdAt(LocalDateTime.now())
                         .build()
         );
@@ -116,6 +118,7 @@ public class PointService {
                 .user(user)
                 .delta(-pointHistory.getDelta())
                 .status(PointHistoryStatus.CANCEL)
+                .description(pointHistory.getDescription() + " 취소")
                 .createdAt(LocalDateTime.now())
                 .build());
     }
