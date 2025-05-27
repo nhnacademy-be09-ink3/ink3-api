@@ -107,7 +107,7 @@ class PackagingServiceTest {
         List<Packaging> list = List.of(Packaging.builder().id(1L).name("활성 포장").isAvailable(true).build());
         Pageable pageable = PageRequest.of(0, 10);
         Page<Packaging> page = new PageImpl<>(list, pageable, list.size());
-        when(packagingRepository.findByIsAvailableTrue(pageable)).thenReturn(page);
+        when(packagingRepository.findAllByIsAvailableTrue(pageable)).thenReturn(page);
 
         // when
         PageResponse<PackagingResponse> response = packagingService.getAvailablePackagingList(pageable);

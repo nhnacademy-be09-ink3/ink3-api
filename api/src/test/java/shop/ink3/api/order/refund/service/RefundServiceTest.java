@@ -54,7 +54,7 @@ class RefundServiceTest {
                 .reason(request.getReason())
                 .details(request.getDetails())
                 .build();
-        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(refund));
+        when(refundRepository.findByOrderId(anyLong())).thenReturn(Optional.of(refund));
 
         // when
         RefundResponse response = refundService.getOrderRefund(1L);
@@ -68,7 +68,7 @@ class RefundServiceTest {
     @DisplayName("반품 조회 - 실패")
     void getRefund_실패() {
         // given
-        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.empty());
+        when(refundRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(RefundNotFoundException.class,
@@ -87,7 +87,7 @@ class RefundServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 2);
         Page<Refund> page = new PageImpl<>(policies, pageable, policies.size());
-        when(refundRepository.findByOrder_UserId(anyLong(), any())).thenReturn(page);
+        when(refundRepository.findAllByOrderUserId(anyLong(), any())).thenReturn(page);
 
         // when
         PageResponse<RefundResponse> pageResponse = refundService.getUserRefundList(1L, pageable);
@@ -134,7 +134,7 @@ class RefundServiceTest {
                 .reason("변경전 사유")
                 .details("변경전 상세")
                 .build();
-        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(refund));
+        when(refundRepository.findByOrderId(anyLong())).thenReturn(Optional.of(refund));
         when(refundRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -152,7 +152,7 @@ class RefundServiceTest {
     void updateRefund_실패() {
         // given
         RefundUpdateRequest request = new RefundUpdateRequest("변경후 사유", "변경후 상세");
-        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.empty());
+        when(refundRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(RefundNotFoundException.class,
@@ -168,7 +168,7 @@ class RefundServiceTest {
                 .reason("테스트 사유")
                 .details("테스트 상세")
                 .build();
-        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(refund));
+        when(refundRepository.findByOrderId(anyLong())).thenReturn(Optional.of(refund));
 
         // when
         refundService.deleteRefund(1L);
@@ -181,7 +181,7 @@ class RefundServiceTest {
     @DisplayName("반품 삭제 - 실패")
     void deleteRefund_실패() {
         // given
-        when(refundRepository.findByOrder_Id(anyLong())).thenReturn(Optional.empty());
+        when(refundRepository.findByOrderId(anyLong())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(RefundNotFoundException.class,

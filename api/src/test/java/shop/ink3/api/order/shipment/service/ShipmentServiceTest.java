@@ -47,7 +47,7 @@ class ShipmentServiceTest {
         // given
         Order order = Order.builder().id(1L).build();
         Shipment shipment = Shipment.builder().id(1L).order(order).build();
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.of(shipment));
 
         // when
         ShipmentResponse response = shipmentService.getShipment(1L);
@@ -61,7 +61,7 @@ class ShipmentServiceTest {
     @DisplayName("배송 정보 조회 - 실패")
     void getShipment_실패() {
         // given
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.empty());
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(ShipmentNotFoundException.class,
@@ -82,7 +82,7 @@ class ShipmentServiceTest {
                 Shipment.builder().id(2L).order(order2).build()
         );
         Page<Shipment> page = new PageImpl<>(list, pageable, list.size());
-        when(shipmentRepository.findByOrder_UserIdAndOrder_Status(anyLong(),any(), any())).thenReturn(page);
+        when(shipmentRepository.findAllByOrderUserIdAndOrderStatus(anyLong(),any(), any())).thenReturn(page);
 
         // when
         PageResponse<ShipmentResponse> response = shipmentService.getShipmentListByOrderStatus(1L, OrderStatus.SHIPPING, pageable);
@@ -135,7 +135,7 @@ class ShipmentServiceTest {
                 5000,
                 "CODE123"
         );
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.of(shipment));
         when(shipmentRepository.save(any())).thenReturn(shipment);
 
         // when
@@ -160,7 +160,7 @@ class ShipmentServiceTest {
                 5000,
                 "CODE123"
         );
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.empty());
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(ShipmentNotFoundException.class,
@@ -172,7 +172,7 @@ class ShipmentServiceTest {
     void deleteShipment_성공() {
         // given
         Shipment shipment = Shipment.builder().id(1L).build();
-        when(shipmentRepository.findByOrder_Id(anyLong())).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByOrderId(anyLong())).thenReturn(Optional.of(shipment));
 
         // when
         shipmentService.deleteShipment(1L);
@@ -185,7 +185,7 @@ class ShipmentServiceTest {
     @DisplayName("배송 삭제 - 실패")
     void deleteShipment_실패() {
         // given
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.empty());
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(ShipmentNotFoundException.class,
@@ -199,7 +199,7 @@ class ShipmentServiceTest {
         Order order = Order.builder().id(1L).build();
         Shipment shipment = Shipment.builder().id(1L).order(order).build();
         LocalDateTime deliveredAt = LocalDateTime.now();
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.of(shipment));
         when(shipmentRepository.save(any())).thenReturn(shipment);
 
         // when
@@ -214,7 +214,7 @@ class ShipmentServiceTest {
     void updateShipmentDeliveredAt_실패() {
         // given
         LocalDateTime deliveredAt = LocalDateTime.now();
-        when(shipmentRepository.findByOrder_Id(1L)).thenReturn(Optional.empty());
+        when(shipmentRepository.findByOrderId(1L)).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(ShipmentNotFoundException.class,
