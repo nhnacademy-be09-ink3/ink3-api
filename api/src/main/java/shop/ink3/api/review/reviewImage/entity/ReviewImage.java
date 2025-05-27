@@ -1,6 +1,5 @@
 package shop.ink3.api.review.reviewImage.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
