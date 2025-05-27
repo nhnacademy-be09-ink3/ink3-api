@@ -95,7 +95,7 @@ public class PointService {
         pointHistoryRepository.save(
                 PointHistory.builder()
                         .user(user)
-                        .delta(request.amount())
+                        .delta(-request.amount())
                         .status(PointHistoryStatus.USE)
                         .description(request.description())
                         .createdAt(LocalDateTime.now())
