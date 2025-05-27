@@ -8,7 +8,11 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: create
@@ -25,3 +29,5 @@ logging:
   level:
     org.hibernate.SQL: debug
 
+aladin:
+  ttb-key: ${TTB_KEY}
