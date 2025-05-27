@@ -1,11 +1,13 @@
 package shop.ink3.api.order.guestOrder.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 
 public record GuestOrderCreateRequest(
         @NotNull
         Long orderId,
+        @Email
         @NotBlank
         String email,
         @NotBlank

@@ -9,5 +9,4 @@ public record OrderFormCreateRequest(
         ShipmentCreateRequest shipmentCreateRequest,
         List<OrderBookCreateRequest> createRequestList
 ) {
-
 }

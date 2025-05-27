@@ -105,7 +105,7 @@ class RefundServiceTest {
         // given
         RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세");
         Order order = Order.builder().id(1L).build();
-        Refund  refund = Refund.builder()
+        Refund refund = Refund.builder()
                 .id(1L)
                 .order(order)
                 .reason(request.getReason())
@@ -138,7 +138,7 @@ class RefundServiceTest {
         when(refundRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        RefundResponse saveRefund = refundService.updateRefund(anyLong(),request);
+        RefundResponse saveRefund = refundService.updateRefund(anyLong(), request);
 
         // then
         assertNotNull(saveRefund);
@@ -156,14 +156,14 @@ class RefundServiceTest {
 
         // when, then
         assertThrows(RefundNotFoundException.class,
-                () -> refundService.updateRefund(anyLong(),request));
+                () -> refundService.updateRefund(anyLong(), request));
     }
 
     @Test
     @DisplayName("반품 삭제 - 성공")
     void deleteRefund_성공() {
         // given
-        Refund  refund = Refund.builder()
+        Refund refund = Refund.builder()
                 .id(1L)
                 .reason("테스트 사유")
                 .details("테스트 상세")
