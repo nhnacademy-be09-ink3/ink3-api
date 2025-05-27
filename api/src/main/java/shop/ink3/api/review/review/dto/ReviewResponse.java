@@ -1,10 +1,8 @@
-package shop.ink3.api.review.dto;
+package shop.ink3.api.review.review.dto;
 
 import java.time.LocalDateTime;
 
-import shop.ink3.api.order.orderBook.entity.OrderBook;
-import shop.ink3.api.review.entity.Review;
-import shop.ink3.api.user.user.entity.User;
+import shop.ink3.api.review.review.entity.Review;
 
 public record ReviewResponse(
     Long id,
