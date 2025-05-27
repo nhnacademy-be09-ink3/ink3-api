@@ -1,4 +1,4 @@
-package shop.ink3.api.review.repository;
+package shop.ink3.api.review.review.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import feign.Param;
-import shop.ink3.api.review.entity.Review;
+import shop.ink3.api.review.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Review findReviewByUserId(Long userId);

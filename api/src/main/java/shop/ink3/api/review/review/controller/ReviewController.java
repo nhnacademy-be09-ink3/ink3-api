@@ -1,6 +1,5 @@
-package shop.ink3.api.review.controller;
+package shop.ink3.api.review.review.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -18,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.review.dto.ReviewRequest;
-import shop.ink3.api.review.dto.ReviewResponse;
-import shop.ink3.api.review.dto.ReviewUpdateRequest;
-import shop.ink3.api.review.service.ReviewService;
+import shop.ink3.api.review.review.dto.ReviewRequest;
+import shop.ink3.api.review.review.dto.ReviewResponse;
+import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
+import shop.ink3.api.review.review.service.ReviewService;
 
 @RestController
 @RequestMapping("/reviews")

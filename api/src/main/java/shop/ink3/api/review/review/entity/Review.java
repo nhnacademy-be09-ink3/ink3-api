@@ -1,4 +1,4 @@
-package shop.ink3.api.review.entity;
+package shop.ink3.api.review.review.entity;
 
 import java.time.LocalDateTime;
 

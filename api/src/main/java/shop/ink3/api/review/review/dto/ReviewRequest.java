@@ -1,4 +1,4 @@
-package shop.ink3.api.review.dto;
+package shop.ink3.api.review.review.dto;
 
 public record ReviewRequest(
     Long userId,
