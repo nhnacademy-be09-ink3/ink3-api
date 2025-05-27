@@ -6,11 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
-import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
@@ -31,6 +29,7 @@ import shop.ink3.api.user.point.eventListener.PointHistoryAfterCancelPaymentEven
 import shop.ink3.api.user.point.eventListener.PointHistoryAfterPaymentEven;
 
 @Slf4j
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
@@ -56,26 +55,30 @@ public class PaymentService {
                 String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), PARSER));
         Payment payment = paymentParser.paymentResponseParser(confirmRequest.orderId(), paymentApproveResponse);
 
+        payment.setDiscountPrice(confirmRequest.discountAmount());
+        payment.setUsedPoint(confirmRequest.usedPointAmount());
+
         //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
-        // 포인트 적립
+        // 포인트 사용 및 적립
         eventPublisher.publishEvent(
-                new PointHistoryAfterPaymentEven(confirmRequest.orderId(),confirmRequest.amount())
-        );
+                new PointHistoryAfterPaymentEven(
+                        confirmRequest.userId(),
+                        confirmRequest.orderId(),
+                        confirmRequest.amount(),
+                        confirmRequest.usedPointAmount()));
         return payment;
     }
 
     // 결제 취소
-    @Transactional(propagation = Propagation.REQUIRED)
     public void cancelPayment(long orderId, long userId){
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        OrderResponse orderResponse = orderService.getOrder(orderId);
         // 결제 취소 가능 여부 확인
-        if(!order.getStatus().equals(OrderStatus.CONFIRMED)){
+        if(!orderResponse.getStatus().equals(OrderStatus.CONFIRMED)){
             throw new PaymentCancelNotAllowedException();
         }
+
         //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
         // 금액 환불 to point (포인트 내역 추가)
-        OrderResponse orderResponse = orderService.getOrder(orderId);
         eventPublisher.publishEvent(
                 new PointHistoryAfterCancelPaymentEven(orderResponse.getId(), orderResponse.getPointHistoryId())
         );
@@ -88,7 +91,6 @@ public class PaymentService {
     }
 
     // 생성
-    @Transactional
     public PaymentResponse createPayment(Payment payment){
         // 특정 주문에 대한 payment가 존재하는지 확인 정도.
         Long orderId = payment.getOrder().getId();
@@ -101,6 +103,7 @@ public class PaymentService {
     }
 
     // 조회
+    @Transactional(readOnly = true)
     public PaymentResponse getPayment(long orderId){
         Payment payment = paymentRepository.findByOrder_Id(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException(orderId));
@@ -108,7 +111,6 @@ public class PaymentService {
     }
 
     // 삭제
-    @Transactional
     public void deletePayment(long orderId){
         orderRepository.findById(orderId)
                 .orElseThrow(()->new OrderNotFoundException(orderId));

@@ -7,6 +7,8 @@ import shop.ink3.api.payment.entity.PaymentType;
 public record PaymentResponse (
     long id,
     long orderId,
+    int usedPointAmount,
+    int discountAmount,
     int paymentAmount,
     PaymentType paymentType,
     LocalDateTime requestedAt,
@@ -16,6 +18,8 @@ public record PaymentResponse (
         return new PaymentResponse(
                 payment.getId(),
                 payment.getOrder().getId(),
+                payment.getUsedPoint(),
+                payment.getDiscountPrice(),
                 payment.getPaymentAmount(),
                 payment.getPaymentType(),
                 payment.getRequestAt(),

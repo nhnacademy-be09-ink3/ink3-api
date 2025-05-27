@@ -31,7 +31,7 @@ import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
-
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -41,23 +41,15 @@ public class OrderService {
     private final UserCouponRepository userCouponRepository;
 
     // 생성
-    @Transactional
-    public OrderResponse createOrder(OrderCreateRequest request){
+    public OrderResponse createOrder(OrderCreateRequest request) {
         User user = null;
-        if(Objects.nonNull(request.getUserId())) {
+        if (Objects.nonNull(request.getUserId())) {
             user = userRepository.findById(request.getUserId())
-                    .orElseThrow(()->new UserNotFoundException(request.getUserId()));
+                    .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
         }
 
-        //TODO 논의사항 = 쿠폰 적용 방식 (특정 도서/카테고리 쿠폰 1개로 하나의 도서만 적용   OR    여러개 도서에 적용)
-        CouponStore couponStore = null;
-        if(request.getCouponStoreId() != null) {
-            couponStore = userCouponRepository.findById(request.getCouponStoreId())
-                    .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
-        }
         Order order = Order.builder()
                 .user(user)
-                .couponStore(couponStore)
                 .status(OrderStatus.CONFIRMED)
                 .orderedAt(LocalDateTime.now())
                 .ordererName(request.getOrdererName())
@@ -70,25 +62,16 @@ public class OrderService {
         return OrderResponse.from(saveOrder);
     }
 
-    // 주문에 포인트 히스토리 내용 저장
-    @Transactional
-    public OrderResponse savePointHistoryInOrder(long orderId, long pointHistoryId){
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        PointHistory pointHistory = pointHistoryRepository.findById(pointHistoryId)
-                .orElseThrow(() -> new PointHistoryNotFoundException(pointHistoryId));
-        order.setPointHistory(pointHistory);
-        return OrderResponse.from(orderRepository.save(order));
-    }
-
-
     // 주문Id에 대한 조회 (사용자)
-    public OrderResponse getOrder(long orderId){
+    @Transactional(readOnly = true)
+    public OrderResponse getOrder(long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
         return OrderResponse.from(order);
     }
 
     // 사용자의 주문 리스트 조회 (사용자)
+    @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByUser(long userId, Pageable pageable) {
         Page<Order> page = orderRepository.findByUser_Id(userId, pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
@@ -96,81 +79,87 @@ public class OrderService {
     }
 
     // 사용자 + 상태별 주문 조회 (사용자)
-    public PageResponse<OrderResponse> getOrderListByUserAndStatus(long userId, OrderStatusRequest request, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByUserAndStatus(long userId, OrderStatusRequest request,
+                                                                   Pageable pageable) {
         Page<Order> page = orderRepository.findByUser_IdAndStatus(userId, request.getOrderStatus(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 기간 별 주문 리스트 조회 (사용자)
-    public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request , Pageable pageable){
-        Page<Order> page = orderRepository.findByUser_IdAndOrderedAtBetween(userId, request.getStartDate(), request.getEndDate(),pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request,
+                                                                 Pageable pageable) {
+        Page<Order> page = orderRepository.findByUser_IdAndOrderedAtBetween(userId, request.getStartDate(),
+                request.getEndDate(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 기간 별 주문 리스트 조회 (관리자)
-    public PageResponse<OrderResponse> getOrderListByDate(OrderDateRequest request, Pageable pageable){
-        Page<Order> page = orderRepository.findByOrderedAtBetween(request.getStartDate(), request.getEndDate() ,pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByDate(OrderDateRequest request, Pageable pageable) {
+        Page<Order> page = orderRepository.findByOrderedAtBetween(request.getStartDate(), request.getEndDate(),
+                pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
 
     // 전체 주문 리스트 조회 (관리자)
-    public PageResponse<OrderResponse> getOrderList(Pageable pageable){
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderList(Pageable pageable) {
         Page<Order> page = orderRepository.findAll(pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 상태별 주문 리스트 조회 (관리자)
-    public PageResponse<OrderResponse> getOrderListByStatus( OrderStatusRequest request, Pageable pageable){
-        Page<Order> page = orderRepository.findByStatus(request.getOrderStatus(),pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByStatus(OrderStatusRequest request, Pageable pageable) {
+        Page<Order> page = orderRepository.findByStatus(request.getOrderStatus(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 포인트 ID로 주문 조회
-    public OrderResponse getOrderByPointHistoryId(long pointHistoryId){
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderByPointHistoryId(long pointHistoryId) {
         Order order = orderRepository.findByPointHistory_Id(pointHistoryId);
         return OrderResponse.from(order);
     }
 
 
     // 수정
-    @Transactional
-    public OrderResponse updateOrder(long orderId,OrderUpdateRequest request){
+    public OrderResponse updateOrder(long orderId, OrderUpdateRequest request) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.update(request);
         return OrderResponse.from(orderRepository.save(order));
     }
 
     // 삭제
-    @Transactional
     public void deleteOrder(long orderId) {
         orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         orderRepository.deleteById(orderId);
     }
 
     // 주문 상태 변경
-    @Transactional
-    public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request){
+    public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.updateStatus(request.getOrderStatus());
         return OrderResponse.from(order);
     }
 
 
-
-    public static String generateOrderUUID(long orderId){
-        String prefix = String.format("order-%d-",orderId);
+    public static String generateOrderUUID(long orderId) {
+        String prefix = String.format("order-%d-", orderId);
         String uuid = UUID.randomUUID().toString().replace("-", "");
 
         String orderUUID = prefix + uuid;
 
         // 최대 64자 이하
-        if(orderUUID.length() > 64){
+        if (orderUUID.length() > 64) {
             orderUUID = orderUUID.substring(0, 64);
         }
 

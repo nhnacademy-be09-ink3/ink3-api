@@ -17,6 +17,7 @@ import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class GuestOrderService {
@@ -25,7 +26,6 @@ public class GuestOrderService {
     private final SecurityConfig securityConfig;
 
     // 생성
-    @Transactional
     public GuestOrderResponse createGuestOrder(GuestOrderCreateRequest request){
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(OrderNotFoundException::new);
@@ -38,6 +38,7 @@ public class GuestOrderService {
     }
 
     // 비회원 주문 번호로 주문 조회
+    @Transactional(readOnly = true)
     public GuestOrderResponse getGuestOrder(long guestOrderId){
         GuestOrder guestOrder = guestOrderRepository.findById(guestOrderId)
                 .orElseThrow(() -> new GuestOrderNotFoundException(guestOrderId));
@@ -45,6 +46,7 @@ public class GuestOrderService {
     }
 
     // 주문 Id에 대한 비회원 주문 조회
+    @Transactional(readOnly = true)
     public GuestOrderResponse getGuestOrderByOrderId(long orderId){
         GuestOrder guestOrder = guestOrderRepository.findByOrder_Id(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
@@ -52,6 +54,7 @@ public class GuestOrderService {
     }
 
     // 자신의 이메일과 비밀번호로 주문리스트 조회하기
+    @Transactional(readOnly = true)
     public PageResponse<GuestOrderResponse> getGuestOrderList(String email, String password, Pageable pageable){
         Page<GuestOrder> pageGuestOrder = guestOrderRepository.findByEmailAndAndPassword(email,
                 securityConfig.passwordEncoder().encode(password), pageable);
@@ -59,10 +62,7 @@ public class GuestOrderService {
         return PageResponse.from(pageGuestOrderResponse);
     }
 
-    //TODO : 수정이 들어가야하는지?
-
     // 삭제 비회원 주문ID로 삭제
-    @Transactional
     public void deleteGuestOrder(long guestOrderId){
         guestOrderRepository.findById(guestOrderId)
                 .orElseThrow(() -> new GuestOrderNotFoundException(guestOrderId));
@@ -70,7 +70,6 @@ public class GuestOrderService {
     }
 
     // 삭제 주문ID로 삭제
-    @Transactional
     public void deleteGuestOrderByOrderId(long orderId){
         guestOrderRepository.findByOrder_Id(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));

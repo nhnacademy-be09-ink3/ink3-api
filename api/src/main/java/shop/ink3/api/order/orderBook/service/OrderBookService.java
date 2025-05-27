@@ -29,6 +29,7 @@ import shop.ink3.api.order.packaging.entity.Packaging;
 import shop.ink3.api.order.packaging.exception.PackagingNotFoundException;
 import shop.ink3.api.order.packaging.repository.PackagingRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderBookService {
@@ -39,7 +40,6 @@ public class OrderBookService {
     private final UserCouponRepository userCouponRepository;
 
     // 생성
-    @Transactional
     public void createOrderBook(List<OrderBookCreateRequest> requestList) {
         long orderId = requestList.getFirst().getOrderId();
 
@@ -58,7 +58,6 @@ public class OrderBookService {
             book.decreaseQuantity(request.getQuantity());
             bookRepository.save(book);
 
-            //TODO 논의사항 = 쿠폰 적용 방식 (특정 도서/카테고리 쿠폰 1개로 하나의 도서만 적용   OR    여러개 도서에 적용)
             CouponStore couponStore = null;
             if(request.getCouponStoreId() != null) {
                 couponStore = userCouponRepository.findById(request.getCouponStoreId())
@@ -78,6 +77,7 @@ public class OrderBookService {
     }
 
     // 조회
+    @Transactional(readOnly = true)
     public OrderBookResponse getOrderBook(long orderBookId) {
         OrderBook orderBook = orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new OrderBookNotFoundException(orderBookId));
@@ -85,6 +85,7 @@ public class OrderBookService {
     }
 
     // 주문에 대한 도서 리스트 조회 (주문내역 시 첫페이지의 도서 내역만 보여주고 나머지는 ... 외 X권 이렇게 사용)
+    @Transactional(readOnly = true)
     public PageResponse<OrderBookResponse> getOrderBookListByOrderId(long orderId, Pageable pageable) {
         Page<OrderBook> page = orderBookRepository.findByOrder_Id(orderId, pageable);
         Page<OrderBookResponse> pageResponse = page.map(OrderBookResponse::from);
@@ -92,7 +93,6 @@ public class OrderBookService {
     }
 
     // 수정
-    @Transactional
     public OrderBookResponse updateOrderBook(long orderBookId, OrderBookUpdateRequest request) {
         OrderBook orderBook = orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new OrderBookNotFoundException(orderBookId));
@@ -106,7 +106,6 @@ public class OrderBookService {
     }
 
     // 삭제 특정 주문 도서만 삭제
-    @Transactional
     public void deleteOrderBook(long orderBookId) {
         orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new OrderBookNotFoundException(orderBookId));
@@ -114,7 +113,6 @@ public class OrderBookService {
     }
 
     // 삭제 orderId에 대한 삭제
-    @Transactional
     public void deleteOrderBookListByOrderId(long orderId) {
         orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
@@ -122,7 +120,6 @@ public class OrderBookService {
     }
 
     // 주문 취소에 따른 도서 재고 원상복구
-    @Transactional
     public void resetBookQuantity(long orderId){
         orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));

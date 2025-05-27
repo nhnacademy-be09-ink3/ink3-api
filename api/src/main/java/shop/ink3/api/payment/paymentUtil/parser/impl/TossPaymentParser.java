@@ -29,6 +29,8 @@ public class TossPaymentParser implements PaymentParser {
             return Payment.builder()
                     .order(order)
                     .paymentKey(tossResponse.paymentKey())
+                    .usedPoint(0)
+                    .discountPrice(0)
                     .paymentAmount(tossResponse.totalAmount())
                     .paymentType(PaymentType.TOSS)
                     .requestAt(tossResponse.requestedAt())

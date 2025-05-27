@@ -21,19 +21,19 @@ import shop.ink3.api.order.guestOrder.service.GuestOrderService;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/guestOders")
+@RequestMapping("/guestOrders")
 public class GuestOrderController {
 
     private final GuestOrderService guestOrderService;
 
     @GetMapping("/{guestOrderId}")
-    public ResponseEntity<CommonResponse<GuestOrderResponse>> getGuestOrder(@PathVariable long guestOrderId){
+    public ResponseEntity<CommonResponse<GuestOrderResponse>> getGuestOrder(@PathVariable long guestOrderId) {
         return ResponseEntity
                 .ok(CommonResponse.success(guestOrderService.getGuestOrder(guestOrderId)));
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<CommonResponse<GuestOrderResponse>> getGuestOrderByOrderId(@PathVariable long orderId){
+    public ResponseEntity<CommonResponse<GuestOrderResponse>> getGuestOrderByOrderId(@PathVariable long orderId) {
         return ResponseEntity
                 .ok(CommonResponse.success(guestOrderService.getGuestOrderByOrderId(orderId)));
     }
@@ -42,26 +42,27 @@ public class GuestOrderController {
     public ResponseEntity<CommonResponse<PageResponse<GuestOrderResponse>>> getGuestOrderList(
             @RequestParam String email,
             @RequestParam String password,
-            Pageable pageable){
+            Pageable pageable)
+    {
         return ResponseEntity
                 .ok(CommonResponse.success(guestOrderService.getGuestOrderList(email, password, pageable)));
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<GuestOrderResponse>> createGuestOrder(@RequestBody GuestOrderCreateRequest request){
+    public ResponseEntity<CommonResponse<GuestOrderResponse>> createGuestOrder(@RequestBody GuestOrderCreateRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(guestOrderService.createGuestOrder(request)));
     }
 
     @DeleteMapping("/{guestOrderId}")
-    public ResponseEntity<CommonResponse<Void>> deleteGuestOrder(@PathVariable long guestOrderId){
+    public ResponseEntity<CommonResponse<Void>> deleteGuestOrder(@PathVariable long guestOrderId) {
         guestOrderService.deleteGuestOrder(guestOrderId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/order/{orderId}")
-    public ResponseEntity<CommonResponse<Void>> deleteGuestOrderByOrderId(@PathVariable long orderId){
+    public ResponseEntity<CommonResponse<Void>> deleteGuestOrderByOrderId(@PathVariable long orderId) {
         guestOrderService.deleteGuestOrderByOrderId(orderId);
         return ResponseEntity.noContent().build();
     }

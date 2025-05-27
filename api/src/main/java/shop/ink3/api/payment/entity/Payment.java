@@ -56,4 +56,12 @@ public class Payment {
 
     @Column(nullable = true)
     private LocalDateTime approvedAt;
+
+    public void setDiscountPrice(Integer discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
+    public void setUsedPoint(Integer usedPoint) {
+        this.usedPoint = usedPoint;
+    }
 }

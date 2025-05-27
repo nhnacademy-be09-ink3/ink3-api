@@ -16,6 +16,7 @@ import shop.ink3.api.order.shipment.service.ShipmentService;
 import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 import shop.ink3.api.user.point.eventListener.PointHistoryAfterCancelPaymentEven;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderMainService {
@@ -27,7 +28,6 @@ public class OrderMainService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     // 결제 시 주문서 생성 (주문 관련 데이터 저장)
-    @Transactional(propagation = Propagation.REQUIRED)
     public OrderResponse createOrderForm(OrderFormCreateRequest request) {
         OrderResponse orderResponse = orderService.createOrder(request.orderCreateRequest());
         orderBookService.createOrderBook(request.createRequestList());
@@ -36,12 +36,11 @@ public class OrderMainService {
     }
 
     // 반품 생성
-    @Transactional(propagation = Propagation.REQUIRED)
     public RefundResponse createRefund(RefundCreateRequest request) {
         // 반품 가능 여부 확인
         refundService.availableRefund(request);
         RefundResponse refund = refundService.createRefund(request);
-        //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
+        //TODO : 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
         // 금액 환불 to point (포인트 내역 추가)
         OrderResponse order = orderService.getOrder(refund.getOrderId());
         applicationEventPublisher.publishEvent(
@@ -52,4 +51,7 @@ public class OrderMainService {
         orderService.updateOrderStatus(request.getOrderId(), new OrderStatusUpdateRequest(OrderStatus.REFUNDED));
         return refund;
     }
+
+
+    //TODO : 결제 실패 시
 }

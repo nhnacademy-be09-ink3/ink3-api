@@ -16,7 +16,6 @@ import shop.ink3.api.user.user.entity.User;
 public class OrderResponse {
     private Long id;
     private Long userId;
-    private Long couponStoreId;
     private Long pointHistoryId;
     private String orderUUID;
     private OrderStatus status;
@@ -28,7 +27,6 @@ public class OrderResponse {
         return new OrderResponse(
                 order.getId(),
                 order.getUser().getId(),
-                order.getCouponStore().getId(),
                 order.getPointHistory().getId(),
                 order.getOrderUUID(),
                 order.getStatus(),

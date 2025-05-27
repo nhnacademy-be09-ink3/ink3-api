@@ -15,6 +15,7 @@ import shop.ink3.api.order.refundPolicy.entity.RefundPolicy;
 import shop.ink3.api.order.refundPolicy.exception.RefundPolicyNotFoundException;
 import shop.ink3.api.order.refundPolicy.repository.RefundPolicyRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class RefundPolicyService {
@@ -22,7 +23,6 @@ public class RefundPolicyService {
     private final RefundPolicyRepository refundPolicyRepository;
 
     // 생성
-    @Transactional
     public RefundPolicyResponse createRefundPolicy(RefundPolicyCreateRequest request) {
         RefundPolicy refundPolicy = RefundPolicy.builder()
                 .name(request.getName())
@@ -36,12 +36,14 @@ public class RefundPolicyService {
     }
 
     // 조회
+    @Transactional(readOnly = true)
     public RefundPolicyResponse getRefundPolicy(long refundPolicyId) {
         RefundPolicy refundPolicy = getRefundPolicyOrThrow(refundPolicyId);
         return RefundPolicyResponse.from(refundPolicy);
     }
 
     // 전체 정책 list 조회
+    @Transactional(readOnly = true)
     public PageResponse<RefundPolicyResponse> getRefundPolicyList(Pageable pageable) {
         Page<RefundPolicy> page = refundPolicyRepository.findAll(pageable);
         Page<RefundPolicyResponse> responsePage = page.map(RefundPolicyResponse::from);
@@ -49,13 +51,13 @@ public class RefundPolicyService {
     }
 
     // 활성화된 정책 list 조회
+    @Transactional(readOnly = true)
     public RefundPolicyResponse getAvailableRefundPolicy() {
         RefundPolicy refundPolicy = refundPolicyRepository.findByIsAvailableTrue();
         return RefundPolicyResponse.from(refundPolicy);
     }
 
     // 수정
-    @Transactional
     public RefundPolicyResponse updateRefundPolicy(long refundPolicyId, RefundPolicyUpdateRequest request) {
         RefundPolicy refundPolicy = getRefundPolicyOrThrow(refundPolicyId);
         refundPolicy.update(request);
@@ -63,14 +65,12 @@ public class RefundPolicyService {
     }
 
     // 삭제
-    @Transactional
     public void deleteRefundPolicy(long refundPolicyId) {
         getRefundPolicyOrThrow(refundPolicyId);
         refundPolicyRepository.deleteById(refundPolicyId);
     }
 
     // 활성화
-    @Transactional
     public void activate(long refundPolicyId) {
         RefundPolicy refundPolicy = getRefundPolicyOrThrow(refundPolicyId);
         refundPolicy.activate();
@@ -78,7 +78,6 @@ public class RefundPolicyService {
     }
 
     // 비활성화
-    @Transactional
     public void deactivate(long refundPolicyId) {
         RefundPolicy refundPolicy = getRefundPolicyOrThrow(refundPolicyId);
         refundPolicy.deactivate();
@@ -88,7 +87,7 @@ public class RefundPolicyService {
 
 
     // 조회 로직
-    private RefundPolicy getRefundPolicyOrThrow(long refundPolicyId) {
+    protected RefundPolicy getRefundPolicyOrThrow(long refundPolicyId) {
         Optional<RefundPolicy> optionalRefundPolicy = refundPolicyRepository.findById(refundPolicyId);
         if (!optionalRefundPolicy.isPresent()) {
             throw new RefundPolicyNotFoundException(refundPolicyId);

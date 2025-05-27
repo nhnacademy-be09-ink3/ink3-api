@@ -14,6 +14,7 @@ import shop.ink3.api.order.packaging.entity.Packaging;
 import shop.ink3.api.order.packaging.exception.PackagingNotFoundException;
 import shop.ink3.api.order.packaging.repository.PackagingRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class PackagingService {
@@ -21,7 +22,6 @@ public class PackagingService {
     private final PackagingRepository packagingRepository;
 
     // 생성
-    @Transactional
     public PackagingResponse createPackaging(PackagingCreateRequest request) {
         Packaging packaging = Packaging.builder()
                 .name(request.getName())
@@ -34,12 +34,14 @@ public class PackagingService {
 
 
     // 조회
+    @Transactional(readOnly = true)
     public PackagingResponse getPackaging(long packagingId) {
         Packaging packaging = getPackagingOrThrow(packagingId);
         return PackagingResponse.from(packaging);
     }
 
     // 활성화된 포장정책 list 조회
+    @Transactional(readOnly = true)
     public PageResponse<PackagingResponse> getAvailablePackagingList(Pageable pageable) {
         Page<Packaging> page = packagingRepository.findByIsAvailableTrue(pageable);
         Page<PackagingResponse> packagingResponseList = page.map(PackagingResponse::from);
@@ -47,6 +49,7 @@ public class PackagingService {
     }
 
     // 전체 포장정책 list 조회
+    @Transactional(readOnly = true)
     public PageResponse<PackagingResponse> getPackagingList(Pageable pageable) {
         Page<Packaging> page = packagingRepository.findAll(pageable);
         Page<PackagingResponse> packagingResponseList = page.map(PackagingResponse::from);
@@ -54,7 +57,6 @@ public class PackagingService {
     }
 
     // 수정
-    @Transactional
     public PackagingResponse updatePackaging(long packagingId, PackagingUpdateRequest request) {
         Packaging packaging = getPackagingOrThrow(packagingId);
         packaging.update(request);
@@ -62,7 +64,6 @@ public class PackagingService {
     }
 
     // 삭제
-    @Transactional
     public void deletePackaging(long packagingId) {
         getPackagingOrThrow(packagingId);
         packagingRepository.deleteById(packagingId);
@@ -70,7 +71,6 @@ public class PackagingService {
 
 
     // 활성화
-    @Transactional
     public void activate(long packagingId) {
         Packaging packaging = getPackagingOrThrow(packagingId);
         packaging.activate();
@@ -78,7 +78,6 @@ public class PackagingService {
     }
 
     // 비활성화
-    @Transactional
     public void deactivate(long packagingId) {
         Packaging packaging = getPackagingOrThrow(packagingId);
         packaging.deactivate();
@@ -87,7 +86,7 @@ public class PackagingService {
 
 
     // 조회 로직
-    private Packaging getPackagingOrThrow(long packagingId) {
+    protected Packaging getPackagingOrThrow(long packagingId) {
         Optional<Packaging> optionalPackaging = packagingRepository.findById(packagingId);
         if (!optionalPackaging.isPresent()) {
             throw new PackagingNotFoundException();

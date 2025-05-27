@@ -28,6 +28,7 @@ import shop.ink3.api.order.shipment.exception.ShipmentNotFoundException;
 import shop.ink3.api.order.shipment.repository.ShipmentRepository;
 import shop.ink3.api.order.shipment.service.ShipmentService;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class RefundService {
@@ -38,30 +39,7 @@ public class RefundService {
     private static final String refundDefectReason = "파손";
     private static final String refundBasicReason = "일반";
 
-    // 반품 처리 가능 여부
-    public void availableRefund(RefundCreateRequest request){
-        RefundPolicy refundPolicy = refundPolicyRepository.findByIsAvailableTrue();
-        Shipment shipment = shipmentRepository.findByOrder_Id(request.getOrderId())
-                .orElseThrow(ShipmentNotFoundException::new);
-        orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new OrderNotFoundException(request.getOrderId()));
-
-        LocalDate deliveredDate = shipment.getDeliveredAt().toLocalDate();
-        LocalDate today = LocalDate.now();
-        int daysSinceDelivery = (int) ChronoUnit.DAYS.between(deliveredDate, today);
-        if(request.getReason().trim().equals(refundDefectReason)){
-            if(refundPolicy.getDefectReturnDeadLine() < daysSinceDelivery){
-                throw new ReturnDeadlineExceededException();
-            }
-        }else if(request.getReason().trim().equals(refundBasicReason)){
-            if(refundPolicy.getReturnDeadLine() < daysSinceDelivery){
-                throw new ReturnDeadlineExceededException();
-            }
-        }
-    }
-
     // 반품 생성
-    @Transactional(propagation = Propagation.REQUIRED)
     public RefundResponse createRefund(RefundCreateRequest request) {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new OrderNotFoundException(request.getOrderId()));
@@ -74,12 +52,14 @@ public class RefundService {
     }
 
     // 주문 id에 대한 조회
-    public RefundResponse getOrderRefund(long orderId){
+    @Transactional(readOnly = true)
+    public RefundResponse getOrderRefund(long orderId) {
         Refund refund = getRefundOrThrow(orderId);
         return RefundResponse.from(refund);
     }
 
     // 사용자에 대한 반품 list 조회
+    @Transactional(readOnly = true)
     public PageResponse<RefundResponse> getUserRefundList(long userId, Pageable pageable) {
         Page<Refund> pageRefund = refundRepository.findByOrder_UserId(userId, pageable);
         Page<RefundResponse> pageRefundResponse = pageRefund.map(RefundResponse::from);
@@ -87,26 +67,45 @@ public class RefundService {
     }
 
     // 주문 id에 대한 수정
-    @Transactional
-    public RefundResponse updateRefund(long orderId,RefundUpdateRequest request) {
+    public RefundResponse updateRefund(long orderId, RefundUpdateRequest request) {
         Refund refund = getRefundOrThrow(orderId);
         refund.update(request);
         return RefundResponse.from(refundRepository.save(refund));
     }
 
     // 주문 Id에 대한 삭제
-    @Transactional
     public void deleteRefund(long orderId) {
         getRefundOrThrow(orderId);
         refundRepository.deleteById(orderId);
     }
 
     // 조회 로직
-    private Refund getRefundOrThrow(long orderId) {
+    protected Refund getRefundOrThrow(long orderId) {
         Optional<Refund> optionalRefund = refundRepository.findByOrder_Id(orderId);
         if (optionalRefund.isEmpty()) {
             throw new RefundNotFoundException(orderId);
         }
         return optionalRefund.get();
+    }
+
+    // 반품 처리 가능 여부
+    public void availableRefund(RefundCreateRequest request) {
+        RefundPolicy refundPolicy = refundPolicyRepository.findByIsAvailableTrue();
+        Shipment shipment = shipmentRepository.findByOrder_Id(request.getOrderId())
+                .orElseThrow(ShipmentNotFoundException::new);
+        orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new OrderNotFoundException(request.getOrderId()));
+        LocalDate deliveredDate = shipment.getDeliveredAt().toLocalDate();
+        LocalDate today = LocalDate.now();
+        int daysSinceDelivery = (int) ChronoUnit.DAYS.between(deliveredDate, today);
+        if (request.getReason().trim().equals(refundDefectReason)) {
+            if (refundPolicy.getDefectReturnDeadLine() < daysSinceDelivery) {
+                throw new ReturnDeadlineExceededException();
+            }
+        } else if (request.getReason().trim().equals(refundBasicReason)) {
+            if (refundPolicy.getReturnDeadLine() < daysSinceDelivery) {
+                throw new ReturnDeadlineExceededException();
+            }
+        }
     }
 }

@@ -12,7 +12,6 @@ import org.hibernate.validator.constraints.Length;
 @Getter
 public class OrderCreateRequest {
     private Long userId;
-    private Long couponStoreId;
     @NotBlank
     @Length(max = 20)
     private String ordererName;

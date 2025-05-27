@@ -37,10 +37,6 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_store_id", nullable = true)
-    private CouponStore couponStore;
-
     @OneToOne
     @JoinColumn(name = "point_history_id", nullable = true)
     private PointHistory pointHistory;

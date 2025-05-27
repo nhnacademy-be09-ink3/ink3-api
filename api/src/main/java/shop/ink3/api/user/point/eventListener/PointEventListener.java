@@ -12,6 +12,7 @@ import shop.ink3.api.user.point.dto.PointHistoryCreateRequest;
 import shop.ink3.api.user.point.dto.PointHistoryResponse;
 import shop.ink3.api.user.point.entity.PointHistoryStatus;
 import shop.ink3.api.user.point.service.PointService;
+import shop.ink3.api.user.user.dto.UserPointRequest;
 
 @Slf4j
 @Component
@@ -28,12 +29,10 @@ public class PointEventListener {
     public void handlePointHistoryAfterPayment(PointHistoryAfterPaymentEven event) {
         try {
             //TODO 포인트 정책 적용 필요
-            int temp_PointAccumulateRate = 0;
-            int pointAmount = event.amount();
-            PointHistoryCreateRequest request = new PointHistoryCreateRequest(pointAmount,
-                    PointHistoryStatus.EARN, POINT_PAYMENT_DESCRIPTION);
-            PointHistoryResponse pointHistoryResponse = pointService.createPointHistory(event.orderId(), request);
-            orderService.savePointHistoryInOrder(event.orderId(), pointHistoryResponse.id());
+            int temp_PointAccumulateRate = 10;
+            int pointAmount = event.paymentAmount()/temp_PointAccumulateRate;
+            pointService.earnPoint(1,new UserPointRequest(pointAmount));
+            pointService.usePoint(1, new UserPointRequest(event.paymentAmount()));
         } catch (Exception e) {
             log.error("포인트 적립 실패: {}", e.getMessage());
         }
@@ -43,6 +42,10 @@ public class PointEventListener {
     @Transactional
     @EventListener
     public void handlePointHistoryAfterCancelPayment(PointHistoryAfterCancelPaymentEven event) {
-        pointService.cancelPoint(event.orderId(), event.pointHistoryId());
+        try {
+            pointService.cancelPoint(event.orderId(), event.pointHistoryId());
+        }catch (Exception e) {
+            log.error("포인트 취소 실패: {}", e.getMessage());
+        }
     }
 }
