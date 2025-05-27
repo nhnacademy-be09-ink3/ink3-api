@@ -192,7 +192,7 @@ class PointControllerTest {
 
     @Test
     void earnPoints() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
+        UserPointRequest request = new UserPointRequest(1000, "test");
         doNothing().when(pointService).earnPoint(1L, request);
         mockMvc.perform(post("/users/1/points/earn")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -203,7 +203,7 @@ class PointControllerTest {
 
     @Test
     void earnPointsWithNotFound() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
+        UserPointRequest request = new UserPointRequest(1000, "test");
         doThrow(new UserNotFoundException(1L)).when(pointService).earnPoint(1L, request);
         mockMvc.perform(post("/users/1/points/earn")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -219,7 +219,7 @@ class PointControllerTest {
 
     @Test
     void usePoints() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
+        UserPointRequest request = new UserPointRequest(1000, "test");
         doNothing().when(pointService).usePoint(1L, request);
         mockMvc.perform(post("/users/1/points/use")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -230,7 +230,7 @@ class PointControllerTest {
 
     @Test
     void usePointsWithNotFound() throws Exception {
-        UserPointRequest request = new UserPointRequest(1000);
+        UserPointRequest request = new UserPointRequest(1000, "test");
         doThrow(new UserNotFoundException(1L)).when(pointService).usePoint(1L, request);
         mockMvc.perform(post("/users/1/points/use")
                         .contentType(MediaType.APPLICATION_JSON)
