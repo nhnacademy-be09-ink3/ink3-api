@@ -22,7 +22,7 @@ import shop.ink3.api.order.shippingPolicy.service.ShippingPolicyService;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/shippingPolicies")
+@RequestMapping("/shipping-policies")
 public class ShippingPolicyController {
 
     private final ShippingPolicyService shippingPolicyService;
@@ -62,13 +62,13 @@ public class ShippingPolicyController {
                 .ok(CommonResponse.update(shippingPolicyService.updateShippingPolicy(shippingPolicyId, request)));
     }
 
-    @PatchMapping("/activate/{shippingPolicyId}")
+    @PatchMapping("/{shippingPolicyId}/activate")
     public ResponseEntity<Void> activateShippingPolicy(@PathVariable long shippingPolicyId) {
         shippingPolicyService.activate(shippingPolicyId);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/deactivate/{shippingPolicyId}")
+    @PatchMapping("/{shippingPolicyId}/deactivate")
     public ResponseEntity<Void> deactivateShippingPolicy(@PathVariable long shippingPolicyId) {
         shippingPolicyService.deactivate(shippingPolicyId);
         return ResponseEntity.ok().build();

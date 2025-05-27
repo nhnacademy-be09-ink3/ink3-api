@@ -22,7 +22,7 @@ import shop.ink3.api.order.orderBook.service.OrderBookService;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/orderBooks")
+@RequestMapping("/order-books")
 public class OrderBookController {
     private final OrderBookService orderBookService;
 
@@ -34,7 +34,7 @@ public class OrderBookController {
     }
 
     // 주문에 대한 주문도서 리스트 조회
-    @GetMapping("/order/{orderId}")
+    @GetMapping("/orders/{orderId}")
     public ResponseEntity<CommonResponse<PageResponse<OrderBookResponse>>> getOrderBooks(
             @PathVariable long orderId,Pageable pageable){
         return ResponseEntity
@@ -66,7 +66,7 @@ public class OrderBookController {
 
 
     // 특정 주문에 대한 주문-도서 정보 삭제
-    @DeleteMapping("/order/{orderId}")
+    @DeleteMapping("/orders/{orderId}")
     public ResponseEntity<CommonResponse<Void>> deleteOrderBooksByOrderId(@PathVariable long orderId){
         orderBookService.deleteOrderBookListByOrderId(orderId);
         return ResponseEntity.noContent().build();

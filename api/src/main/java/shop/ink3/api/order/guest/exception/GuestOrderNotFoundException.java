@@ -1,4 +1,4 @@
-package shop.ink3.api.order.guestOrder.exception;
+package shop.ink3.api.order.guest.exception;
 
 import shop.ink3.api.common.exception.NotFoundException;
 

@@ -1,7 +1,7 @@
-package shop.ink3.api.order.guestOrder.dto;
+package shop.ink3.api.order.guest.dto;
 
 import java.time.LocalDateTime;
-import shop.ink3.api.order.guestOrder.entiity.GuestOrder;
+import shop.ink3.api.order.guest.entiity.GuestOrder;
 import shop.ink3.api.order.order.entity.OrderStatus;
 
 public record GuestOrderResponse(

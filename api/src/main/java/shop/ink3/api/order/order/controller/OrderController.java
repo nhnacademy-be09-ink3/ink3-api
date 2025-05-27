@@ -84,7 +84,7 @@ public class OrderController {
     }
 
     // 포인트 내역에 대한 주문 조회
-    @GetMapping("/point/{pointHistoryId}")
+    @GetMapping("/point-histories/{pointHistoryId}")
     public ResponseEntity<CommonResponse<OrderResponse>> getOrderByPointHistoryId(@PathVariable long pointHistoryId) {
         return ResponseEntity.ok(
                 CommonResponse.success(orderService.getOrderByPointHistoryId(pointHistoryId)));

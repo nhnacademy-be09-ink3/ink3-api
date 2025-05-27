@@ -1,6 +1,5 @@
-package shop.ink3.api.order.guestOrder.service;
+package shop.ink3.api.order.guest.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,11 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.config.SecurityConfig;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.order.guestOrder.dto.GuestOrderCreateRequest;
-import shop.ink3.api.order.guestOrder.dto.GuestOrderResponse;
-import shop.ink3.api.order.guestOrder.entiity.GuestOrder;
-import shop.ink3.api.order.guestOrder.exception.GuestOrderNotFoundException;
-import shop.ink3.api.order.guestOrder.repository.GuestOrderRepository;
+import shop.ink3.api.order.guest.dto.GuestOrderCreateRequest;
+import shop.ink3.api.order.guest.dto.GuestOrderResponse;
+import shop.ink3.api.order.guest.entiity.GuestOrder;
+import shop.ink3.api.order.guest.exception.GuestOrderNotFoundException;
+import shop.ink3.api.order.guest.repository.GuestOrderRepository;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
