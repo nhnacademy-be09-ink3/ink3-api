@@ -259,7 +259,7 @@ class PackagingControllerTest {
     void activatePackaging_성공() throws Exception {
         doNothing().when(packagingService).activate(anyLong());
 
-        mockMvc.perform(patch("/packagings/activate/1"))
+        mockMvc.perform(patch("/packagings/1/activate"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -269,7 +269,7 @@ class PackagingControllerTest {
     void activatePackaging_실패() throws Exception {
         doThrow(new PackagingNotFoundException(1L)).when(packagingService).activate(anyLong());
 
-        mockMvc.perform(patch("/packagings/activate/1"))
+        mockMvc.perform(patch("/packagings/1/activate"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -284,7 +284,7 @@ class PackagingControllerTest {
     void deactivatePackaging_성공() throws Exception {
         doNothing().when(packagingService).deactivate(anyLong());
 
-        mockMvc.perform(patch("/packagings/deactivate/1"))
+        mockMvc.perform(patch("/packagings/1/deactivate"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -294,7 +294,7 @@ class PackagingControllerTest {
     void deactivatePackaging_실패() throws Exception {
         doThrow(new PackagingNotFoundException(1L)).when(packagingService).deactivate(anyLong());
 
-        mockMvc.perform(patch("/packagings/deactivate/1"))
+        mockMvc.perform(patch("/packagings/1/deactivate"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))

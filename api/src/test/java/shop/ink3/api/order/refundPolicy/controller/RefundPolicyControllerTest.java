@@ -50,7 +50,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.getRefundPolicy(1L)).thenReturn(response);
 
         // when, then
-        mockMvc.perform(get("/refundPolicies/1"))
+        mockMvc.perform(get("/refund-policies/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -67,7 +67,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.getRefundPolicy(1L)).thenThrow(new RefundPolicyNotFoundException(1L));
 
         // when, then
-        mockMvc.perform(get("/refundPolicies/1"))
+        mockMvc.perform(get("/refund-policies/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -91,7 +91,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.getRefundPolicyList(any())).thenReturn(pageResponse);
 
         // when, then
-        mockMvc.perform(get("/refundPolicies"))
+        mockMvc.perform(get("/refund-policies"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -113,7 +113,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.getRefundPolicyList(any())).thenThrow(new RefundPolicyNotFoundException());
 
         // when, then
-        mockMvc.perform(get("/refundPolicies"))
+        mockMvc.perform(get("/refund-policies"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -131,7 +131,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.getAvailableRefundPolicy()).thenReturn(refundPolicyResponse);
 
         // when, then
-        mockMvc.perform(get("/refundPolicies/activate"))
+        mockMvc.perform(get("/refund-policies/activate"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -148,7 +148,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.getAvailableRefundPolicy()).thenThrow(new RefundPolicyNotFoundException());
 
         // when, then
-        mockMvc.perform(get("/refundPolicies/activate"))
+        mockMvc.perform(get("/refund-policies/activate"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -168,7 +168,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.createRefundPolicy(any())).thenReturn(response);
 
         // when, then
-        mockMvc.perform(post("/refundPolicies")
+        mockMvc.perform(post("/refund-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -188,7 +188,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.createRefundPolicy(any())).thenThrow(new RefundPolicyNotFoundException(1L));
 
         // when, then
-        mockMvc.perform(post("/refundPolicies")
+        mockMvc.perform(post("/refund-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -210,7 +210,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.updateRefundPolicy(anyLong(), any())).thenReturn(response);
 
         // when, then
-        mockMvc.perform(put("/refundPolicies/1")
+        mockMvc.perform(put("/refund-policies/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -230,7 +230,7 @@ class RefundPolicyControllerTest {
         when(refundPolicyService.updateRefundPolicy(anyLong(), any())).thenThrow(new RefundPolicyNotFoundException(1L));
 
         // when, then
-        mockMvc.perform(put("/refundPolicies/1")
+        mockMvc.perform(put("/refund-policies/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -249,7 +249,7 @@ class RefundPolicyControllerTest {
         doNothing().when(refundPolicyService).activate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/refundPolicies/activate/1"))
+        mockMvc.perform(patch("/refund-policies/1/activate"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -261,7 +261,7 @@ class RefundPolicyControllerTest {
         doThrow(new RefundPolicyNotFoundException(1L)).when(refundPolicyService).activate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/refundPolicies/activate/1"))
+        mockMvc.perform(patch("/refund-policies/1/activate"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -278,7 +278,7 @@ class RefundPolicyControllerTest {
         doNothing().when(refundPolicyService).deactivate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/refundPolicies/deactivate/1"))
+        mockMvc.perform(patch("/refund-policies/1/deactivate"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -290,7 +290,7 @@ class RefundPolicyControllerTest {
         doThrow(new RefundPolicyNotFoundException(1L)).when(refundPolicyService).deactivate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/refundPolicies/deactivate/1"))
+        mockMvc.perform(patch("/refund-policies/1/deactivate"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -307,7 +307,7 @@ class RefundPolicyControllerTest {
         doNothing().when(refundPolicyService).deleteRefundPolicy(anyLong());
 
         // when, then
-        mockMvc.perform(delete("/refundPolicies/1"))
+        mockMvc.perform(delete("/refund-policies/1"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -319,7 +319,7 @@ class RefundPolicyControllerTest {
         doThrow(new RefundPolicyNotFoundException(1L)).when(refundPolicyService).deleteRefundPolicy(anyLong());
 
         // when, then
-        mockMvc.perform(delete("/refundPolicies/1"))
+        mockMvc.perform(delete("/refund-policies/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
