@@ -8,6 +8,15 @@ spring:
     port: 5672
     username: admin
     password: nhnacademy123!
+    virtualhost: ink_dev
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000
+          multiplier: 2.0
+          max-interval: 10000
   cloud:
     bus:
       enabled: true

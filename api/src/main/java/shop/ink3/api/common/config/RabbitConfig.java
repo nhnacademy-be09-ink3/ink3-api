@@ -3,6 +3,7 @@ package shop.ink3.api.common.config;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-    public static final String QUEUE_NAME = "coupon.queue";
     public static final String EXCHANGE_NAME = "coupon.exchange";
-    public static final String ROUTING_KEY = "coupon.routing";
 
     /*
      coupon을 담을 queue 생성
@@ -33,19 +32,20 @@ public class RabbitConfig {
      message는 이 큐에 쌓이고, 이후 @RabbitListener에서 소비됨.
     */
     @Bean
-    public Queue testQueue() {
-        return new Queue(QUEUE_NAME, true); // durable
-    }
-
-    @Bean
     public Queue welcomeQueue() {
         return new Queue("coupon.welcome", true);
     }
 
     @Bean
     public Queue birthdayQueue() {
-        return new Queue("coupon.birthday", true);
+        return QueueBuilder.durable("coupon.birthday")
+                .withArgument("x-dead-letter-exchange", "dlx.exchange")
+                .withArgument("x-dead-letter-routing-key","dlx.coupon")
+                .build();
     }
+
+    @Bean
+    public Queue birthdayQueueDead(){ return new Queue("coupon.birthday.dead", true); }
 
     @Bean
     public Queue bookQueue() {
@@ -67,15 +67,16 @@ public class RabbitConfig {
         return new TopicExchange(EXCHANGE_NAME);
     }
 
+    @Bean
+    public TopicExchange dlxExchange() {
+        return new TopicExchange("dlx.exchange");
+    }
+
     /*
      특정 Routing key를 통해 message를 Exchange -> Queue로 연결
      즉, "coupon.routing" 키를 가진 message가 오면 coupon.queue로 전달
      이걸 해줘야 message가 queue로 들어가게 됨
     */
-    @Bean
-    public Binding binding(Queue testQueue, TopicExchange exchange) {
-        return BindingBuilder.bind(testQueue).to(exchange).with(ROUTING_KEY);
-    }
 
     @Bean
     public Binding bindWelcomeQueue() {
@@ -85,6 +86,11 @@ public class RabbitConfig {
     @Bean
     public Binding bindBirthdayQueue() {
         return BindingBuilder.bind(birthdayQueue()).to(exchange()).with("coupon.birthday.bulk");
+    }
+
+    @Bean
+    public Binding bindBirthdayDLQ() {
+        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon");
     }
 
     @Bean

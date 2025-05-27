@@ -28,20 +28,13 @@ public interface CouponService {
     void deleteCouponById(Long couponId);
 
     // 📘 도서 관련 쿠폰
-    void issueBookCoupons(Long userId, Long bookId);
+    void issueBookCoupons(Long userId, Long bookCouponId);
 
     // 생일 쿠폰 발급
-    List<Long> issueBirthdayCoupons(List<Long> userIds, Long couponId, LocalDate issuedDate);
+    void issueBirthdayCoupons(List<Long> userIds, Long couponId, LocalDate issuedDate);
 
     // 📗 카테고리 관련 쿠폰
-    void issueCategoryCoupons(Long userId, Long categoryId);
-
-    // ✋ 쿠폰 코드 입력 발급 (공통)
-    void issueCouponByCode(Long userId, String couponCode);
-
-
-    // 🎁 쿠폰 ID로 직접 발급 (예: 다운로드)
-    void issueCouponById(Long userId, Long couponId);
+    void issueCategoryCoupons(Long userId, Long categoryCouponId);
 
     // 📃 발급 이력 확인 (보관함)
     List<CouponStoreResponse> getUserCoupons(Long userId);

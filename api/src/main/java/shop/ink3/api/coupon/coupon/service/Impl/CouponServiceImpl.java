@@ -14,7 +14,9 @@ import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
+import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
+import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
@@ -42,6 +44,8 @@ public class CouponServiceImpl implements CouponService {
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final BookCouponRepository bookCouponRepository;
+    private final CategoryCouponRepository categoryCouponRepository;
 
     @Override
     public CouponResponse createCoupon(CouponCreateRequest req) {
@@ -147,23 +151,54 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public void issueBookCoupons(Long couponId, Long bookId) {
+    public void issueBookCoupons(Long userId, Long bookCouponId) {
+        BookCoupon bookCoupon = bookCouponRepository.getReferenceById(bookCouponId);
+        Coupon coupon = bookCoupon.getCoupon();
 
+        boolean alreadyIssued = userCouponStore.existsByUserIdAndCouponIdAndYear(userId, coupon.getId(), LocalDate.now().getYear());
+
+        if (!alreadyIssued) {
+            User user = userRepository.getReferenceById(userId);
+            CouponStore couponStore = CouponStore.builder()
+                    .user(user)
+                    .coupon(coupon)
+                    .status(CouponStatus.READY)
+                    .issuedAt(LocalDateTime.now())
+                    .build();
+
+            userCouponStore.save(couponStore);
+        }
     }
 
     @Override
-    public void issueCategoryCoupons(Long couponId, Long categoryId) {
+    public void issueCategoryCoupons(Long userId, Long categoryCouponId) {
+        CategoryCoupon categoryCoupon = categoryCouponRepository.getReferenceById(categoryCouponId);
+        Coupon coupon = categoryCoupon.getCoupon();
 
+        boolean alreadyIssued = userCouponStore.existsByUserIdAndCouponIdAndYear(userId, coupon.getId(), LocalDate.now().getYear());
+
+        if (!alreadyIssued) {
+            User user = userRepository.getReferenceById(userId);
+            CouponStore couponStore = CouponStore.builder()
+                    .user(user)
+                    .coupon(coupon)
+                    .status(CouponStatus.READY)
+                    .issuedAt(LocalDateTime.now())
+                    .build();
+
+            userCouponStore.save(couponStore);
+        }
     }
 
+
     @Transactional
-    public List<Long> issueBirthdayCoupons(List<Long> userIds, Long couponId, LocalDate issuedDate) {
+    public void issueBirthdayCoupons(List<Long> userIds, Long couponId, LocalDate issuedDate) {
         int year = issuedDate.getYear();
 
-        List<Long> issuedUsers = new ArrayList<>();
         List<CouponStore> couponsToIssue = new ArrayList<>();
 
         for (Long userId : userIds) {
+            // 이미 발급 된 쿠폰인지 여부 확인
             boolean alreadyIssued = userCouponStore.existsByUserIdAndCouponIdAndYear(userId, couponId, year);
 
             if (!alreadyIssued) {
@@ -175,22 +210,9 @@ public class CouponServiceImpl implements CouponService {
                         .status(CouponStatus.READY)
                         .issuedAt(LocalDateTime.now())
                         .build());
-                issuedUsers.add(userId);
             }
         }
-
         userCouponStore.saveAll(couponsToIssue);
-        return issuedUsers;
-    }
-
-    @Override
-    public void issueCouponByCode(Long userId, String couponCode) {
-
-    }
-
-    @Override
-    public void issueCouponById(Long userId, Long couponId){
-
     }
 
     @Override

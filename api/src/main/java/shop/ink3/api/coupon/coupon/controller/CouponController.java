@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
@@ -68,6 +69,27 @@ public class CouponController {
         couponService.deleteCouponById(couponId);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
+
+    /** category coupon 다운로드 API **/
+    @PostMapping("/download/categoryCoupon")
+    public ResponseEntity<CommonResponse<String>> downloadCategoryCoupon(
+            @RequestParam Long userId,
+            @RequestParam Long categoryCouponId
+    ){
+        couponService.issueCategoryCoupons(userId, categoryCouponId);
+        return ResponseEntity.ok(CommonResponse.success("카테고리 쿠폰이 정상 발급되었습니다."));
+    }
+
+    /** book coupon 다운로드 API **/
+    @PostMapping("/download/bookCoupon")
+    public ResponseEntity<CommonResponse<String>> downloadBookCoupon(
+            @RequestParam Long userId,
+            @RequestParam Long bookCouponId
+    ){
+        couponService.issueBookCoupons(userId, bookCouponId);
+        return ResponseEntity.ok(CommonResponse.success("도서 쿠폰이 정상 발급되었습니다."));
+    }
+
 }
 
 

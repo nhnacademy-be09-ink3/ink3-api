@@ -1,10 +1,9 @@
-package shop.ink3.api.coupon.mq;
+package shop.ink3.api.coupon.rabbitMq.mq.produce;
 
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import shop.ink3.api.common.config.RabbitConfig;
-import shop.ink3.api.coupon.message.WelcomeBulkMessage;
+import shop.ink3.api.coupon.rabbitMq.message.WelcomeBulkMessage;
 
 @Service
 public class WelcomeCouponProducer {
