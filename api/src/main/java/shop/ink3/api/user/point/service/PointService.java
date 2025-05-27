@@ -110,7 +110,7 @@ public class PointService {
             throw new PointHistoryAlreadyCanceledException(pointHistoryId);
         }
 
-        PointHistory pointHistory = pointHistoryRepository.findByIdAndUserId(userId, pointHistoryId)
+        PointHistory pointHistory = pointHistoryRepository.findByIdAndUserId(pointHistoryId, userId)
                 .orElseThrow(() -> new PointHistoryNotFoundException(pointHistoryId));
 
         if (pointHistory.getStatus() == PointHistoryStatus.CANCEL) {
