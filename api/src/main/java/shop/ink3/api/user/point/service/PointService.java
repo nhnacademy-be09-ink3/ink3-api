@@ -105,6 +105,11 @@ public class PointService {
 
     public void cancelPoint(long userId, long pointHistoryId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (pointHistoryRepository.existsByOriginId(pointHistoryId)) {
+            throw new PointHistoryAlreadyCanceledException(pointHistoryId);
+        }
+
         PointHistory pointHistory = pointHistoryRepository.findByIdAndUserId(userId, pointHistoryId)
                 .orElseThrow(() -> new PointHistoryNotFoundException(pointHistoryId));
 
