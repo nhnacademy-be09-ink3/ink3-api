@@ -87,7 +87,7 @@ public class OrderBookService {
     // 주문에 대한 도서 리스트 조회 (주문내역 시 첫페이지의 도서 내역만 보여주고 나머지는 ... 외 X권 이렇게 사용)
     @Transactional(readOnly = true)
     public PageResponse<OrderBookResponse> getOrderBookListByOrderId(long orderId, Pageable pageable) {
-        Page<OrderBook> page = orderBookRepository.findByOrder_Id(orderId, pageable);
+        Page<OrderBook> page = orderBookRepository.findAllByOrderId(orderId, pageable);
         Page<OrderBookResponse> pageResponse = page.map(OrderBookResponse::from);
         return PageResponse.from(pageResponse);
     }
@@ -116,7 +116,7 @@ public class OrderBookService {
     public void deleteOrderBookListByOrderId(long orderId) {
         orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-        orderBookRepository.deleteOrderBookListByOrder_Id(orderId);
+        orderBookRepository.deleteOrderBookListByOrderId(orderId);
     }
 
     // 주문 취소에 따른 도서 재고 원상복구
@@ -124,7 +124,7 @@ public class OrderBookService {
         orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        List<OrderBook> orderBooks = orderBookRepository.findByOrder_Id(orderId);
+        List<OrderBook> orderBooks = orderBookRepository.findAllByOrderId(orderId);
         for(OrderBook orderBook : orderBooks){
             Integer requestQuantity = orderBook.getQuantity();
             Long bookId = orderBook.getBook().getId();

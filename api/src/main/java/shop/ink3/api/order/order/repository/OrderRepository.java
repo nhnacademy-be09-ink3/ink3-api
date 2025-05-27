@@ -8,13 +8,13 @@ import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    Page<Order> findByUser_Id(long userId, Pageable pageable);
+    Page<Order> findAllByUserId(long userId, Pageable pageable);
     Page<Order> findAll(Pageable pageable);
-    Order findByPointHistory_Id(long pointHistoryId);
+    Order findByPointHistoryId(long pointHistoryId);
 
-    Page<Order> findByStatus(OrderStatus status, Pageable pageable);
-    Page<Order> findByUser_IdAndStatus(long userId, OrderStatus status, Pageable pageable);
+    Page<Order> findAllByStatus(OrderStatus status, Pageable pageable);
+    Page<Order> findAllByUserIdAndStatus(long userId, OrderStatus status, Pageable pageable);
 
-    Page<Order> findByOrderedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-    Page<Order> findByUser_IdAndOrderedAtBetween(long userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Order> findAllByOrderedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Order> findAllByUserIdAndOrderedAtBetween(long userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

@@ -48,7 +48,7 @@ public class GuestOrderService {
     // 주문 Id에 대한 비회원 주문 조회
     @Transactional(readOnly = true)
     public GuestOrderResponse getGuestOrderByOrderId(long orderId){
-        GuestOrder guestOrder = guestOrderRepository.findByOrder_Id(orderId)
+        GuestOrder guestOrder = guestOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
         return GuestOrderResponse.from(guestOrder);
     }
@@ -56,7 +56,7 @@ public class GuestOrderService {
     // 자신의 이메일과 비밀번호로 주문리스트 조회하기
     @Transactional(readOnly = true)
     public PageResponse<GuestOrderResponse> getGuestOrderList(String email, String password, Pageable pageable){
-        Page<GuestOrder> pageGuestOrder = guestOrderRepository.findByEmailAndAndPassword(email,
+        Page<GuestOrder> pageGuestOrder = guestOrderRepository.findAllByEmailAndAndPassword(email,
                 securityConfig.passwordEncoder().encode(password), pageable);
         Page<GuestOrderResponse> pageGuestOrderResponse = pageGuestOrder.map(GuestOrderResponse::from);
         return PageResponse.from(pageGuestOrderResponse);
@@ -71,8 +71,8 @@ public class GuestOrderService {
 
     // 삭제 주문ID로 삭제
     public void deleteGuestOrderByOrderId(long orderId){
-        guestOrderRepository.findByOrder_Id(orderId)
+        guestOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-        guestOrderRepository.deleteByOrder_Id(orderId);
+        guestOrderRepository.deleteByOrderId(orderId);
     }
 }

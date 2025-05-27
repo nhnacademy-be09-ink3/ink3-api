@@ -59,8 +59,8 @@ public class ShipmentService {
     // 주문 상태에 따른 배송 list
     @Transactional(readOnly = true)
     public PageResponse<ShipmentResponse> getShipmentListByOrderStatus(long userId, OrderStatus status, Pageable pageable){
-        Page<Shipment> shipmentPage = shipmentRepository.findByOrder_UserIdAndOrder_Status(userId, status, pageable);
-        Page<ShipmentResponse> shipmentResponsePage = shipmentPage.map(shipment -> ShipmentResponse.from(shipment));
+        Page<Shipment> shipmentPage = shipmentRepository.findAllByOrderUserIdAndOrderStatus(userId, status, pageable);
+        Page<ShipmentResponse> shipmentResponsePage = shipmentPage.map(ShipmentResponse::from);
         return PageResponse.from(shipmentResponsePage);
     }
 
@@ -86,7 +86,7 @@ public class ShipmentService {
 
     // 조회 로직
     protected Shipment getShipmentOrThrow(long orderId) {
-        Optional<Shipment> optionalShipping = shipmentRepository.findByOrder_Id(orderId);
+        Optional<Shipment> optionalShipping = shipmentRepository.findByOrderId(orderId);
         if (optionalShipping.isEmpty()) {
             throw new ShipmentNotFoundException();
         }

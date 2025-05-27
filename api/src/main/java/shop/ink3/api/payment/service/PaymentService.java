@@ -94,7 +94,7 @@ public class PaymentService {
     public PaymentResponse createPayment(Payment payment){
         // 특정 주문에 대한 payment가 존재하는지 확인 정도.
         Long orderId = payment.getOrder().getId();
-        Optional<Payment> optionalPayment = paymentRepository.findByOrder_Id(orderId);
+        Optional<Payment> optionalPayment = paymentRepository.findByOrderId(orderId);
         if(Objects.nonNull(optionalPayment)){
             throw new PaymentAlreadyExistsException(orderId);
         }
@@ -105,7 +105,7 @@ public class PaymentService {
     // 조회
     @Transactional(readOnly = true)
     public PaymentResponse getPayment(long orderId){
-        Payment payment = paymentRepository.findByOrder_Id(orderId)
+        Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException(orderId));
         return PaymentResponse.from(payment);
     }
@@ -114,6 +114,6 @@ public class PaymentService {
     public void deletePayment(long orderId){
         orderRepository.findById(orderId)
                 .orElseThrow(()->new OrderNotFoundException(orderId));
-        paymentRepository.deleteByOrder_Id(orderId);
+        paymentRepository.deleteByOrderId(orderId);
     }
 }

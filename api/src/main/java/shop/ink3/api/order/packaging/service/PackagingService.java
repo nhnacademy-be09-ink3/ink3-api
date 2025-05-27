@@ -43,7 +43,7 @@ public class PackagingService {
     // 활성화된 포장정책 list 조회
     @Transactional(readOnly = true)
     public PageResponse<PackagingResponse> getAvailablePackagingList(Pageable pageable) {
-        Page<Packaging> page = packagingRepository.findByIsAvailableTrue(pageable);
+        Page<Packaging> page = packagingRepository.findAllByIsAvailableTrue(pageable);
         Page<PackagingResponse> packagingResponseList = page.map(PackagingResponse::from);
         return PageResponse.from(packagingResponseList);
     }

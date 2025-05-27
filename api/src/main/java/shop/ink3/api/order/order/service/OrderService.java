@@ -37,8 +37,6 @@ import shop.ink3.api.user.user.repository.UserRepository;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final PointHistoryRepository pointHistoryRepository;
-    private final UserCouponRepository userCouponRepository;
 
     // 생성
     public OrderResponse createOrder(OrderCreateRequest request) {
@@ -73,7 +71,7 @@ public class OrderService {
     // 사용자의 주문 리스트 조회 (사용자)
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByUser(long userId, Pageable pageable) {
-        Page<Order> page = orderRepository.findByUser_Id(userId, pageable);
+        Page<Order> page = orderRepository.findAllByUserId(userId, pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
@@ -82,7 +80,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByUserAndStatus(long userId, OrderStatusRequest request,
                                                                    Pageable pageable) {
-        Page<Order> page = orderRepository.findByUser_IdAndStatus(userId, request.getOrderStatus(), pageable);
+        Page<Order> page = orderRepository.findAllByUserIdAndStatus(userId, request.getOrderStatus(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
@@ -91,7 +89,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request,
                                                                  Pageable pageable) {
-        Page<Order> page = orderRepository.findByUser_IdAndOrderedAtBetween(userId, request.getStartDate(),
+        Page<Order> page = orderRepository.findAllByUserIdAndOrderedAtBetween(userId, request.getStartDate(),
                 request.getEndDate(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
@@ -100,7 +98,7 @@ public class OrderService {
     // 기간 별 주문 리스트 조회 (관리자)
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByDate(OrderDateRequest request, Pageable pageable) {
-        Page<Order> page = orderRepository.findByOrderedAtBetween(request.getStartDate(), request.getEndDate(),
+        Page<Order> page = orderRepository.findAllByOrderedAtBetween(request.getStartDate(), request.getEndDate(),
                 pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
@@ -118,7 +116,7 @@ public class OrderService {
     // 상태별 주문 리스트 조회 (관리자)
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByStatus(OrderStatusRequest request, Pageable pageable) {
-        Page<Order> page = orderRepository.findByStatus(request.getOrderStatus(), pageable);
+        Page<Order> page = orderRepository.findAllByStatus(request.getOrderStatus(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
@@ -126,7 +124,7 @@ public class OrderService {
     // 포인트 ID로 주문 조회
     @Transactional(readOnly = true)
     public OrderResponse getOrderByPointHistoryId(long pointHistoryId) {
-        Order order = orderRepository.findByPointHistory_Id(pointHistoryId);
+        Order order = orderRepository.findByPointHistoryId(pointHistoryId);
         return OrderResponse.from(order);
     }
 
