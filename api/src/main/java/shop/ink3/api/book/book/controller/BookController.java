@@ -1,5 +1,6 @@
 package shop.ink3.api.book.book.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,35 +27,34 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/books")
 public class BookController {
     private final BookService bookService;
     private final AladinClient aladinClient;
 
     // 도서 상세 조회 (ID 기반 단건 조회)
-    @GetMapping("/{bookId}")
+    @GetMapping("/books/{bookId}")
     public ResponseEntity<CommonResponse<BookResponse>> getBookById(@PathVariable Long bookId) {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBook(bookId)));
     }
 
      // 전체 도서 목록 조회
-    @GetMapping
+    @GetMapping("/books")
     public ResponseEntity<CommonResponse<PageResponse<BookResponse>>> getBooks(Pageable pageable) {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBooks(pageable)));
     }
 
-    @PostMapping
-    public ResponseEntity<CommonResponse<BookResponse>> createBook(@RequestBody BookCreateRequest request) {
+    @PostMapping("/books")
+    public ResponseEntity<CommonResponse<BookResponse>> createBook(@RequestBody @Valid BookCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(bookService.createBook(request)));
     }
 
-    @PutMapping("/{bookId}")
+    @PutMapping("/books/{bookId}")
     public ResponseEntity<CommonResponse<BookResponse>> updateBook(@PathVariable Long bookId,
-                                                                   @RequestBody BookUpdateRequest request) {
+                                                                   @RequestBody @Valid BookUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(bookService.updateBook(bookId, request)));
     }
 
-    @DeleteMapping("/{bookId}")
+    @DeleteMapping("/books/{bookId}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long bookId) {
         bookService.deleteBook(bookId);
         return ResponseEntity.noContent().build();
@@ -67,8 +67,8 @@ public class BookController {
     }
 
     // 알라딘 API에서 Keyword로 조회한 도서 리스트에서 하나의 도서를 선택하고 자체적으로 설정할 내용 입력하여 도서 등록
-    @PostMapping("/register")
-    public ResponseEntity<CommonResponse<BookResponse>> registerBook(@RequestBody BookRegisterRequest request) {
+    @PostMapping("/aladin/register-book")
+    public ResponseEntity<CommonResponse<BookResponse>> registerBook(@RequestBody @Valid BookRegisterRequest request) {
         return ResponseEntity.ok(CommonResponse.success(bookService.registerBook(request)));
     }
 }
