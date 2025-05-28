@@ -1,4 +1,4 @@
-package shop.ink3.api.review.service;
+package shop.ink3.api.review.review.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;

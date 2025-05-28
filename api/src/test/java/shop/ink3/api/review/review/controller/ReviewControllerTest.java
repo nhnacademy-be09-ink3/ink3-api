@@ -1,4 +1,4 @@
-package shop.ink3.api.review.controller;
+package shop.ink3.api.review.review.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
