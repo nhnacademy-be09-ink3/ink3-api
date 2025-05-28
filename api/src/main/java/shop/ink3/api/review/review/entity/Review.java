@@ -44,7 +44,7 @@ public class Review {
     private int rating;
 
     private LocalDateTime createdAt;
-    // private LocalDateTime modifiedAt;
+    private LocalDateTime modifiedAt;
 
     public Review(User user, OrderBook orderBook, String title, String content, int rating) {
         this.user = user;
@@ -59,6 +59,6 @@ public class Review {
         this.title = title;
         this.content = content;
         this.rating = rating;
-        // this.modifiedAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now();
     }
 }
