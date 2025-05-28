@@ -8,11 +8,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: create
@@ -24,7 +19,13 @@ spring:
   h2:
     console:
       enabled: true
-
+  cloud:
+    bus:
+      enabled: false
+management:
+  health:
+    rabbit:
+      enabled: false
 logging:
   level:
     org.hibernate.SQL: debug
