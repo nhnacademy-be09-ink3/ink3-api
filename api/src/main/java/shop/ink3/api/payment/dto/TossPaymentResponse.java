@@ -8,5 +8,4 @@ public record TossPaymentResponse (
         LocalDateTime requestedAt,
         LocalDateTime approvedAt
 ){
-
 }

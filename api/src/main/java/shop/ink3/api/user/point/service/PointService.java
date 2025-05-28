@@ -127,5 +127,4 @@ public class PointService {
                 .createdAt(LocalDateTime.now())
                 .build());
     }
-
 }
