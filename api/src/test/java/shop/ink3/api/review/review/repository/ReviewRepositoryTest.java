@@ -1,4 +1,4 @@
-package shop.ink3.api.review.repository;
+package shop.ink3.api.review.review.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
