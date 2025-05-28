@@ -1,13 +1,10 @@
-package shop.ink3.api.review.reviewImage;
+package shop.ink3.api.review.reviewImage.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,13 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.review.review.entity.Review;
 import shop.ink3.api.review.reviewImage.entity.ReviewImage;
-import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
