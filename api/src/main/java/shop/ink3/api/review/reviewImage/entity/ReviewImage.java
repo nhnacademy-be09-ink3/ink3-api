@@ -28,6 +28,6 @@ public class ReviewImage {
     private String imageUrl;
 
     @ManyToOne
-    @JoinColumn(name = "review_id")
+    @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 }
