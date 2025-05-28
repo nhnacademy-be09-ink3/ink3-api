@@ -7,6 +7,9 @@ import shop.ink3.api.order.shipment.dto.ShipmentCreateRequest;
 public record OrderFormCreateRequest(
         OrderCreateRequest orderCreateRequest,
         ShipmentCreateRequest shipmentCreateRequest,
-        List<OrderBookCreateRequest> createRequestList
+        List<OrderBookCreateRequest> createRequestList,
+        int discountAmount,
+        int usedPointAmount,
+        int paymentAmount
 ) {
 }

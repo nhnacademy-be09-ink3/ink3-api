@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
@@ -19,7 +20,8 @@ import shop.ink3.api.user.like.dto.LikeResponse;
 import shop.ink3.api.user.like.service.LikeService;
 
 @RequiredArgsConstructor
-@RestController("/users/me/likes")
+@RestController
+@RequestMapping("/users/me/likes")
 public class MeLikeController {
     private final LikeService likeService;
 
