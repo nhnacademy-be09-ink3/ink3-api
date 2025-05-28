@@ -79,6 +79,7 @@ public class PointService {
                         .user(user)
                         .delta(request.amount())
                         .status(PointHistoryStatus.EARN)
+                        .description(request.description())
                         .createdAt(LocalDateTime.now())
                         .build()
         );
@@ -94,8 +95,9 @@ public class PointService {
         pointHistoryRepository.save(
                 PointHistory.builder()
                         .user(user)
-                        .delta(request.amount())
+                        .delta(-request.amount())
                         .status(PointHistoryStatus.USE)
+                        .description(request.description())
                         .createdAt(LocalDateTime.now())
                         .build()
         );
@@ -103,7 +105,12 @@ public class PointService {
 
     public void cancelPoint(long userId, long pointHistoryId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        PointHistory pointHistory = pointHistoryRepository.findByIdAndUserId(userId, pointHistoryId)
+
+        if (pointHistoryRepository.existsByOriginId(pointHistoryId)) {
+            throw new PointHistoryAlreadyCanceledException(pointHistoryId);
+        }
+
+        PointHistory pointHistory = pointHistoryRepository.findByIdAndUserId(pointHistoryId, userId)
                 .orElseThrow(() -> new PointHistoryNotFoundException(pointHistoryId));
 
         if (pointHistory.getStatus() == PointHistoryStatus.CANCEL) {
@@ -116,8 +123,8 @@ public class PointService {
                 .user(user)
                 .delta(-pointHistory.getDelta())
                 .status(PointHistoryStatus.CANCEL)
+                .description(pointHistory.getDescription() + " 취소")
                 .createdAt(LocalDateTime.now())
                 .build());
     }
-
 }

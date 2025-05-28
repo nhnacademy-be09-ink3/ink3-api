@@ -13,7 +13,6 @@ import shop.ink3.api.user.common.exception.WithdrawnException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
-import shop.ink3.api.user.point.repository.PointHistoryRepository;
 import shop.ink3.api.user.social.entity.Social;
 import shop.ink3.api.user.social.repository.SocialRepository;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
@@ -37,7 +36,6 @@ import shop.ink3.api.user.user.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
-    private final PointHistoryRepository pointHistoryRepository;
     private final SocialRepository socialRepository;
     private final PasswordEncoder passwordEncoder;
 

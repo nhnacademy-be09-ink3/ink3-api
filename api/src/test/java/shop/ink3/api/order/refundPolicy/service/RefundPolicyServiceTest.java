@@ -35,7 +35,7 @@ class RefundPolicyServiceTest {
     @DisplayName("반품 정책 생성 - 성공")
     void createRefundPolicy_성공() {
         // given
-        RefundPolicyCreateRequest request = new RefundPolicyCreateRequest("테스트", 7, 30);
+        RefundPolicyCreateRequest request = new RefundPolicyCreateRequest("테스트", 7, 30, 3000);
         when(refundPolicyRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // when
@@ -98,18 +98,15 @@ class RefundPolicyServiceTest {
     @DisplayName("활성화된 반품 정책 목록 조회 - 성공")
     void getAvailableRefundPolicyList_성공() {
         // given
-        List<RefundPolicy> policies = List.of(RefundPolicy.builder().id(1L).name("테스트").isAvailable(true).build());
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<RefundPolicy> page = new PageImpl<>(policies, pageable, policies.size());
-        when(refundPolicyRepository.findByIsAvailableTrue(pageable)).thenReturn(page);
+        RefundPolicy policy = RefundPolicy.builder().id(1L).name("테스트").isAvailable(true).build();
+        when(refundPolicyRepository.findByIsAvailableTrue()).thenReturn(policy);
 
         // when
-        PageResponse<RefundPolicyResponse> response = refundPolicyService.getAvailableRefundPolicyList(pageable);
+        RefundPolicyResponse response = refundPolicyService.getAvailableRefundPolicy();
 
         // then
-        assertEquals(1, response.content().size());
-        assertEquals("테스트",response.content().get(0).getName());
-        assertTrue(response.content().get(0).getIsAvailable());
+        assertEquals("테스트",response.getName());
+        assertTrue(response.getIsAvailable());
     }
 
     @Test
@@ -117,7 +114,7 @@ class RefundPolicyServiceTest {
     void updateRefundPolicy_성공() {
         // given
         RefundPolicy policy = RefundPolicy.builder().id(1L).name("변경점").build();
-        RefundPolicyUpdateRequest request = new RefundPolicyUpdateRequest("변경후", 10, 15);
+        RefundPolicyUpdateRequest request = new RefundPolicyUpdateRequest("변경후", 10, 15, 3000);
         when(refundPolicyRepository.findById(1L)).thenReturn(Optional.of(policy));
 
         // when
@@ -131,7 +128,7 @@ class RefundPolicyServiceTest {
     @DisplayName("반품 정책 수정 - 실패")
     void updateRefundPolicy_실패() {
         // given
-        RefundPolicyUpdateRequest request = new RefundPolicyUpdateRequest("변경후", 10, 15);
+        RefundPolicyUpdateRequest request = new RefundPolicyUpdateRequest("변경후", 10, 15, 3000);
         when(refundPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
         // when, then

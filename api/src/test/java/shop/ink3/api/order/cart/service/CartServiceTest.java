@@ -23,12 +23,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.repository.BookRepository;
-import shop.ink3.api.book.common.exception.BookNotFoundException;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
-import shop.ink3.api.order.cart.dto.GuestCartRequest;
 import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.order.cart.repository.CartRepository;
 import shop.ink3.api.order.common.exception.CartNotFoundException;
@@ -136,6 +134,7 @@ class CartServiceTest {
 
         ReflectionTestUtils.setField(cart, "id", 1L);
 
+        when(cartRepository.findByUserIdAndBookId(user.getId(), book1.getId())).thenReturn(null);
         when(cartRepository.save(ArgumentMatchers.any(Cart.class))).thenReturn(cart);
 
         CartResponse cartResponse = cartService.addCartItem(cartRequest);
@@ -216,40 +215,6 @@ class CartServiceTest {
         assertThat(result.get(0).id()).isEqualTo(1L);
 
         verify(cartRepository, never()).findByUserId(any());
-    }
-
-    @Test
-    @DisplayName("비회원 장바구니 목록 조회")
-    void getCartItemsByGuest() {
-        List<GuestCartRequest> guestCarts = List.of(
-            new GuestCartRequest(book1.getId(), 100),
-            new GuestCartRequest(book2.getId(), 200)
-        );
-
-        when(bookRepository.findAllById(anyList())).thenReturn(List.of(book1, book2));
-
-        List<CartResponse> responses = cartService.getCartItemsByGuest(guestCarts);
-
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).bookId()).isEqualTo(book1.getId());
-        assertThat(responses.get(0).quantity()).isEqualTo(100);
-        assertThat(responses.get(1).bookId()).isEqualTo(book2.getId());
-        assertThat(responses.get(1).quantity()).isEqualTo(200);
-    }
-
-    @Test
-    @DisplayName("비회원 장바구니에 존재하지 않는 도서 포함 시 예외 발생")
-    void getCartItemsByGuestFailure() {
-        List<GuestCartRequest> guestCarts = List.of(
-            new GuestCartRequest(book1.getId(), 100),
-            new GuestCartRequest(999L, 200)
-        );
-
-        when(bookRepository.findAllById(anyList())).thenReturn(List.of(book1));
-
-        assertThatThrownBy(() -> cartService.getCartItemsByGuest(guestCarts))
-            .isInstanceOf(BookNotFoundException.class)
-            .hasMessageContaining("존재하지 않는 도서입니다 id: ");
     }
 
     @Test

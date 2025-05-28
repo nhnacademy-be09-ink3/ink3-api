@@ -19,6 +19,7 @@ import shop.ink3.api.order.shipment.entity.Shipment;
 import shop.ink3.api.order.shipment.exception.ShipmentNotFoundException;
 import shop.ink3.api.order.shipment.repository.ShipmentRepository;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class ShipmentService {
@@ -27,7 +28,6 @@ public class ShipmentService {
     private final OrderRepository orderRepository;
 
     // 생성
-    @Transactional
     public ShipmentResponse createShipment(ShipmentCreateRequest request) {
         Optional<Order> optionalOrder = orderRepository.findById(request.getOrderId());
         if(optionalOrder.isEmpty()){
@@ -50,28 +50,21 @@ public class ShipmentService {
     }
 
     // 특정 주문에 대한 배송 정보 조회
+    @Transactional(readOnly = true)
     public ShipmentResponse getShipment(long orderId) {
         Shipment shipment = getShipmentOrThrow(orderId);
         return ShipmentResponse.from(shipment);
     }
 
-
-    // 특정 사용자의 배송 list
-    public PageResponse<ShipmentResponse> getUserShipmentList(long userId, Pageable pageable) {
-        Page<Shipment> shipmentpage = shipmentRepository.findByOrder_UserId(userId, pageable);
-        Page<ShipmentResponse> shipmentResponsePage = shipmentpage.map(shipment -> ShipmentResponse.from(shipment));
-        return PageResponse.from(shipmentResponsePage);
-    }
-
     // 주문 상태에 따른 배송 list
+    @Transactional(readOnly = true)
     public PageResponse<ShipmentResponse> getShipmentListByOrderStatus(long userId, OrderStatus status, Pageable pageable){
-        Page<Shipment> shipmentPage = shipmentRepository.findByOrder_UserIdAndOrder_Status(userId, status, pageable);
-        Page<ShipmentResponse> shipmentResponsePage = shipmentPage.map(shipment -> ShipmentResponse.from(shipment));
+        Page<Shipment> shipmentPage = shipmentRepository.findAllByOrderUserIdAndOrderStatus(userId, status, pageable);
+        Page<ShipmentResponse> shipmentResponsePage = shipmentPage.map(ShipmentResponse::from);
         return PageResponse.from(shipmentResponsePage);
     }
 
     // 수정
-    @Transactional
     public ShipmentResponse updateShipment(long orderId, ShipmentUpdateRequest request) {
         Shipment shipment = getShipmentOrThrow(orderId);
         shipment.update(request);
@@ -79,14 +72,12 @@ public class ShipmentService {
     }
 
     // 삭제
-    @Transactional
     public void deleteShipment(long orderId) {
         Shipment shipment = getShipmentOrThrow(orderId);
         shipmentRepository.deleteById(shipment.getId());
     }
 
     // 배달 완료 시간 변경
-    @Transactional
     public ShipmentResponse updateShipmentDeliveredAt(long orderId, LocalDateTime deliveredAt) {
         Shipment shipment = getShipmentOrThrow(orderId);
         shipment.updateDeliveredAt(deliveredAt);
@@ -94,8 +85,8 @@ public class ShipmentService {
     }
 
     // 조회 로직
-    private Shipment getShipmentOrThrow(long orderId) {
-        Optional<Shipment> optionalShipping = shipmentRepository.findByOrder_Id(orderId);
+    protected Shipment getShipmentOrThrow(long orderId) {
+        Optional<Shipment> optionalShipping = shipmentRepository.findByOrderId(orderId);
         if (optionalShipping.isEmpty()) {
             throw new ShipmentNotFoundException();
         }

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import shop.ink3.api.order.packaging.entity.Packaging;
 
 public interface PackagingRepository extends JpaRepository<Packaging, Long> {
-    Page<Packaging> findByIsAvailableTrue(Pageable pageable);
+    Page<Packaging> findAllByIsAvailableTrue(Pageable pageable);
 }

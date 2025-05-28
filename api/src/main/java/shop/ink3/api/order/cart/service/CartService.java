@@ -2,21 +2,20 @@ package shop.ink3.api.order.cart.service;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.common.exception.BookNotFoundException;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
-import shop.ink3.api.order.cart.dto.GuestCartRequest;
 import shop.ink3.api.order.cart.entity.Cart;
 import shop.ink3.api.order.cart.repository.CartRepository;
 import shop.ink3.api.order.common.exception.CartNotFoundException;
@@ -36,21 +35,23 @@ public class CartService {
     private final CartRepository cartRepository;
 
     public CartResponse addCartItem(CartRequest request) {
-        User user = userRepository.findById(request.userId())
-            .orElseThrow(() -> new UserNotFoundException(request.userId()));
+        User user = userRepository.findById(request.userId()).orElseThrow(() -> new UserNotFoundException(request.userId()));
         Book book = bookRepository.findById(request.bookId()).orElseThrow(() -> new BookNotFoundException(request.bookId()));
 
-        Cart cart = Cart.builder()
-            .user(user)
-            .book(book)
-            .quantity(request.quantity())
-            .build();
-        Cart savedCart = cartRepository.save(cart);
+        Cart cart = cartRepository.findByUserIdAndBookId(user.getId(), book.getId());
 
-        CartResponse response = toResponse(savedCart);
-        String key = CART_KEY_PREFIX + savedCart.getUser().getId();
-        hashOps().put(key, savedCart.getId().toString(), response);
-        redisTemplate.expire(key, Duration.ofDays(3));
+        if (Objects.nonNull(cart)) {
+            cart.updateQuantity(cart.getQuantity() + request.quantity());
+        } else {
+            cart = Cart.builder()
+                .user(user)
+                .book(book)
+                .quantity(request.quantity())
+                .build();
+        }
+        Cart savedCart = cartRepository.save(cart);
+        CartResponse response = CartResponse.from(savedCart);
+        cacheCart(savedCart, response);
 
         return response;
     }
@@ -61,7 +62,10 @@ public class CartService {
         cart.updateQuantity(request.quantity());
         cartRepository.save(cart);
 
-        return toResponse(cart);
+        CartResponse response = CartResponse.from(cart);
+        cacheCart(cart, response);
+
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -72,37 +76,16 @@ public class CartService {
             return cacheCarts;
         }
 
-        List<CartResponse> carts = cartRepository.findByUserId(userId).stream()
-            .map(this::toResponse)
+        List<Cart> carts = cartRepository.findByUserId(userId);
+        List<CartResponse> responses = carts.stream()
+            .map(CartResponse::from)
             .toList();
 
-        for (CartResponse response : carts) {
-            hashOps().put(key, response.id().toString(), response);
+        for (int i = 0; i < carts.size(); i++) {
+            cacheCart(carts.get(i), responses.get(i));
         }
-        redisTemplate.expire(key, Duration.ofDays(3));
 
-        return carts;
-    }
-
-    public List<CartResponse> getCartItemsByGuest(List<GuestCartRequest> requests) {
-        List<Long> bookIds = requests.stream()
-            .map(GuestCartRequest::bookId)
-            .toList();
-
-        List<Book> books = bookRepository.findAllById(bookIds);
-        Map<Long, Book> bookMap = books.stream()
-            .collect(Collectors.toMap(Book::getId, Function.identity()));
-
-        return requests.stream()
-            .map(req -> {
-                Book book = bookMap.get(req.bookId());
-                if (book == null) {
-                    throw new BookNotFoundException(req.bookId());
-                }
-                Cart cart = new Cart(null, book, req.quantity());
-                return toResponse(cart);
-            })
-            .toList();
+        return responses;
     }
 
     public void deleteCartItems(Long userId) {
@@ -124,11 +107,13 @@ public class CartService {
         hashOps().delete(key, cartId.toString());
     }
 
-    private CartResponse toResponse(Cart cart) {
-        return CartResponse.from(cart);
-    }
-
     private HashOperations<String, String, CartResponse> hashOps() {
         return redisTemplate.opsForHash();
+    }
+
+    private void cacheCart(Cart cart, CartResponse response) {
+        String key = CART_KEY_PREFIX + cart.getUser().getId();
+        hashOps().put(key, cart.getId().toString(), response);
+        redisTemplate.expire(key, Duration.ofDays(3));
     }
 }

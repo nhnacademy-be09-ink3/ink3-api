@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import shop.ink3.api.payment.entity.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findByOrder_Id(long orderId);
+    Optional<Payment> findByOrderId(long orderId);
 
-    void deleteByOrder_Id(long orderId);
+    void deleteByOrderId(long orderId);
 }

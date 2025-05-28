@@ -33,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.shipment.dto.ShipmentCreateRequest;
 import shop.ink3.api.order.shipment.dto.ShipmentResponse;
 import shop.ink3.api.order.shipment.dto.ShipmentUpdateRequest;
@@ -59,7 +60,8 @@ class ShipmentControllerTest {
     @DisplayName("배송 정보 조회 - 성공")
     void getShipment() throws Exception {
         // given
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         ShipmentResponse response = ShipmentResponse.from(shipment);
         when(shipmentService.getShipment(anyLong())).thenReturn(response);
 
@@ -91,49 +93,26 @@ class ShipmentControllerTest {
     }
 
     @Test
-    @DisplayName("사용자의 배송 리스트 조회 - 성공")
-    void getUserShipmentList_성공() throws Exception {
-        // given
-        PageResponse<ShipmentResponse> response = new PageResponse<>(
-                List.of(
-                        ShipmentResponse.from(Shipment.builder().id(1L).build()),
-                        ShipmentResponse.from(Shipment.builder().id(2L).build())
-                ),
-                0, 2, 2L, 1, false, false
-        );
-        when(shipmentService.getUserShipmentList(anyLong(), any())).thenReturn(response);
-
-        // when, then
-        mockMvc.perform(get("/shipments/user/1")
-                        .param("page", "0")
-                        .param("size", "2"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data.content[0].id").value(1L))
-                .andDo(print());
-    }
-
-    @Test
     @DisplayName("주문 상태별 배송 리스트 조회 - 성공")
     void getUserShipmentByOrderStatus_성공() throws Exception {
         // given
+        Order order1 = Order.builder().id(1L).build();
+        Order order2 = Order.builder().id(2L).build();
         PageResponse<ShipmentResponse> response = new PageResponse<>(
                 List.of(
-                        ShipmentResponse.from(Shipment.builder().id(1L).build()),
-                        ShipmentResponse.from(Shipment.builder().id(2L).build())
+                        ShipmentResponse.from(Shipment.builder().id(1L).order(order1).build()),
+                        ShipmentResponse.from(Shipment.builder().id(2L).order(order2).build())
                 ),
                 0, 2, 2L, 1, false, false
         );
         when(shipmentService.getShipmentListByOrderStatus(anyLong(), any(), any())).thenReturn(response);
 
         // when, then
-        mockMvc.perform(get("/shipments/user/1/order-status")
+        mockMvc.perform(get("/shipments/me/order-status")
                         .param("orderStatus", "SHIPPING")
                         .param("page", "0")
-                        .param("size", "2"))
+                        .param("size", "2")
+                        .header("X-User-Id",  1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -160,7 +139,8 @@ class ShipmentControllerTest {
                 3000,
                 "code"
         );
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         ShipmentResponse response = ShipmentResponse.from(shipment);
         when(shipmentService.createShipment(any())).thenReturn(response);
 
@@ -214,7 +194,8 @@ class ShipmentControllerTest {
     void updateShipment_성공() throws Exception {
         // given
         ShipmentUpdateRequest request = new ShipmentUpdateRequest("수정된 수령인", "01012345678", 12345, "서울시", "건물명", "101호", 4000, "UPDATED_CODE");
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         ShipmentResponse response = ShipmentResponse.from(shipment);
         when(shipmentService.updateShipment(anyLong(), any())).thenReturn(response);
 
@@ -257,7 +238,8 @@ class ShipmentControllerTest {
     @DisplayName("배송 완료 시간 변경 - 성공")
     void updateShipmentDeliveredAt_성공() throws Exception {
         // given
-        Shipment shipment = Shipment.builder().id(1L).build();
+        Order order = Order.builder().id(1L).build();
+        Shipment shipment = Shipment.builder().id(1L).order(order).build();
         ShipmentResponse response = ShipmentResponse.from(shipment);
         when(shipmentService.updateShipmentDeliveredAt(anyLong(), any())).thenReturn(response);
 
