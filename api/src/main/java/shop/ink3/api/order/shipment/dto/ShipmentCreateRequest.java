@@ -15,8 +15,6 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 public class ShipmentCreateRequest {
     @NotNull
-    private Long orderId;
-    @NotNull
     private LocalDate preferredDeliveryDate;
     @NotBlank
     @Length(max = 50)

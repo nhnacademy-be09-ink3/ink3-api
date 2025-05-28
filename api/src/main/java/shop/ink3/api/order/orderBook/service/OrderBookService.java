@@ -40,8 +40,7 @@ public class OrderBookService {
     private final UserCouponRepository userCouponRepository;
 
     // 생성
-    public void createOrderBook(List<OrderBookCreateRequest> requestList) {
-        long orderId = requestList.getFirst().getOrderId();
+    public void createOrderBook(long orderId, List<OrderBookCreateRequest> requestList) {
         for (OrderBookCreateRequest request : requestList) {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new OrderNotFoundException(orderId));

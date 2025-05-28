@@ -28,10 +28,10 @@ public class ShipmentService {
     private final OrderRepository orderRepository;
 
     // 생성
-    public ShipmentResponse createShipment(ShipmentCreateRequest request) {
-        Optional<Order> optionalOrder = orderRepository.findById(request.getOrderId());
+    public ShipmentResponse createShipment(long orderId, ShipmentCreateRequest request) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if(optionalOrder.isEmpty()){
-            throw new OrderNotFoundException(request.getOrderId());
+            throw new OrderNotFoundException(orderId);
         }
         Order order = optionalOrder.get();
         Shipment shipment = Shipment.builder()

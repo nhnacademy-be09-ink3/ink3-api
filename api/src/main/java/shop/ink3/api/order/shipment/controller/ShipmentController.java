@@ -53,14 +53,6 @@ public class ShipmentController {
                                 pageable)));
     }
 
-    @PostMapping
-    public ResponseEntity<CommonResponse<ShipmentResponse>> createShipment(
-            @RequestBody ShipmentCreateRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(CommonResponse.create(shipmentService.createShipment(request)));
-    }
-
     @PutMapping("/{orderId}")
     public ResponseEntity<CommonResponse<ShipmentResponse>> updateShipment(
             @PathVariable long orderId,

@@ -29,8 +29,8 @@ public class OrderMainService {
     // 결제 시 주문서 생성 (주문 관련 데이터 저장)
     public OrderResponse createOrderForm(OrderFormCreateRequest request) {
         OrderResponse orderResponse = orderService.createOrder(request.orderCreateRequest());
-        orderBookService.createOrderBook(request.createRequestList());
-        shipmentService.createShipment(request.shipmentCreateRequest());
+        orderBookService.createOrderBook(orderResponse.getId(), request.createRequestList());
+        shipmentService.createShipment(orderResponse.getId(), request.shipmentCreateRequest());
         return orderResponse;
     }
 

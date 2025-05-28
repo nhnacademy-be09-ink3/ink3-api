@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class OrderBookCreateRequest {
     @NotNull
-    private Long orderId;
-    @NotNull
     private Long bookId;
     @Nullable
     private Long packagingId;
