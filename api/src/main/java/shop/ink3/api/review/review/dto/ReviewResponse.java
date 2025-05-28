@@ -11,10 +11,11 @@ public record ReviewResponse(
     String title,
     String content,
     int rating,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    LocalDateTime modifiedAt
 ) {
     public static ReviewResponse from(Review review) {
-        return new ReviewResponse(review.getId(), review.getUser().getId(), review.getOrderBook().getId(), review.getTitle(),
-            review.getContent(), review.getRating(), review.getCreatedAt());
+        return new ReviewResponse(review.getId(), review.getUser().getId(), review.getOrderBook().getId(),
+            review.getTitle(), review.getContent(), review.getRating(), review.getCreatedAt(), review.getModifiedAt());
     }
 }
