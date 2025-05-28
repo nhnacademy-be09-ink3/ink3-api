@@ -26,6 +26,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class MinioUploader {
+
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
@@ -42,6 +43,7 @@ public class MinioUploader {
 
             s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
             log.warn("upload======key={}", key);
+
             return key;
         } catch (IOException e) {
             throw new MinioUploadFailException("MinIO 파일 업로드 실패");
