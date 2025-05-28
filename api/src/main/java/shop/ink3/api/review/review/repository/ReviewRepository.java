@@ -6,14 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import shop.ink3.api.review.review.dto.ReviewListResponse;
+import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
 import shop.ink3.api.review.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Review findReviewByUserId(Long userId);
+    Review findByUserId(Long userId);
 
     @Query("""
-            SELECT new shop.ink3.api.review.review.dto.ReviewListResponse(
+            SELECT new shop.ink3.api.review.review.dto.ReviewDefaultListResponse(
                 r.id,
                 u.id,
                 ob.id,
@@ -29,6 +29,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN r.orderBook ob
             JOIN ob.book b
             WHERE b.id = :bookId
+            ORDER BY r.createdAt DESC
         """)
-    Page<ReviewListResponse> findListByBookId(Pageable pageable, @Param("bookId") Long bookId);
+    Page<ReviewDefaultListResponse> findListByBookId(Pageable pageable, @Param("bookId") Long bookId);
 }

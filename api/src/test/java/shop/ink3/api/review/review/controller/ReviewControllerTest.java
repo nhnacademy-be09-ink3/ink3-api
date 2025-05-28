@@ -5,38 +5,34 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.book.book.entity.BookStatus;
-import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.order.orderBook.entity.OrderBook;
-import shop.ink3.api.review.review.controller.ReviewController;
 import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
 import shop.ink3.api.review.review.service.ReviewService;
-import shop.ink3.api.user.user.entity.User;
-import shop.ink3.api.user.user.entity.UserStatus;
+import shop.ink3.api.review.reviewImage.dto.ReviewImageResponse;
 
 @WebMvcTest(ReviewController.class)
 class ReviewControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -46,153 +42,93 @@ class ReviewControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private User user;
-    private Publisher publisher;
-    private Book book;
-    private OrderBook orderBook1;
-    private OrderBook orderBook2;
     private ReviewRequest reviewRequest;
+    private ReviewUpdateRequest reviewUpdateRequest;
     private ReviewResponse reviewResponse;
+    private ReviewListResponse reviewListResponse;
 
     @BeforeEach
     void setUp() {
-        user = User.builder()
-            .id(1L)
-            .loginId("test")
-            .name("test")
-            .email("test@test.com")
-            .phone("010-1234-5678")
-            .birthday(LocalDate.of(2025, 1, 1))
-            .point(1000)
-            .status(UserStatus.ACTIVE)
-            .lastLoginAt(LocalDateTime.now())
-            .createdAt(LocalDateTime.now())
-            .build();
+        reviewRequest = new ReviewRequest(1L, 1L, "title", "content", 5);
+        reviewUpdateRequest = new ReviewUpdateRequest("updatedTitle", "updatedContent", 4);
+        reviewResponse = new ReviewResponse(1L, 1L, 1L, "title", "content", 5,
+            LocalDateTime.now(), LocalDateTime.now(),
+            List.of("image1.jpg", "image2.jpg"));
 
-        publisher = Publisher.builder()
-            .id(1L)
-            .name("출판사1")
-            .build();
-
-        book = Book.builder()
-            .id(1L)
-            .isbn("1234567890123")
-            .title("예제 책 제목")
-            .contents("책 내용 요약")
-            .description("책 상세 설명")
-            .publishedAt(LocalDate.of(2024, 1, 1))
-            .originalPrice(20000)
-            .salePrice(18000)
-            .discountRate((18000 * 100) / 20000)
-            .quantity(100)
-            .status(BookStatus.AVAILABLE)
-            .isPackable(true)
-            .thumbnailUrl("https://example.com/image.jpg")
-            .publisher(publisher)
-            .build();
-
-        orderBook1 = OrderBook.builder()
-            .id(1L)
-            .order(null)
-            .book(book)
-            .packaging(null)
-            .couponStore(null)
-            .price(20000)
-            .quantity(100)
-            .build();
-
-        orderBook2 = OrderBook.builder()
-            .id(2L)
-            .order(null)
-            .book(book)
-            .packaging(null)
-            .couponStore(null)
-            .price(20000)
-            .quantity(100)
-            .build();
-
-        reviewRequest = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
-        reviewResponse = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5,
-            LocalDateTime.now(), LocalDateTime.now());
+        reviewListResponse = new ReviewListResponse(1L, 1L, 1L, "user1", "title", "content", 5,
+            LocalDateTime.now(), LocalDateTime.now(),
+            List.of(new ReviewImageResponse("image1.jpg"), new ReviewImageResponse("image2.jpg")));
     }
 
     @Test
     @DisplayName("리뷰 등록")
     void addReview() throws Exception {
-        Mockito.when(reviewService.addReview(any(ReviewRequest.class))).thenReturn(reviewResponse);
+        MockMultipartFile file = new MockMultipartFile("images", "image1.jpg", "image/jpeg", "test".getBytes());
+        MockMultipartFile json = new MockMultipartFile("review", "", "application/json",
+            objectMapper.writeValueAsBytes(reviewRequest));
 
-        mockMvc.perform(post("/reviews")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(reviewRequest)))
+        when(reviewService.addReview(any(), any())).thenReturn(reviewResponse);
+
+        mockMvc.perform(multipart("/reviews")
+                .file(file)
+                .file(json)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.data.id").value(1L))
-            .andExpect(jsonPath("$.data.title").value("title1"))
-            .andExpect(jsonPath("$.data.content").value("content1"));
-    }
-
-    @Test
-    @DisplayName("주문 도서의 리뷰 조회")
-    void getReviewByUserId() throws Exception {
-        ReviewResponse response = new ReviewResponse(
-            1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now(), LocalDateTime.now()
-        );
-
-        when(reviewService.getReviewByUserId(user.getId())).thenReturn(response);
-
-        mockMvc.perform(get("/users/{userId}/reviews", user.getId()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.id").value(1L))
-            .andExpect(jsonPath("$.data.title").value("title1"))
-            .andExpect(jsonPath("$.data.content").value("content1"))
-            .andExpect(jsonPath("$.data.rating").value(5));
-    }
-
-    @Test
-    @DisplayName("도서의 리뷰 목록 조회")
-    void getReviewsByBookId() throws Exception {
-        List<ReviewListResponse> reviewList = List.of(
-            new ReviewListResponse(1L, user.getId(), orderBook1.getId(), "user1", "title1", "content1", 5, LocalDateTime.now(),
-                LocalDateTime.now()),
-            new ReviewListResponse(2L, user.getId(), orderBook2.getId(), "user2", "title2", "content2", 4, LocalDateTime.now(),
-                LocalDateTime.now())
-        );
-
-        PageResponse<ReviewListResponse> pageResponse = new PageResponse<>(
-            reviewList,
-            0,
-            10,
-            2L,
-            1,
-            false,
-            false
-        );
-
-        when(reviewService.getReviewsByBookId(any(), eq(book.getId()))).thenReturn(pageResponse);
-
-        mockMvc.perform(get("/books/{bookId}/reviews", book.getId()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content.length()").value(2))
-            .andExpect(jsonPath("$.content[0].title").value("title1"))
-            .andExpect(jsonPath("$.content[1].title").value("title2"));
+            .andExpect(jsonPath("$.data.title").value("title"))
+            .andExpect(jsonPath("$.data.images.length()").value(2))
+            .andExpect(jsonPath("$.data.images[0]").value("image1.jpg"));
     }
 
     @Test
     @DisplayName("리뷰 수정")
     void updateReview() throws Exception {
-        ReviewUpdateRequest request = new ReviewUpdateRequest("updatedTitle", "updatedContent", 4);
-        ReviewResponse response = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "updatedTitle",
-            "updatedContent", 4, LocalDateTime.now(), LocalDateTime.now());
+        ReviewResponse updatedResponse = new ReviewResponse(1L, 1L, 1L, "updatedTitle", "updatedContent", 4,
+            LocalDateTime.now(), LocalDateTime.now(),
+            List.of("image3.jpg", "image4.jpg"));
 
-        when(reviewService.updateReview(eq(1L), any(ReviewUpdateRequest.class))).thenReturn(response);
+        MockMultipartFile file = new MockMultipartFile("images", "image3.jpg", "image/jpeg", "test".getBytes());
+        MockMultipartFile json = new MockMultipartFile("review", "", "application/json",
+            objectMapper.writeValueAsBytes(reviewUpdateRequest));
 
-        mockMvc.perform(put("/reviews/{reviewId}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        when(reviewService.updateReview(eq(1L), any(), any())).thenReturn(updatedResponse);
+
+        mockMvc.perform(multipart("/reviews/1")
+                .file(file)
+                .file(json)
+                .with(req -> {
+                    req.setMethod("PUT");
+                    return req;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.id").value(1L))
             .andExpect(jsonPath("$.data.title").value("updatedTitle"))
-            .andExpect(jsonPath("$.data.content").value("updatedContent"))
-            .andExpect(jsonPath("$.data.rating").value(4));
+            .andExpect(jsonPath("$.data.images[0]").value("image3.jpg"));
+    }
+
+    @Test
+    @DisplayName("유저의 리뷰 단건 조회")
+    void getReviewByUserId() throws Exception {
+        when(reviewService.getReviewByUserId(1L)).thenReturn(reviewResponse);
+
+        mockMvc.perform(get("/users/1/reviews"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.title").value("title"))
+            .andExpect(jsonPath("$.data.images[0]").value("image1.jpg"));
+    }
+
+    @Test
+    @DisplayName("도서 ID로 리뷰 목록 조회")
+    void getReviewsByBookId() throws Exception {
+        PageResponse<ReviewListResponse> pageResponse = PageResponse.from(
+            new PageImpl<>(List.of(reviewListResponse), PageRequest.of(0, 10), 1)
+        );
+
+        when(reviewService.getReviewsByBookId(any(), eq(1L))).thenReturn(pageResponse);
+
+        mockMvc.perform(get("/books/1/reviews?page=0&size=10&sort=createdAt,DESC"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].title").value("title"))
+            .andExpect(jsonPath("$.content[0].images[0].imageUrl").value("image1.jpg"));
     }
 
     @Test
