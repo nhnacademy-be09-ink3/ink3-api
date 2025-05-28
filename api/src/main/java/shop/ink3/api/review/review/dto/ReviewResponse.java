@@ -1,6 +1,7 @@
 package shop.ink3.api.review.review.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import shop.ink3.api.review.review.entity.Review;
 
@@ -12,10 +13,20 @@ public record ReviewResponse(
     String content,
     int rating,
     LocalDateTime createdAt,
-    LocalDateTime modifiedAt
+    LocalDateTime modifiedAt,
+    List<String> images
 ) {
-    public static ReviewResponse from(Review review) {
-        return new ReviewResponse(review.getId(), review.getUser().getId(), review.getOrderBook().getId(),
-            review.getTitle(), review.getContent(), review.getRating(), review.getCreatedAt(), review.getModifiedAt());
+    public static ReviewResponse from(Review review, List<String> imageUrls) {
+        return new ReviewResponse(
+            review.getId(),
+            review.getUser().getId(),
+            review.getOrderBook().getId(),
+            review.getTitle(),
+            review.getContent(),
+            review.getRating(),
+            review.getCreatedAt(),
+            review.getModifiedAt(),
+            imageUrls
+        );
     }
 }
