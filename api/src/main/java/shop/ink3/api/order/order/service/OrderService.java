@@ -121,14 +121,6 @@ public class OrderService {
         return PageResponse.from(pageResponse);
     }
 
-    // 포인트 ID로 주문 조회
-    @Transactional(readOnly = true)
-    public OrderResponse getOrderByPointHistoryId(long pointHistoryId) {
-        Order order = orderRepository.findByPointHistoryId(pointHistoryId);
-        return OrderResponse.from(order);
-    }
-
-
     // 수정
     public OrderResponse updateOrder(long orderId, OrderUpdateRequest request) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));

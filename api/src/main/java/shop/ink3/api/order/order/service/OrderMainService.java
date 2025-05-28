@@ -40,11 +40,11 @@ public class OrderMainService {
         refundService.availableRefund(request);
         RefundResponse refund = refundService.createRefund(request);
         //TODO : 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
-        // 금액 환불 to point (포인트 내역 추가)
-        OrderResponse order = orderService.getOrder(refund.getOrderId());
+        //TODO 금액 환불 및 포인트 내역 추가
+/*        OrderResponse order = orderService.getOrder(refund.getOrderId());
         applicationEventPublisher.publishEvent(
                 new PointHistoryAfterCancelPaymentEven(order.getId(), order.getPointHistoryId())
-        );
+        );*/
         //TODO : 사용된 쿠폰 재발급
 
         orderService.updateOrderStatus(request.getOrderId(), new OrderStatusUpdateRequest(OrderStatus.REFUNDED));
