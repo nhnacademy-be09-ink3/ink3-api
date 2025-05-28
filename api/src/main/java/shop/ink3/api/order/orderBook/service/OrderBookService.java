@@ -42,7 +42,6 @@ public class OrderBookService {
     // 생성
     public void createOrderBook(List<OrderBookCreateRequest> requestList) {
         long orderId = requestList.getFirst().getOrderId();
-
         for (OrderBookCreateRequest request : requestList) {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new OrderNotFoundException(orderId));
