@@ -104,7 +104,11 @@ public class Book {
     @PrePersist
     @PreUpdate
     public void updateDiscountRate() {
-        this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
+        if (originalPrice != 0) {
+            this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
+        } else {
+            this.discountRate = 0;
+        }
     }
 
     public void addBookCategory(Category category) {

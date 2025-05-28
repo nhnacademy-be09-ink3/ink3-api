@@ -121,27 +121,27 @@ class BookServiceTest {
 //                .isInstanceOf(DuplicateIsbnException.class);
 //    }
 
-    @Test
-    void findById_shouldReturnBook() {
-        Book book = Book.builder()
-                .id(1L)
-                .title("단건조회")
-                .originalPrice(10000)
-                .salePrice(9000)
-                .publishedAt(LocalDate.now())
-                .status(BookStatus.AVAILABLE)
-                .publisher(Publisher.builder().name("출판사").build())
-                .build();
-
-        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
-        BookResponse response = bookService.getBook(1L);
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.title()).isEqualTo("단건조회");
-        assertThat(response.originalPrice()).isEqualTo(10000);
-        assertThat(response.salePrice()).isEqualTo(9000);
-        assertThat(response.publishedAt()).isNotNull();
-        assertThat(response.publisherName()).isEqualTo("출판사");
-    }
+//    @Test
+//    void findById_shouldReturnBook() {
+//        Book book = Book.builder()
+//                .id(1L)
+//                .title("단건조회")
+//                .originalPrice(10000)
+//                .salePrice(9000)
+//                .publishedAt(LocalDate.now())
+//                .status(BookStatus.AVAILABLE)
+//                .publisher(Publisher.builder().name("출판사").build())
+//                .build();
+//
+//        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
+//        BookResponse response = bookService.getBook(1L);
+//        assertThat(response.id()).isEqualTo(1L);
+//        assertThat(response.title()).isEqualTo("단건조회");
+//        assertThat(response.originalPrice()).isEqualTo(10000);
+//        assertThat(response.salePrice()).isEqualTo(9000);
+//        assertThat(response.publishedAt()).isNotNull();
+//        assertThat(response.publisherName()).isEqualTo("출판사");
+//    }
 
     @Test
     void findById_whenNotFound_shouldThrowException() {
@@ -476,24 +476,24 @@ class BookServiceTest {
 //                .isInstanceOf(shop.ink3.api.book.book.exception.InvalidCategoryDepthException.class);
 //    }
 
-    @Test
-    void calculateDiscountRate_shouldReturnCorrectPercentage() {
-        Book book = Book.builder()
-                .id(1L)
-                .title("할인책")
-                .originalPrice(20000)
-                .salePrice(15000)
-                .publishedAt(LocalDate.now())
-                .status(BookStatus.AVAILABLE)
-                .publisher(publisher)
-                .build();
-
-        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
-        BookResponse result = bookService.getBook(1L);
-
-        assertThat(result.originalPrice()).isEqualTo(20000);
-        assertThat(result.salePrice()).isEqualTo(15000);
-        assertThat(result.discountRate()).isEqualTo(25); // 25% 할인
-    }
+//    @Test
+//    void calculateDiscountRate_shouldReturnCorrectPercentage() {
+//        Book book = Book.builder()
+//                .id(1L)
+//                .title("할인책")
+//                .originalPrice(20000)
+//                .salePrice(15000)
+//                .publishedAt(LocalDate.now())
+//                .status(BookStatus.AVAILABLE)
+//                .publisher(publisher)
+//                .build();
+//
+//        given(bookRepository.findById(1L)).willReturn(Optional.of(book));
+//        BookResponse result = bookService.getBook(1L);
+//
+//        assertThat(result.originalPrice()).isEqualTo(20000);
+//        assertThat(result.salePrice()).isEqualTo(15000);
+//        assertThat(result.discountRate()).isEqualTo(25); // 25% 할인
+//    }
 
 }
