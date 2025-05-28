@@ -78,10 +78,10 @@ public class PaymentService {
         }
 
         //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
-        // 금액 환불 to point (포인트 내역 추가)
-        eventPublisher.publishEvent(
+        //TODO 금액 환불 및 포인트 내역 추가
+/*        eventPublisher.publishEvent(
                 new PointHistoryAfterCancelPaymentEven(orderResponse.getId(), orderResponse.getPointHistoryId())
-        );
+        );*/
         //TODO : 사용된 쿠폰 재발급
 
         // 주문된 도서들의 재고를 원상복구

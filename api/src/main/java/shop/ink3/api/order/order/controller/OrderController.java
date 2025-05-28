@@ -83,13 +83,6 @@ public class OrderController {
                         orderService.getOrderListByDate(dateRequest, pageable)));
     }
 
-    // 포인트 내역에 대한 주문 조회
-    @GetMapping("/point-histories/{pointHistoryId}")
-    public ResponseEntity<CommonResponse<OrderResponse>> getOrderByPointHistoryId(@PathVariable long pointHistoryId) {
-        return ResponseEntity.ok(
-                CommonResponse.success(orderService.getOrderByPointHistoryId(pointHistoryId)));
-    }
-
     // 주문 상태 별 전체 주문목록 조회
     @PostMapping("/status")
     public ResponseEntity<CommonResponse<PageResponse<OrderResponse>>> getOrderListByStatus(
