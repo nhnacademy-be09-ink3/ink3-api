@@ -10,4 +10,6 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
     Page<PointHistory> findAllByUserId(long userId, Pageable pageable);
 
     Optional<PointHistory> findByIdAndUserId(long userId, long pointHistoryId);
+
+    boolean existsByOriginId(long originId);
 }

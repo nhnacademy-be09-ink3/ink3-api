@@ -62,21 +62,21 @@ public class PackagingController {
                 .ok(CommonResponse.update(packagingService.updatePackaging(packagingId, request)));
     }
 
-    @DeleteMapping("/{packagingId}")
-    public ResponseEntity<Void> deletePackaging(@PathVariable long packagingId) {
-        packagingService.deletePackaging(packagingId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PatchMapping("/activate/{packagingId}")
+    @PatchMapping("/{packagingId}/activate")
     public ResponseEntity<Void> activatePackaging(@PathVariable long packagingId) {
         packagingService.activate(packagingId);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/deactivate/{packagingId}")
+    @PatchMapping("/{packagingId}/deactivate")
     public ResponseEntity<Void> deactivatePackaging(@PathVariable long packagingId) {
         packagingService.deactivate(packagingId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{packagingId}")
+    public ResponseEntity<Void> deletePackaging(@PathVariable long packagingId) {
+        packagingService.deletePackaging(packagingId);
         return ResponseEntity.ok().build();
     }
 }

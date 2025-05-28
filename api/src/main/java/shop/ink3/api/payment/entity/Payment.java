@@ -35,8 +35,14 @@ public class Payment {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String paymentKey;
+
+    @Column(nullable = false)
+    private Integer usedPoint;
+
+    @Column(nullable = false)
+    private Integer discountPrice;
 
     @Column(nullable = false)
     private Integer paymentAmount;
@@ -50,4 +56,12 @@ public class Payment {
 
     @Column(nullable = true)
     private LocalDateTime approvedAt;
+
+    public void setDiscountPrice(Integer discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
+    public void setUsedPoint(Integer usedPoint) {
+        this.usedPoint = usedPoint;
+    }
 }

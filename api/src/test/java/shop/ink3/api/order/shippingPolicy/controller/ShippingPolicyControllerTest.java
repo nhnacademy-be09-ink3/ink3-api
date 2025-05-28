@@ -57,7 +57,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.getShippingPolicy(1L)).thenReturn(shippingPolicyResponse);
 
         // when then
-        mockMvc.perform(get("/shippingPolicies/1"))
+        mockMvc.perform(get("/shipping-policies/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -75,7 +75,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.getShippingPolicy(1L)).thenThrow(new ShippingPolicyNotFoundException(1L));
 
         // when, then
-        mockMvc.perform(get("/shippingPolicies/1"))
+        mockMvc.perform(get("/shipping-policies/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -95,7 +95,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.getActivateShippingPolicy()).thenReturn(shippingPolicyResponse);
 
         // when then
-        mockMvc.perform(get("/shippingPolicies/activate"))
+        mockMvc.perform(get("/shipping-policies/activate"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -113,7 +113,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.getActivateShippingPolicy()).thenThrow(new ShippingPolicyNotFoundException());
 
         // when then
-        mockMvc.perform(get("/shippingPolicies/activate"))
+        mockMvc.perform(get("/shipping-policies/activate"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
                 .andExpect(jsonPath("$.message").exists())
@@ -137,7 +137,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.getShippingPolicyList(any())).thenReturn(response);
 
         // when, then
-        mockMvc.perform(get("/shippingPolicies")
+        mockMvc.perform(get("/shipping-policies")
                         .param("page", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -161,7 +161,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.getShippingPolicyList(any())).thenThrow(new ShippingPolicyNotFoundException());
 
         // when, then
-        mockMvc.perform(get("/shippingPolicies")
+        mockMvc.perform(get("/shipping-policies")
                         .param("page", "0")
                         .param("size", "2"))
                 .andExpect(status().isNotFound())
@@ -193,7 +193,7 @@ class ShippingPolicyControllerTest {
         when(shippingPolicyService.createShippingPolicy(any())).thenReturn(response);
 
         // when, then
-        mockMvc.perform(post("/shippingPolicies")
+        mockMvc.perform(post("/shipping-policies")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -215,7 +215,7 @@ class ShippingPolicyControllerTest {
                 .thenThrow(new ShippingPolicyNotFoundException(1L)); // 예외 발생 가정
 
         // when, then
-        mockMvc.perform(post("/shippingPolicies")
+        mockMvc.perform(post("/shipping-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -248,7 +248,7 @@ class ShippingPolicyControllerTest {
 
 
         // when, then
-        mockMvc.perform(put("/shippingPolicies/1")
+        mockMvc.perform(put("/shipping-policies/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -270,7 +270,7 @@ class ShippingPolicyControllerTest {
                 .thenThrow(new ShippingPolicyNotFoundException(1L)); // 예외 발생 가정
 
         // when, then
-        mockMvc.perform(put("/shippingPolicies/1")
+        mockMvc.perform(put("/shipping-policies/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -288,7 +288,7 @@ class ShippingPolicyControllerTest {
         doNothing().when(shippingPolicyService).activate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/shippingPolicies/activate/1"))
+        mockMvc.perform(patch("/shipping-policies/1/activate"))
                 .andExpect(status().isOk())
                 .andDo(print());
         verify(shippingPolicyService).activate(anyLong());
@@ -301,7 +301,7 @@ class ShippingPolicyControllerTest {
         doThrow(new ShippingPolicyNotFoundException(1L)).when(shippingPolicyService).activate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/shippingPolicies/activate/1"))
+        mockMvc.perform(patch("/shipping-policies/1/activate"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
                 .andExpect(jsonPath("$.message").exists())
@@ -317,7 +317,7 @@ class ShippingPolicyControllerTest {
         doNothing().when(shippingPolicyService).deactivate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/shippingPolicies/deactivate/1"))
+        mockMvc.perform(patch("/shipping-policies/1/deactivate"))
                 .andExpect(status().isOk())
                 .andDo(print());
         verify(shippingPolicyService).deactivate(anyLong());
@@ -330,7 +330,7 @@ class ShippingPolicyControllerTest {
         doThrow(new ShippingPolicyNotFoundException(1L)).when(shippingPolicyService).deactivate(anyLong());
 
         // when, then
-        mockMvc.perform(patch("/shippingPolicies/deactivate/1"))
+        mockMvc.perform(patch("/shipping-policies/1/deactivate"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
                 .andExpect(jsonPath("$.message").exists())
@@ -346,7 +346,7 @@ class ShippingPolicyControllerTest {
         doNothing().when(shippingPolicyService).deleteShippingPolicy(anyLong());
 
         // when, then
-        mockMvc.perform(delete("/shippingPolicies/1"))
+        mockMvc.perform(delete("/shipping-policies/1"))
                 .andExpect(status().isOk())
                 .andDo(print());
         verify(shippingPolicyService).deleteShippingPolicy(anyLong());
@@ -359,7 +359,7 @@ class ShippingPolicyControllerTest {
         doThrow(new ShippingPolicyNotFoundException(1L)).when(shippingPolicyService).deleteShippingPolicy(anyLong());
 
         // when, then
-        mockMvc.perform(delete("/shippingPolicies/1"))
+        mockMvc.perform(delete("/shipping-policies/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
                 .andExpect(jsonPath("$.message").exists())

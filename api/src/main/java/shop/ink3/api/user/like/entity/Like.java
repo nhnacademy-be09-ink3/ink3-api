@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.user.user.entity.User;
 
 @Entity
@@ -30,5 +31,7 @@ public class Like {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Long bookId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 }

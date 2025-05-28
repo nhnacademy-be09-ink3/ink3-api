@@ -188,7 +188,7 @@ class PointServiceTest {
     void earnPoint() {
         User user = User.builder().id(1L).point(0).build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        pointService.earnPoint(1L, new UserPointRequest(1000));
+        pointService.earnPoint(1L, new UserPointRequest(1000, "test"));
         Assertions.assertEquals(1000, user.getPoint());
         verify(pointHistoryRepository).save(any());
     }
@@ -198,7 +198,7 @@ class PointServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(
                 UserNotFoundException.class,
-                () -> pointService.earnPoint(1L, new UserPointRequest(1000))
+                () -> pointService.earnPoint(1L, new UserPointRequest(1000, "test"))
         );
     }
 
@@ -206,7 +206,7 @@ class PointServiceTest {
     void usePoint() {
         User user = User.builder().id(1L).point(1000).build();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        pointService.usePoint(1L, new UserPointRequest(1000));
+        pointService.usePoint(1L, new UserPointRequest(1000, "test"));
         Assertions.assertEquals(0, user.getPoint());
         verify(pointHistoryRepository).save(any());
     }
@@ -216,7 +216,7 @@ class PointServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(
                 UserNotFoundException.class,
-                () -> pointService.usePoint(1L, new UserPointRequest(1000))
+                () -> pointService.usePoint(1L, new UserPointRequest(1000, "test"))
         );
     }
 

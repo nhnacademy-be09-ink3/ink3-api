@@ -22,7 +22,7 @@ import shop.ink3.api.order.refundPolicy.service.RefundPolicyService;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/refundPolicies")
+@RequestMapping("/refund-policies")
 public class RefundPolicyController {
     private final RefundPolicyService refundPolicyService;
 
@@ -34,10 +34,9 @@ public class RefundPolicyController {
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<CommonResponse<PageResponse<RefundPolicyResponse>>> getActivateRefundPolicyList(
-            Pageable pageable) {
+    public ResponseEntity<CommonResponse<RefundPolicyResponse>> getActivateRefundPolicy() {
         return ResponseEntity
-                .ok(CommonResponse.success(refundPolicyService.getAvailableRefundPolicyList(pageable)));
+                .ok(CommonResponse.success(refundPolicyService.getAvailableRefundPolicy()));
     }
 
     @GetMapping
@@ -62,13 +61,13 @@ public class RefundPolicyController {
                 .ok(CommonResponse.update(refundPolicyService.updateRefundPolicy(refundPolicyId, request)));
     }
 
-    @PatchMapping("/activate/{refundPolicyId}")
+    @PatchMapping("/{refundPolicyId}/activate")
     public ResponseEntity<Void> activateRefundPolicy(@PathVariable long refundPolicyId) {
         refundPolicyService.activate(refundPolicyId);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/deactivate/{refundPolicyId}")
+    @PatchMapping("/{refundPolicyId}/deactivate")
     public ResponseEntity<Void> deactivateRefundPolicy(@PathVariable long refundPolicyId) {
         refundPolicyService.deactivate(refundPolicyId);
         return ResponseEntity.ok().build();
