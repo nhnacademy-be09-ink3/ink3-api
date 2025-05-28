@@ -58,6 +58,9 @@ class ReviewControllerTest {
         reviewListResponse = new ReviewListResponse(1L, 1L, 1L, "user1", "title", "content", 5,
             LocalDateTime.now(), LocalDateTime.now(),
             List.of(new ReviewImageResponse("image1.jpg")));
+        reviewListResponse = new ReviewListResponse(1L, 1L, 1L, "user1", "title", "content", 5,
+            LocalDateTime.now(), LocalDateTime.now(),
+            List.of(new ReviewImageResponse("image1.jpg"), new ReviewImageResponse("image2.jpg")));
     }
 
     @Test
