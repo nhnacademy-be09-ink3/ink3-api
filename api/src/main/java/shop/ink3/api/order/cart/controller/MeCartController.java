@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
@@ -23,6 +24,7 @@ import shop.ink3.api.order.cart.dto.CartUpdateRequest;
 import shop.ink3.api.order.cart.dto.MeCartRequest;
 import shop.ink3.api.order.cart.service.CartService;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/me/carts")
@@ -40,7 +42,9 @@ public class MeCartController {
         @RequestHeader("X-User-Id") Long userId) {
         for (MeCartRequest item : guestItems) {
             CartRequest request = new CartRequest(userId, item.bookId(), item.quantity());
+            log.error("service 실행 전");
             cartService.addCartItem(request);
+            log.error("service 실행 후");
         }
         return ResponseEntity.ok().build();
     }
