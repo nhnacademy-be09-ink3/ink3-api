@@ -20,12 +20,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import shop.ink3.api.book.book.entity.Book;
-import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
 import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
-import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -132,15 +130,16 @@ class ReviewServiceTest {
 
         Review review = new Review(user, orderBook, "title", "content", 5);
         ReflectionTestUtils.setField(review, "id", 1L);
+
         ReviewImage image = ReviewImage.builder().imageUrl("img1.jpg").review(review).build();
 
         when(reviewRepository.findListByBookId(any(), anyLong())).thenReturn(page);
         when(reviewImageRepository.findByReviewIdIn(List.of(1L))).thenReturn(List.of(image));
 
-        PageResponse<ReviewListResponse> reviewsByBookId = reviewService.getReviewsByBookId(PageRequest.of(0, 10), 1L);
+        var response = reviewService.getReviewsByBookId(PageRequest.of(0, 10), 1L);
 
-        assertThat(reviewsByBookId.content()).hasSize(1);
-        assertThat(reviewsByBookId.content().getFirst().images()).hasSize(1);
+        assertThat(response.content()).hasSize(1);
+        assertThat(response.content().get(0).images()).hasSize(1);
     }
 
     @Test
