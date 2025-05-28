@@ -41,14 +41,6 @@ public class OrderBookController {
                 .ok(CommonResponse.success(orderBookService.getOrderBookListByOrderId(orderId, pageable)));
     }
 
-    // 주문에 대한 주문-도서 생성
-    @PostMapping
-    public ResponseEntity<CommonResponse<Void>> createOrderBooks(@RequestBody List<OrderBookCreateRequest> request){
-        orderBookService.createOrderBook(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED).build();
-    }
-
     @PutMapping("/{orderBookId}")
     public ResponseEntity<CommonResponse<OrderBookResponse>> updateOrderBookResponse(
             @PathVariable long orderBookId,
