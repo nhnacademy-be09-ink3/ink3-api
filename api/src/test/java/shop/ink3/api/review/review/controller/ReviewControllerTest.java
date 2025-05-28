@@ -111,7 +111,8 @@ class ReviewControllerTest {
             .build();
 
         reviewRequest = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
-        reviewResponse = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now());
+        reviewResponse = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5,
+            LocalDateTime.now(), LocalDateTime.now());
     }
 
     @Test
@@ -132,7 +133,7 @@ class ReviewControllerTest {
     @DisplayName("주문 도서의 리뷰 조회")
     void getReviewByUserId() throws Exception {
         ReviewResponse response = new ReviewResponse(
-            1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now()
+            1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now(), LocalDateTime.now()
         );
 
         when(reviewService.getReviewByUserId(user.getId())).thenReturn(response);
@@ -149,8 +150,10 @@ class ReviewControllerTest {
     @DisplayName("도서의 리뷰 목록 조회")
     void getReviewsByBookId() throws Exception {
         List<ReviewResponse> reviewList = List.of(
-            new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now()),
-            new ReviewResponse(2L, user.getId(), orderBook2.getId(), "title2", "content2", 4, LocalDateTime.now())
+            new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now(),
+                LocalDateTime.now()),
+            new ReviewResponse(2L, user.getId(), orderBook2.getId(), "title2", "content2", 4, LocalDateTime.now(),
+                LocalDateTime.now())
         );
 
         PageResponse<ReviewResponse> pageResponse = new PageResponse<>(
@@ -176,7 +179,8 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정")
     void updateReview() throws Exception {
         ReviewUpdateRequest request = new ReviewUpdateRequest("updatedTitle", "updatedContent", 4);
-        ReviewResponse response = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "updatedTitle", "updatedContent", 4, LocalDateTime.now());
+        ReviewResponse response = new ReviewResponse(1L, user.getId(), orderBook1.getId(), "updatedTitle",
+            "updatedContent", 4, LocalDateTime.now(), LocalDateTime.now());
 
         when(reviewService.updateReview(eq(1L), any(ReviewUpdateRequest.class))).thenReturn(response);
 
