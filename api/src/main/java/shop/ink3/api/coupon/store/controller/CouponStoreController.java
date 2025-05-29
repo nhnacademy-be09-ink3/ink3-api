@@ -1,6 +1,7 @@
 package shop.ink3.api.coupon.store.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.ink3.api.common.dto.CommonResponse;
@@ -29,14 +30,14 @@ public class CouponStoreController {
     private final CategoryCouponRepository categoryCouponRepository;
 
     // 쿠폰 발급 (store 생성)
-    @PostMapping("/users/{userId}/stores")
-    public ResponseEntity<CouponStoreResponse> issueCoupon(@RequestBody CouponIssueRequest request) {
+    @PostMapping("/users/{userId}/coupon-stores")
+    public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(@RequestBody CouponIssueRequest request) {
         CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
     }
 
     // ✅ 유저의 전체 쿠폰 조회 → /users/{userId}/stores
-    @GetMapping("/users/{userId}/stores")
+    @GetMapping("/users/{userId}/coupon-stores")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByUserId(@PathVariable Long userId) {
         List<CouponStore> stores = couponStoreService.getStoresByUserId(userId);
         List<CouponStoreResponse> responses = stores.stream()
@@ -46,7 +47,7 @@ public class CouponStoreController {
     }
 
     // ✅ 유저의 미사용 쿠폰만 조회 → /users/{userId}/stores/unused
-    @GetMapping("/users/{userId}/stores/unused")
+    @GetMapping("/users/{userId}/coupon-stores/status-unused")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getUnusedStores(@PathVariable Long userId) {
         List<CouponStore> stores = couponStoreService.getUnusedStoresByUserId(userId);
         List<CouponStoreResponse> responses = stores.stream()
@@ -56,7 +57,7 @@ public class CouponStoreController {
     }
 
     // ✅ 특정 쿠폰으로 발급된 store 전체 조회 → /coupons/{couponId}/stores
-    @GetMapping("/coupons/{couponId}/stores")
+    @GetMapping("/coupons/{couponId}/coupon-stores")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByCouponId(@PathVariable Long couponId) {
         List<CouponStore> stores = couponStoreService.getStoresByCouponId(couponId);
         List<CouponStoreResponse> responses = stores.stream()
@@ -66,7 +67,7 @@ public class CouponStoreController {
     }
 
     // ✅ 쿠폰 사용 여부 업데이트
-    @PutMapping("/stores/{storeId}")
+    @PutMapping("/coupon-stores/{storeId}")
     public ResponseEntity<CommonResponse<CouponStoreUpdateResponse>> updateStore(
             @PathVariable Long storeId,
             @RequestBody CouponStoreUpdateRequest request) {
@@ -77,7 +78,7 @@ public class CouponStoreController {
     }
 
     // ✅ 쿠폰 발급 삭제
-    @DeleteMapping("/stores/{storeId}")
+    @DeleteMapping("/coupon-stores/{storeId}")
     public ResponseEntity<CommonResponse<Void>> deleteStore(@PathVariable Long storeId) {
         couponStoreService.deleteStore(storeId);
         return ResponseEntity.ok(CommonResponse.success(null));

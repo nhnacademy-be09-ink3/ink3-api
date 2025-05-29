@@ -20,7 +20,6 @@ import shop.ink3.api.book.category.entity.Category;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@Setter
 @Table(name = "book_categories")
 public class BookCategory {
 
