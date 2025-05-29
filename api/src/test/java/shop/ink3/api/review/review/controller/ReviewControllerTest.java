@@ -27,6 +27,7 @@ import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.review.review.controller.ReviewController;
+import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -149,14 +150,14 @@ class ReviewControllerTest {
     @Test
     @DisplayName("도서의 리뷰 목록 조회")
     void getReviewsByBookId() throws Exception {
-        List<ReviewResponse> reviewList = List.of(
-            new ReviewResponse(1L, user.getId(), orderBook1.getId(), "title1", "content1", 5, LocalDateTime.now(),
+        List<ReviewListResponse> reviewList = List.of(
+            new ReviewListResponse(1L, user.getId(), orderBook1.getId(), "user1", "title1", "content1", 5, LocalDateTime.now(),
                 LocalDateTime.now()),
-            new ReviewResponse(2L, user.getId(), orderBook2.getId(), "title2", "content2", 4, LocalDateTime.now(),
+            new ReviewListResponse(2L, user.getId(), orderBook2.getId(), "user2", "title2", "content2", 4, LocalDateTime.now(),
                 LocalDateTime.now())
         );
 
-        PageResponse<ReviewResponse> pageResponse = new PageResponse<>(
+        PageResponse<ReviewListResponse> pageResponse = new PageResponse<>(
             reviewList,
             0,
             10,

@@ -21,6 +21,7 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
+import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.entity.Review;
 import shop.ink3.api.review.review.repository.ReviewRepository;
 import shop.ink3.api.user.membership.entity.Membership;
@@ -114,11 +115,11 @@ class ReviewRepositoryTest {
     @Test
     @DisplayName("한 도서에 대한 모든 리뷰 조회")
     void findAllByBookId() {
-        Page<Review> page = reviewRepository.findAllByBookId(
+        Page<ReviewListResponse> page = reviewRepository.findListByBookId(
             PageRequest.of(0, 10), book.getId()
         );
         assertThat(page.getTotalElements()).isEqualTo(1);
-        assertThat(page.getContent().get(0).getRating()).isEqualTo(5);
+        assertThat(page.getContent().getFirst().rating()).isEqualTo(5);
     }
 }
 

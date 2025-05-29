@@ -27,6 +27,7 @@ import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
+import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
 import shop.ink3.api.review.review.exception.ReviewNotFoundException;
 import shop.ink3.api.review.review.dto.ReviewRequest;
@@ -192,10 +193,14 @@ class ReviewServiceTest {
         reviews.add(review1);
         reviews.add(review2);
 
-        Page<Review> reviewPage = new PageImpl<>(reviews, PageRequest.of(0, 10), reviews.size());
-        when(reviewRepository.findAllByBookId(any(), eq(book.getId()))).thenReturn(reviewPage);
+        List<ReviewListResponse> reviewListResponses = List.of(
+            new ReviewListResponse(1L, user.getId(), orderBook1.getId(), "user1", "title1", "content1", 5, LocalDateTime.now(), LocalDateTime.now()),
+            new ReviewListResponse(2L, user.getId(), orderBook2.getId(), "user1", "title2", "content2", 4, LocalDateTime.now(), LocalDateTime.now())
+        );
+        Page<ReviewListResponse> reviewPage = new PageImpl<>(reviewListResponses, PageRequest.of(0, 10), reviewListResponses.size());
+        when(reviewRepository.findListByBookId(any(), eq(book.getId()))).thenReturn(reviewPage);
 
-        PageResponse<ReviewResponse> response = reviewService.getReviewsByBookId(PageRequest.of(0, 10), book.getId());
+        PageResponse<ReviewListResponse> response = reviewService.getReviewsByBookId(PageRequest.of(0, 10), book.getId());
 
         assertThat(response.content()).hasSize(2);
         assertThat(response.content().get(0).id()).isEqualTo(1L);

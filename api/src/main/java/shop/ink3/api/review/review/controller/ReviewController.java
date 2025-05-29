@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -38,7 +39,7 @@ public class ReviewController {
     }
 
     @GetMapping("/books/{bookId}/reviews")
-    public ResponseEntity<PageResponse<ReviewResponse>> getReviewsByBookId(
+    public ResponseEntity<PageResponse<ReviewListResponse>> getReviewsByBookId(
         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @PathVariable Long bookId) {
         return ResponseEntity.ok(reviewService.getReviewsByBookId(pageable, bookId));
