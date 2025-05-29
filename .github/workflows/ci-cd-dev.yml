@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev
-      
+
 env:
   RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
   RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
@@ -15,7 +15,7 @@ env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   TTB_KEY: ${{ secrets.TTB_KEY }}
   REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-  
+
 jobs:
   build:
     name: Build JAR
@@ -216,5 +216,7 @@ jobs:
             export RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}
             export RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+            export TOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+            export TOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
