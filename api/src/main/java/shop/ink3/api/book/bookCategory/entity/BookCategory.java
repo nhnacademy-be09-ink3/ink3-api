@@ -17,7 +17,7 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.category.entity.Category;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter

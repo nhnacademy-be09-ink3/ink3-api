@@ -34,7 +34,7 @@ import shop.ink3.api.book.tag.entity.Tag;
 
 @Builder
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Setter
 @Getter
