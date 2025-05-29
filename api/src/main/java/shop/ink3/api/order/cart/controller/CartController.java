@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import shop.ink3.api.common.dto.CommonResponse;
@@ -28,12 +29,12 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestBody CartRequest request) {
+    public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestBody @Valid CartRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(cartService.addCartItem(request)));
     }
 
     @PutMapping("/{cartId}")
-    public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@PathVariable Long cartId, @RequestBody CartUpdateRequest request) {
+    public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@PathVariable Long cartId, @RequestBody @Valid CartUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(cartService.updateCartQuantity(cartId, request)));
     }
 
