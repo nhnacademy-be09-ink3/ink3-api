@@ -11,10 +11,9 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
-import shop.ink3.api.coupon.store.repository.UserCouponRepository;
+import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.exception.InsufficientBookStockException;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
@@ -37,7 +36,7 @@ public class OrderBookService {
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
     private final PackagingRepository packagingRepository;
-    private final UserCouponRepository userCouponRepository;
+    private final CouponStoreRepository couponStoreRepository;
 
     // 생성
     public void createOrderBook(long orderId, List<OrderBookCreateRequest> requestList) {
@@ -58,7 +57,7 @@ public class OrderBookService {
 
             CouponStore couponStore = null;
             if(request.getCouponStoreId() != null) {
-                couponStore = userCouponRepository.findById(request.getCouponStoreId())
+                couponStore = couponStoreRepository.findById(request.getCouponStoreId())
                         .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
             }
 
@@ -97,7 +96,7 @@ public class OrderBookService {
         Packaging packaging = (Objects.isNull(request.getPackagingId())) ? null
                 : packagingRepository.findById(request.getPackagingId())
                         .orElseThrow(() -> new PackagingNotFoundException(request.getPackagingId()));
-        CouponStore couponStore = userCouponRepository.findById(request.getCouponStoreId())
+        CouponStore couponStore = couponStoreRepository.findById(request.getCouponStoreId())
                 .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
         orderBook.update(request, packaging, couponStore);
         return OrderBookResponse.from(orderBookRepository.save(orderBook));
