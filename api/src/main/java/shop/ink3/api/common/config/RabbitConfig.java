@@ -85,24 +85,13 @@ public class RabbitConfig {
 
     @Bean
     public Binding bindBirthdayQueue() {
-        return BindingBuilder.bind(birthdayQueue()).to(exchange()).with("coupon.birthday.bulk");
+        return BindingBuilder.bind(birthdayQueue()).to(exchange()).with("coupon.birthday");
     }
 
     @Bean
     public Binding bindBirthdayDLQ() {
         return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon");
     }
-
-    @Bean
-    public Binding bindBookQueue() {
-        return BindingBuilder.bind(bookQueue()).to(exchange()).with("coupon.issue.book");
-    }
-
-    @Bean
-    public Binding bindCategoryQueue() {
-        return BindingBuilder.bind(categoryQueue()).to(exchange()).with("coupon.category");
-    }
-
     /*
      message를 자동으로 Json <-> java객체로 직렬화/역직렬화 해주는 변환기
      RebbitTemplate 및 @RabbitListener에서 DTO객체를 바로 주고받을 수 있게 해줌

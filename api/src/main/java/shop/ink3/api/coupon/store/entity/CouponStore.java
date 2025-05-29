@@ -42,6 +42,11 @@ public class CouponStore {
     private Coupon coupon;
 
     @Column(nullable = false)
+    private OriginType originType;
+
+    private Long originId;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CouponStatus status;
 

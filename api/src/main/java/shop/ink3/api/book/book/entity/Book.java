@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
@@ -33,8 +34,9 @@ import shop.ink3.api.book.tag.entity.Tag;
 
 @Builder
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
+@Setter
 @Getter
 @Table(name = "books")
 public class Book {

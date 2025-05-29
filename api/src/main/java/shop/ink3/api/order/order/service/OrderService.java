@@ -58,7 +58,6 @@ public class OrderService {
         return OrderResponse.from(saveOrder);
     }
 
-
     // 주문Id에 대한 조회 (사용자)
     public OrderResponse getOrder(long orderId){
         Order order = orderRepository.findById(orderId)
@@ -95,7 +94,6 @@ public class OrderService {
         return PageResponse.from(pageResponse);
     }
 
-
     // 전체 주문 리스트 조회 (관리자)
     public PageResponse<OrderResponse> getOrderList(Pageable pageable){
         Page<Order> page = orderRepository.findAll(pageable);
@@ -109,8 +107,6 @@ public class OrderService {
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
-
-
 
     // 수정
     @Transactional
@@ -148,7 +144,6 @@ public class OrderService {
         if(orderUUID.length() > 64){
             orderUUID = orderUUID.substring(0, 64);
         }
-
         return orderUUID;
     }
 }
