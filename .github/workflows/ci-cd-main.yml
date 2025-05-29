@@ -15,6 +15,8 @@ env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   TTB_KEY: ${{ secrets.TTB_KEY }}
   REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+  TOSS_PAYMENT_CLIENT_KEY: ${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+  TOSS_PAYMENT_SECRET_KEY: ${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
 
 jobs:
   build:
@@ -71,7 +73,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} sonar:sonar \
+          mvn clean verify -Dspring.profiles.active=test \
+          -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} \
+          -DTTB_KEY=${{ secrets.TTB_KEY }} \
+          -DTOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }} \
+          -DTOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }} \
+          sonar:sonar \
             -Dsonar.projectKey=ink3_api_server \
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
@@ -152,7 +159,13 @@ jobs:
         env:
           EUREKA_URL: ${{ secrets.EUREKA_URL }}
           TTB_KEY: ${{ secrets.TTB_KEY }}
-        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -B
+        run: |
+          mvn test \
+          -Dspring.profiles.active=test \
+          -DTTB_KEY=$TTB_KEY \
+          -DTOSS_PAYMENT_CLIENT_KEY=$TOSS_PAYMENT_CLIENT_KEY \
+          -DTOSS_PAYMENT_SECRET_KEY=$TOSS_PAYMENT_SECRET_KEY \
+          -B
 
       - name: Print app log if health check fails
         if: failure()
@@ -217,5 +230,7 @@ jobs:
             export RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}
             export RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+            export TOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+            export TOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
