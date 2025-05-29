@@ -40,6 +40,9 @@ public class RefundPolicy {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private Integer refundShippingFee;
+
     public void deactivate() {
         this.isAvailable = false;
     }
@@ -52,5 +55,6 @@ public class RefundPolicy {
         this.name = request.getName();
         this.returnDeadLine = request.getReturnDeadLine();
         this.defectReturnDeadLine = request.getDefectReturnDeadLine();
+        this.refundShippingFee = request.getRefundShippingFee();
     }
 }

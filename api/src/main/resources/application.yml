@@ -4,37 +4,13 @@ spring:
   config:
     import: optional:configserver:https://ink3.shop/config/
   rabbitmq:
-    host: s4.java21.net
-    port: 5672
-    username: admin
-    password: nhnacademy123!
-    virtualhost: ink_dev
-    listener:
-      simple:
-        retry:
-          enabled: true
-          max-attempts: 3
-          initial-interval: 1000
-          multiplier: 2.0
-          max-interval: 10000
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
   cloud:
     bus:
       enabled: true
-  datasource:
-    url: jdbc:h2:mem:testdb   # 또는 jdbc:h2:~/your-db-name
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-    h2:
-      console:
-        enabled: true          # ✅ 콘솔 활성화
-        path: /h2-console      # 기본 경로
-
-    jpa:
-      hibernate:
-        ddl-auto: update       # or create, create-drop
-      show-sql: true
 
 management:
   endpoints:

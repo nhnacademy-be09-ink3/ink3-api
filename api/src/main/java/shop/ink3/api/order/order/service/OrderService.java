@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
+import shop.ink3.api.coupon.store.repository.UserCouponRepository;
 import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
@@ -20,11 +22,16 @@ import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
+import shop.ink3.api.order.refundPolicy.service.RefundPolicyService;
+import shop.ink3.api.user.point.dto.PointHistoryResponse;
+import shop.ink3.api.user.point.entity.PointHistory;
+import shop.ink3.api.user.point.exception.PointHistoryNotFoundException;
+import shop.ink3.api.user.point.repository.PointHistoryRepository;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
-
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -32,20 +39,15 @@ public class OrderService {
     private final UserRepository userRepository;
 
     // 생성
-    @Transactional
-    public OrderResponse createOrder(OrderCreateRequest request){
+    public OrderResponse createOrder(OrderCreateRequest request) {
         User user = null;
-        if(Objects.nonNull(request.getUserId())) {
+        if (Objects.nonNull(request.getUserId())) {
             user = userRepository.findById(request.getUserId())
-                    .orElseThrow(()->new UserNotFoundException(request.getUserId()));
+                    .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
         }
-
-        // fix : 조회 한 쿠폰 객체 넣어주기
-        CouponStore couponStore = null;
 
         Order order = Order.builder()
                 .user(user)
-                .couponStore(couponStore)
                 .status(OrderStatus.CONFIRMED)
                 .orderedAt(LocalDateTime.now())
                 .ordererName(request.getOrdererName())
@@ -59,89 +61,94 @@ public class OrderService {
     }
 
     // 주문Id에 대한 조회 (사용자)
-    public OrderResponse getOrder(long orderId){
+    @Transactional(readOnly = true)
+    public OrderResponse getOrder(long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
         return OrderResponse.from(order);
     }
 
     // 사용자의 주문 리스트 조회 (사용자)
+    @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByUser(long userId, Pageable pageable) {
-        Page<Order> page = orderRepository.findByUser_Id(userId, pageable);
+        Page<Order> page = orderRepository.findAllByUserId(userId, pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 사용자 + 상태별 주문 조회 (사용자)
-    public PageResponse<OrderResponse> getOrderListByUserAndStatus(long userId, OrderStatusRequest request, Pageable pageable) {
-        Page<Order> page = orderRepository.findByUser_IdAndStatus(userId, request.getOrderStatus(), pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByUserAndStatus(long userId, OrderStatusRequest request,
+                                                                   Pageable pageable) {
+        Page<Order> page = orderRepository.findAllByUserIdAndStatus(userId, request.getOrderStatus(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 기간 별 주문 리스트 조회 (사용자)
-    public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request ,
-                                                                 Pageable pageable){
-        Page<Order> page = orderRepository.findByUser_IdAndOrderedAtBetween(userId, request.getStartDate(), request.getEndDate(),pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByUserAndDate(long userId, OrderDateRequest request,
+                                                                 Pageable pageable) {
+        Page<Order> page = orderRepository.findAllByUserIdAndOrderedAtBetween(userId, request.getStartDate(),
+                request.getEndDate(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 기간 별 주문 리스트 조회 (관리자)
-    public PageResponse<OrderResponse> getOrderListByDate(OrderDateRequest request, Pageable pageable){
-        Page<Order> page = orderRepository.findByOrderedAtBetween(request.getStartDate(), request.getEndDate() ,pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByDate(OrderDateRequest request, Pageable pageable) {
+        Page<Order> page = orderRepository.findAllByOrderedAtBetween(request.getStartDate(), request.getEndDate(),
+                pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 전체 주문 리스트 조회 (관리자)
-    public PageResponse<OrderResponse> getOrderList(Pageable pageable){
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderList(Pageable pageable) {
         Page<Order> page = orderRepository.findAll(pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 상태별 주문 리스트 조회 (관리자)
-    public PageResponse<OrderResponse> getOrderListByStatus( OrderStatusRequest request, Pageable pageable){
-        Page<Order> page = orderRepository.findByStatus(request.getOrderStatus(),pageable);
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getOrderListByStatus(OrderStatusRequest request, Pageable pageable) {
+        Page<Order> page = orderRepository.findAllByStatus(request.getOrderStatus(), pageable);
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
 
     // 수정
-    @Transactional
-    public OrderResponse updateOrder(long orderId,OrderUpdateRequest request){
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+    public OrderResponse updateOrder(long orderId, OrderUpdateRequest request) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.update(request);
         return OrderResponse.from(orderRepository.save(order));
     }
 
     // 삭제
-    @Transactional
     public void deleteOrder(long orderId) {
-        orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         orderRepository.deleteById(orderId);
     }
 
-    // 주문 상태 변경 (관리자에 의한)
-    @Transactional
-    public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request){
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+    // 주문 상태 변경
+    public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.updateStatus(request.getOrderStatus());
         return OrderResponse.from(order);
     }
 
-    public static String generateOrderUUID(long orderId){
-        String prefix = String.format("order-%d-",orderId);
+
+    public static String generateOrderUUID(long orderId) {
+        String prefix = String.format("order-%d-", orderId);
         String uuid = UUID.randomUUID().toString().replace("-", "");
 
         String orderUUID = prefix + uuid;
 
         // 최대 64자 이하
-        if(orderUUID.length() > 64){
+        if (orderUUID.length() > 64) {
             orderUUID = orderUUID.substring(0, 64);
         }
         return orderUUID;

@@ -21,7 +21,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/authors")
+@RequestMapping("/authors")
 public class AuthorController {
 
     private final AuthorService authorService;

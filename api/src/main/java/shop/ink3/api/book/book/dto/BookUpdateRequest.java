@@ -5,7 +5,7 @@ import java.util.List;
 import shop.ink3.api.book.book.entity.BookStatus;
 
 public record BookUpdateRequest(
-        String ISBN,
+        String isbn,
         String title,
         String contents,
         String description,
@@ -18,6 +18,6 @@ public record BookUpdateRequest(
         String thumbnailUrl,
         Long publisherId,
         List<Long> categoryIds,
-        List<Long> authorIds,
+        List<AuthorRoleRequest> authors,
         List<Long> tagIds
 ) {}

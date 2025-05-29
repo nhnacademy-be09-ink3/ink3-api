@@ -32,23 +32,13 @@ public class AuthorService {
     }
 
     public AuthorResponse createAuthor(AuthorCreateRequest request) {
-        Author author = Author.builder()
-                .name(request.name())
-                .birth(request.birth())
-                .nationality(request.nationality())
-                .biography(request.biography())
-                .build();
+        Author author = Author.builder().name(request.name()).build();
         return AuthorResponse.from(authorRepository.save(author));
     }
 
     public AuthorResponse updateAuthor(Long authorId, AuthorUpdateRequest request) {
         Author author = authorRepository.findById(authorId).orElseThrow(() -> new AuthorNotFoundException(authorId));
-        author.update(
-                request.name(),
-                request.birth(),
-                request.nationality(),
-                request.biography()
-        );
+        author.update(request.name());
         return AuthorResponse.from(authorRepository.save(author));
     }
 

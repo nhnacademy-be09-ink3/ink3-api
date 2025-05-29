@@ -1,6 +1,8 @@
 package shop.ink3.api.order.order.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,12 +13,12 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Getter
 public class OrderCreateRequest {
-    private long userId;
-    private long couponStoreId;
+    @NotNull
+    private Long userId;
     @NotBlank
     @Length(max = 20)
     private String ordererName;
     @NotBlank
-    @Length(max = 20)
+    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$")
     private String ordererPhone;
 }

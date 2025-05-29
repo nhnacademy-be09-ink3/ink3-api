@@ -38,7 +38,7 @@ public class Shipment {
     @Column(nullable = false)
     private LocalDate preferredDeliveryDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime deliveredAt;
 
     @Column(nullable = false, length = 50)

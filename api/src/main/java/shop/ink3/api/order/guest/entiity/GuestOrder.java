@@ -1,4 +1,4 @@
-package shop.ink3.api.order.guestOrder.entiity;
+package shop.ink3.api.order.guest.entiity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,8 +21,8 @@ import shop.ink3.api.order.order.entity.Order;
 @Getter
 @Builder
 @Entity
-@Table(name = "guest_order_accesses")
-public class GuestOrderAccess {
+@Table(name = "guest")
+public class GuestOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

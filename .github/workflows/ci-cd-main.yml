@@ -5,6 +5,17 @@ on:
     branches:
       - main
 
+env:
+  RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
+  RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
+  RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+  RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+  EUREKA_URL: ${{ secrets.EUREKA_URL }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  TTB_KEY: ${{ secrets.TTB_KEY }}
+  REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+
 jobs:
   build:
     name: Build JAR
@@ -202,5 +213,9 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export TTB_KEY=${{ secrets.TTB_KEY }}
             export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            export RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }}
+            export RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}
+            export RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
+            export RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0

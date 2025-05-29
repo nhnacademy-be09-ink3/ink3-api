@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.book.publisher.dto.PublisherCreateRequest;
 import shop.ink3.api.book.publisher.dto.PublisherResponse;
@@ -21,7 +22,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/books/publishers")
+@RequestMapping("/publishers")
 public class PublisherController {
 
     private final PublisherService publisherService;
@@ -31,14 +32,18 @@ public class PublisherController {
         return ResponseEntity.ok(CommonResponse.success(publisherService.getPublishers(pageable)));
     }
 
-    @GetMapping("/id/{publisherId}")
-    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherById(@PathVariable Long publisherId) {
-        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(publisherId)));
-    }
+    @GetMapping("/detail")
+    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisher(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String name) {
 
-    @GetMapping("/name/{publisherName}")
-    public ResponseEntity<CommonResponse<PublisherResponse>> getPublisherByName(@PathVariable String publisherName) {
-        return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(publisherName)));
+        if (id != null) {
+            return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherById(id)));
+        } else if (name != null) {
+            return ResponseEntity.ok(CommonResponse.success(publisherService.getPublisherByName(name)));
+        } else {
+            throw new IllegalArgumentException("Either id or name must be provided");
+        }
     }
 
     @PostMapping

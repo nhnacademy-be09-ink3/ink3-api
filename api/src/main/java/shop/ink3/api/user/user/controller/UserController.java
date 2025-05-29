@@ -1,9 +1,11 @@
 package shop.ink3.api.user.user.controller;
 
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
@@ -23,7 +28,6 @@ import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
-import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.service.UserService;
@@ -57,6 +61,13 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getSocialUserAuth(provider, providerUserId)));
     }
 
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
+            @RequestParam LocalDate birthday
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUsersByBirthday(birthday)));
+    }
+
     @GetMapping("/check")
     public ResponseEntity<CommonResponse<Map<String, Boolean>>> checkUserIdentifierAvailability(
             @RequestParam(required = false) String loginId,
@@ -73,12 +84,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody UserCreateRequest request) {
+    public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody @Valid UserCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
     }
 
     @PostMapping("/social")
-    public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(@RequestBody SocialUserCreateRequest request) {
+    public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(
+            @RequestBody @Valid SocialUserCreateRequest request
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CommonResponse.create(userService.createSocialUser(request)));
     }
@@ -86,7 +99,7 @@ public class UserController {
     @PutMapping("/{userId}")
     public ResponseEntity<CommonResponse<UserResponse>> updateUser(
             @PathVariable long userId,
-            @RequestBody UserUpdateRequest request
+            @RequestBody @Valid UserUpdateRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.update(userService.updateUser(userId, request)));
     }
@@ -94,7 +107,7 @@ public class UserController {
     @PatchMapping("/{userId}/password")
     public ResponseEntity<Void> updateUserPassword(
             @PathVariable long userId,
-            @RequestBody UserPasswordUpdateRequest request
+            @RequestBody @Valid UserPasswordUpdateRequest request
     ) {
         userService.updateUserPassword(userId, request);
         return ResponseEntity.noContent().build();
@@ -118,22 +131,10 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{userId}/points/earn")
-    public ResponseEntity<Void> earnPoints(@PathVariable long userId, @RequestBody UserPointRequest request) {
-        userService.earnPoint(userId, request);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{userId}/points/use")
-    public ResponseEntity<Void> usePoints(@PathVariable long userId, @RequestBody UserPointRequest request) {
-        userService.usePoint(userId, request);
-        return ResponseEntity.noContent().build();
-    }
-
     @PatchMapping("/{userId}/membership")
     public ResponseEntity<Void> updateMembership(
             @PathVariable long userId,
-            @RequestBody UserMembershipUpdateRequest request
+            @RequestBody @Valid UserMembershipUpdateRequest request
     ) {
         userService.updateMembership(userId, request);
         return ResponseEntity.noContent().build();

@@ -114,6 +114,10 @@ public class User {
         this.point -= amount;
     }
 
+    public void cancelPoint(int amount) {
+        this.point -= amount;
+    }
+
     public void updateMembership(Membership membership) {
         this.membership = membership;
     }

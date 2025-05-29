@@ -78,7 +78,7 @@ class ReviewServiceTest {
 
         book = Book.builder()
             .id(1L)
-            .ISBN("1234567890123")
+            .isbn("1234567890123")
             .title("예제 책 제목")
             .contents("책 내용 요약")
             .description("책 상세 설명")
