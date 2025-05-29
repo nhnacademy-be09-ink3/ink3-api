@@ -3,7 +3,6 @@ package shop.ink3.api.coupon.coupon.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
-import shop.ink3.api.coupon.coupon.entity.IssueType;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 
 @RestController
@@ -31,14 +29,6 @@ public class CouponController {
     public ResponseEntity<CommonResponse<CouponResponse>> create(@RequestBody @Valid CouponCreateRequest request) {
         CouponResponse coupon = couponService.createCoupon(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(coupon));
-    }
-
-    /** 이슈 타입으로 쿠폰 조회 */
-    @GetMapping("/by-issue-type/{issueType}")
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getByIssueType(
-            @PathVariable IssueType issueType) {
-        List<CouponResponse> list = couponService.getCouponByIssueType(issueType);
-        return ResponseEntity.ok(CommonResponse.success(list));
     }
 
     /** ID로 쿠폰 단건 조회 */
@@ -68,6 +58,9 @@ public class CouponController {
         couponService.deleteCouponById(couponId);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
+
+
+
 }
 
 

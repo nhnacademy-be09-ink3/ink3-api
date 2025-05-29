@@ -1,5 +1,6 @@
 package shop.ink3.api.book.bookAuthor.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -39,5 +40,6 @@ public class BookAuthor {
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
 
+    @Column(nullable = false)
     private String role;
 }

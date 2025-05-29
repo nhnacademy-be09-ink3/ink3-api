@@ -43,6 +43,12 @@ public class CouponStore {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    private OriginType originType;
+
+    private Long originId;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CouponStatus status;
 
     private LocalDateTime usedAt;

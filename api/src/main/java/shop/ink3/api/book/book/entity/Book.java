@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.bookAuthor.entity.BookAuthor;
 import shop.ink3.api.book.bookCategory.entity.BookCategory;
@@ -104,7 +105,11 @@ public class Book {
     @PrePersist
     @PreUpdate
     public void updateDiscountRate() {
-        this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
+        if (originalPrice != 0) {
+            this.discountRate = (originalPrice - salePrice) * 100 / originalPrice;
+        } else {
+            this.discountRate = 0;
+        }
     }
 
     public void addBookCategory(Category category) {

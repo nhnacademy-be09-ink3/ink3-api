@@ -1,10 +1,13 @@
 package shop.ink3.api.book.book.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.category.entity.Category;
 
 public record BookResponse(
         Long id,
@@ -28,10 +31,6 @@ public record BookResponse(
     public static BookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
-        // 할인율 계산
-        int discountRate = (originalPrice > 0)
-                ? (int) Math.round((1 - (salePrice / (double) originalPrice)) * 100)
-                : 0;
 
         return new BookResponse(
                 book.getId(),
@@ -43,14 +42,14 @@ public record BookResponse(
                 book.getPublishedAt(),
                 originalPrice,
                 salePrice,
-                discountRate,
+                book.getDiscountRate(),
                 book.getQuantity() != null ? book.getQuantity() : 0,
                 book.getStatus(),
                 book.isPackable(),
                 book.getThumbnailUrl(),
                 book.getBookCategories()
                         .stream()
-                        .map(bc -> bc.getCategory().getName())
+                        .map(bc -> buildCategoryPath(bc.getCategory()))
                         .toList(),
                 book.getBookAuthors()
                         .stream()
@@ -62,4 +61,15 @@ public record BookResponse(
                         .toList()
         );
     }
+
+    private static String buildCategoryPath(Category category) {
+        List<String> categoryNames = new ArrayList<>();
+        while (category != null) {
+            categoryNames.add(category.getName());
+            category = category.getParent();
+        }
+        Collections.reverse(categoryNames);
+        return String.join(">", categoryNames);
+    }
+
 }

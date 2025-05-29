@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.order.cart.dto.CartRequest;
@@ -29,7 +30,7 @@ public class MeCartController {
     private final CartService cartService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestHeader(name = "X-User-Id") Long userId, @RequestBody MeCartRequest request) {
+    public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestHeader(name = "X-User-Id") Long userId, @RequestBody @Valid MeCartRequest request) {
         CartRequest cartRequest = new CartRequest(userId, request.bookId(), request.quantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(cartService.addCartItem(cartRequest)));
     }
@@ -45,7 +46,7 @@ public class MeCartController {
     }
 
     @PutMapping("/{cartId}")
-    public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable Long cartId, @RequestBody CartUpdateRequest request) {
+    public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable Long cartId, @RequestBody @Valid CartUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(cartService.updateCartQuantity(cartId, request)));
     }
 

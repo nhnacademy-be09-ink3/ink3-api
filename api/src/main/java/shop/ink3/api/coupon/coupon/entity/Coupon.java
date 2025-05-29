@@ -44,9 +44,6 @@ public class Coupon {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private IssueType issueType;
-
     private LocalDateTime issuableFrom;
 
     private LocalDateTime expiresAt;

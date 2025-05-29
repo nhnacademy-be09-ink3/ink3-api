@@ -1,24 +1,22 @@
 package shop.ink3.api.coupon.store.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Year;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.ink3.api.coupon.coupon.entity.Coupon;
-import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
+import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
+import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
-import shop.ink3.api.coupon.store.dto.CouponStoreCreateRequest;
+import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
 import shop.ink3.api.coupon.store.exception.DuplicateCouponException;
-import shop.ink3.api.coupon.store.repository.UserCouponRepository;
-import shop.ink3.api.user.user.entity.User;
-import shop.ink3.api.user.user.exception.UserNotFoundException;
+import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 import shop.ink3.api.user.user.repository.UserRepository;
 
 @Transactional
@@ -28,31 +26,35 @@ public class CouponStoreService {
 
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
-    private final UserCouponRepository userCouponRepository;
+    private final CouponStoreRepository userCouponRepository;
+    private final BookCouponRepository bookCouponRepository;
+    private final CategoryCouponRepository categoryCouponRepository;
+    private final CouponStoreRepository couponStoreRepository;
 
-    /** 1) 쿠폰 저장소 생성 */
-    public CouponStore createStore(CouponStoreCreateRequest req) {
-        User user = userRepository.findById(req.userId())
-                .orElseThrow(() -> new UserNotFoundException(req.userId()));
-        Coupon coupon = couponRepository.findById(req.couponId())
-                .orElseThrow(() -> new CouponNotFoundException("쿠폰이 없습니다. id=" + req.couponId()));
+    /** 1) 쿠폰 발급 */
+    public CouponStore issueCoupon(CouponIssueRequest request) {
+        boolean isIssued;
 
-        if (isAlreadyIssued(req.userId(), req.couponId())) {
-            throw new DuplicateCouponException(
-                    "이미 발급된 쿠폰입니다. user=" + req.userId() + ", coupon=" + req.couponId()
+        if (request.originId() == null) {
+            isIssued = userCouponRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginIdIsNull(
+                    request.userId(), request.couponId(), request.originType()
+            );
+        } else {
+            isIssued = userCouponRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginId(
+                    request.userId(), request.couponId(), request.originType(), request.originId()
             );
         }
-
-        CouponStore store = CouponStore.builder()
-                .user(user)
-                .coupon(coupon)
+        CouponStore couponStore = CouponStore.builder()
+                .user(userRepository.getReferenceById(request.userId()))
+                .coupon(couponRepository.getReferenceById(request.couponId()))
+                .originType(request.originType())
+                .originId(request.originId())
                 .status(CouponStatus.READY)
                 .usedAt(null)
                 .issuedAt(LocalDateTime.now())
                 .build();
-
-        userCouponRepository.save(store);
-        return store;
+        couponStoreRepository.save(couponStore);
+        return couponStore;
     }
 
     /** 2) 유저의 모든 쿠폰 조회 */
@@ -68,7 +70,6 @@ public class CouponStoreService {
         return userCouponRepository.findByCouponId(couponId);
     }
 
-    /** fix 예정 */
     /** 4) 미사용 쿠폰만 조회 */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
@@ -94,17 +95,34 @@ public class CouponStoreService {
         userCouponRepository.deleteById(id);
     }
 
-    /** 7) 중복 쿠폰 발급 여부 확인 */
+    /** 7) 상품에 적용가능한 쿠폰 조회 */
     @Transactional(readOnly = true)
-    public boolean isAlreadyIssued(Long userId, Long couponId) {
-        return userCouponRepository.existsByUserIdAndCouponId(userId, couponId);
+    public List<CouponStore> getApplicableCouponStores(Long userId, Long bookId, Long categoryId) {
+        // 1) book origin
+        List<Long> bookCouponIds = bookCouponRepository.findIdsByBookId(bookId);
+        List<CouponStore> bookStores = couponStoreRepository
+                .findByUserIdAndOriginTypeAndOriginIdInAndStatus(
+                        userId, OriginType.BOOK, bookCouponIds, CouponStatus.READY);
+
+        // 2) category origin
+        List<Long> categoryCouponIds = categoryCouponRepository.findIdsByCategoryId(categoryId);
+        List<CouponStore> categoryStores = couponStoreRepository
+                .findByUserIdAndOriginTypeAndOriginIdInAndStatus(
+                        userId, OriginType.CATEGORY, categoryCouponIds, CouponStatus.READY);
+
+        // 3) welcome
+        List<CouponStore> welcomeStores = couponStoreRepository
+                .findByUserIdAndOriginTypeAndStatus(userId, OriginType.WELCOME, CouponStatus.READY);
+
+        // 4) birthday
+        List<CouponStore> birthdayStores = couponStoreRepository
+                .findByUserIdAndOriginTypeAndStatus(userId, OriginType.BIRTHDAY, CouponStatus.READY);
+
+        // 결합 후 쿠폰 유효성 필터링
+        return Stream.of(bookStores, categoryStores, welcomeStores, birthdayStores)
+                .flatMap(List::stream)
+                .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
+                .toList();
     }
 
-    /** 8) 정기적으로 발급되는 쿠폰 처리 (생일쿠폰) */
-    @Transactional(readOnly = true)
-    public boolean isAlreadyIssuedBirthday(Long userId, Long couponId) {
-
-        return userCouponRepository.existsByUserIdAndCouponIdAndYear(
-                userId, couponId, Year.now().getValue());
-    }
 }

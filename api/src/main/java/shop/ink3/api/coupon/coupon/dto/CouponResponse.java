@@ -3,14 +3,11 @@ package shop.ink3.api.coupon.coupon.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
-import shop.ink3.api.coupon.coupon.entity.IssueType;
-
 
 public record CouponResponse(
         Long couponId,
         Long policyId,
         String name,
-        IssueType issueType,
         LocalDateTime issuableFrom,
         LocalDateTime expiresAt,
         LocalDateTime createdAt,
@@ -24,7 +21,6 @@ public record CouponResponse(
                 coupon.getId(),
                 coupon.getCouponPolicy().getId(),
                 coupon.getName(),
-                coupon.getIssueType(),
                 coupon.getIssuableFrom(),
                 coupon.getExpiresAt(),
                 coupon.getCreatedAt(),
@@ -33,6 +29,6 @@ public record CouponResponse(
         );
     }
 
-    public record BookInfo(Long id, String title) {}
-    public record CategoryInfo(Long id, String name) {}
+    public record BookInfo(Long originId, Long id, String title) {}
+    public record CategoryInfo(Long originId, Long id, String name) {}
 }

@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.category.entity.Category;
 

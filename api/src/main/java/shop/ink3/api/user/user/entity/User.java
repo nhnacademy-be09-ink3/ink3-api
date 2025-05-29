@@ -23,7 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.order.cart.entity.Cart;
-import shop.ink3.api.review.entity.Review;
+import shop.ink3.api.review.review.entity.Review;
 import shop.ink3.api.user.membership.entity.Membership;
 
 @Entity
