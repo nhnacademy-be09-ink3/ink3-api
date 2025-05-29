@@ -31,7 +31,7 @@ public class PaymentController {
     // 결제 승인 API 호출 및 결과 저장
     @PostMapping("/confirm")
     public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(
-            @RequestBody PaymentConfirmRequest confirmRequest,
+            @RequestBody PaymentConfirmRequest confirmRequest
     ) {
         log.info("payType={}", confirmRequest.paymentType());
         Payment payment = paymentService.callPaymentAPI(confirmRequest);
