@@ -1,5 +1,6 @@
 package shop.ink3.api.book.publisher.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/publishers")
+@RequestMapping("/pubs")
 public class PublisherController {
 
     private final PublisherService publisherService;
@@ -47,13 +48,13 @@ public class PublisherController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<PublisherResponse>> createPublisher(@RequestBody PublisherCreateRequest publisherCreateRequest) {
+    public ResponseEntity<CommonResponse<PublisherResponse>> createPublisher(@RequestBody @Valid PublisherCreateRequest publisherCreateRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(publisherService.createPublisher(publisherCreateRequest)));
     }
 
     @PutMapping("/{publisherId}")
     public ResponseEntity<CommonResponse<PublisherResponse>> updatePublisher(@PathVariable Long publisherId,
-                                                                             @RequestBody PublisherUpdateRequest publisherUpdateRequest) {
+                                                                             @RequestBody @Valid PublisherUpdateRequest publisherUpdateRequest) {
         return ResponseEntity.ok(CommonResponse.update(publisherService.updatePublisher(publisherId, publisherUpdateRequest)));
     }
 

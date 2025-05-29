@@ -1,5 +1,6 @@
 package shop.ink3.api.book.author.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,7 @@ public class AuthorController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<AuthorResponse>> createAuthor(@RequestBody AuthorCreateRequest request) {
+    public ResponseEntity<CommonResponse<AuthorResponse>> createAuthor(@RequestBody @Valid AuthorCreateRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(authorService.createAuthor(request)));
@@ -45,7 +46,7 @@ public class AuthorController {
 
     @PutMapping("/{authorId}")
     public ResponseEntity<CommonResponse<AuthorResponse>> updateAuthor(@PathVariable Long authorId,
-                                                                       @RequestBody AuthorUpdateRequest request) {
+                                                                       @RequestBody @Valid AuthorUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(authorService.updateAuthor(authorId, request)));
     }
 
