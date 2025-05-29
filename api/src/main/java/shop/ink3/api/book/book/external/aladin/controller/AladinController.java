@@ -20,7 +20,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/admin/aladin")
+@RequestMapping("/aladin")
 public class AladinController {
 
     private final BookService bookService;

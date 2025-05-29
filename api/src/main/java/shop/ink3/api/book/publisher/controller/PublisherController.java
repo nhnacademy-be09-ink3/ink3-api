@@ -23,7 +23,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/admin/pubs")
+@RequestMapping("/pubs")
 public class PublisherController {
 
     private final PublisherService publisherService;

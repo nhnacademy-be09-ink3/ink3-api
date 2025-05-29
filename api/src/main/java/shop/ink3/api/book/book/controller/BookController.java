@@ -36,18 +36,18 @@ public class BookController {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBooks(pageable)));
     }
 
-    @PostMapping("/admin/books")
+    @PostMapping("/books")
     public ResponseEntity<CommonResponse<BookResponse>> createBook(@RequestBody @Valid BookCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(bookService.createBook(request)));
     }
 
-    @PutMapping("/admin/books/{bookId}")
+    @PutMapping("/books/{bookId}")
     public ResponseEntity<CommonResponse<BookResponse>> updateBook(@PathVariable Long bookId,
                                                                    @RequestBody @Valid BookUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(bookService.updateBook(bookId, request)));
     }
 
-    @DeleteMapping("/admin/books/{bookId}")
+    @DeleteMapping("/books/{bookId}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long bookId) {
         bookService.deleteBook(bookId);
         return ResponseEntity.noContent().build();
