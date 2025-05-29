@@ -30,10 +30,13 @@ public class PaymentController {
 
     // 결제 승인 API 호출 및 결과 저장
     @PostMapping("/confirm")
-    public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(@RequestBody PaymentConfirmRequest confirmRequest){
-        log.info("payType={}",confirmRequest.paymentType());
+    public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(
+            @RequestBody PaymentConfirmRequest confirmRequest,
+            @RequestHeader("X-User-Id") long userId
+    ) {
+        log.info("payType={}", confirmRequest.paymentType());
         Payment payment = paymentService.callPaymentAPI(confirmRequest);
-        PaymentResponse paymentResponse = paymentService.createPayment(payment);
+        PaymentResponse paymentResponse = paymentService.createPayment(userId, payment);
         return ResponseEntity.ok(CommonResponse.success(paymentResponse));
     }
 
