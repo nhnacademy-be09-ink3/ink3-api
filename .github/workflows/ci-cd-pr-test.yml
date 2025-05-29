@@ -168,7 +168,8 @@ jobs:
 
       - name: Run unit tests
 
-        run: mvn test \
+        run: |
+          mvn test \
           -Dspring.profiles.active=test \
           -DTTB_KEY=$TTB_KEY \
           -DTOSS_PAYMENT_CLIENT_KEY=$TOSS_PAYMENT_CLIENT_KEY \
