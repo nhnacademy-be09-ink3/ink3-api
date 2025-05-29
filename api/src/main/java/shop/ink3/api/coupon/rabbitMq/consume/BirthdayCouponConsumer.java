@@ -1,16 +1,18 @@
-package shop.ink3.api.coupon.rabbitMq.mq.consume;
+package shop.ink3.api.coupon.rabbitMq.consume;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
-import shop.ink3.api.coupon.message.BirthdayBulkMessage;
+import shop.ink3.api.coupon.rabbitMq.message.BirthdayBulkMessage;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
@@ -30,7 +32,7 @@ public class BirthdayCouponConsumer {
         try{
             BirthdayBulkMessage message = objectMapper.readValue(payload, BirthdayBulkMessage.class);
             System.out.println(message.userIds());
-            CouponCreateRequest couponCreateRequest = new CouponCreateRequest(1L, "BIRTHDAY", LocalDateTime.now(), LocalDateTime.now().plusDays(30), null, null);
+            CouponCreateRequest couponCreateRequest = new CouponCreateRequest(1L, "BIRTHDAY", LocalDateTime.now(), LocalDateTime.now().plusDays(30), Collections.emptyList(), Collections.emptyList());
             CouponResponse coupon = couponService.createCoupon(couponCreateRequest);
             Long couponId = coupon.couponId();
 
@@ -42,7 +44,13 @@ public class BirthdayCouponConsumer {
 
 
         }catch (Exception e){
-            log.error("Failed to parse bulk message", e);
+            log.error("❌ 쿠폰 발급 실패 - payload: {}", payload, e);
+            throw new AmqpRejectAndDontRequeueException("Failed to process message", e);
         }
+    }
+
+    @RabbitListener(queues = "coupon.birthday.dead")
+    public void consumeFailedMessage(String payload) {
+        // 로그 저장, 수동 재처리, DB 기록 등
     }
 }

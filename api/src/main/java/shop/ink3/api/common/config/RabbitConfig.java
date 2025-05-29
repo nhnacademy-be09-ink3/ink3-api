@@ -47,16 +47,6 @@ public class RabbitConfig {
     @Bean
     public Queue birthdayQueueDead(){ return new Queue("coupon.birthday.dead", true); }
 
-    @Bean
-    public Queue bookQueue() {
-        return new Queue("coupon.book", true);
-    }
-
-    @Bean
-    public Queue categoryQueue() {
-        return new Queue("coupon.category", true);
-    }
-
     /*
      message를 어디로 보낼지 라우팅해주는 교환기 생성
      Topic 타입은 "coupon.* -> coupon.routing, coupon.created : 모두 수신 가능

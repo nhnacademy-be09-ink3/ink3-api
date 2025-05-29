@@ -23,8 +23,7 @@ import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.coupon.service.CouponService;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
-import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
-import shop.ink3.api.user.user.repository.UserRepository;
+
 
 @Transactional
 @RequiredArgsConstructor
