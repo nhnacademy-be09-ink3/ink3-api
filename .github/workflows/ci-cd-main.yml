@@ -156,9 +156,6 @@ jobs:
         run: kill $(cat app.pid)
 
       - name: Run unit tests
-        env:
-          EUREKA_URL: ${{ secrets.EUREKA_URL }}
-          TTB_KEY: ${{ secrets.TTB_KEY }}
         run: |
           mvn test \
           -Dspring.profiles.active=test \
