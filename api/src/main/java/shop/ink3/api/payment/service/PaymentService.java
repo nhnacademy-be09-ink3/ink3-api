@@ -45,29 +45,24 @@ public class PaymentService {
     private static final String PROCESSOR = "PROCESSOR";
 
     // 결제 승인 API 호출 및 Payment 객체 반환
+    // 트랜잭션 안거쳐야함 외부 API이기 때문.
+    @Transactional(readOnly = true)
     public Payment callPaymentAPI(PaymentConfirmRequest confirmRequest){
         // 결제 승인 요청
+        String paymentType = String.valueOf(confirmRequest.paymentType()).toUpperCase();
         PaymentProcessor paymentProcessor = paymentProcessorResolver.getPaymentProcessor(
-                String.format("%s-%s",String.valueOf(confirmRequest.paymentType()).toUpperCase(),PROCESSOR));
+                String.format("%s-%s", paymentType,PROCESSOR));
         String paymentApproveResponse = paymentProcessor.processPayment(confirmRequest);
         // 결제 응답 파서
         PaymentParser paymentParser = paymentResponseParserResolver.getPaymentParser(
-                String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), PARSER));
-        Payment payment = paymentParser.paymentResponseParser(confirmRequest.orderId(), paymentApproveResponse);
+                String.format("%s-%s", paymentType, PARSER));
+        Payment payment = paymentParser.paymentResponseParser(confirmRequest, paymentApproveResponse);
 
         payment.setDiscountPrice(confirmRequest.discountAmount());
         payment.setUsedPoint(confirmRequest.usedPointAmount());
-
-        //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
-        // 포인트 사용 및 적립
-        eventPublisher.publishEvent(
-                new PointHistoryAfterPaymentEven(
-                        confirmRequest.userId(),
-                        confirmRequest.orderId(),
-                        confirmRequest.amount(),
-                        confirmRequest.usedPointAmount()));
         return payment;
     }
+
 
     // 결제 취소
     public void cancelPayment(long orderId, long userId){
@@ -91,7 +86,7 @@ public class PaymentService {
     }
 
     // 생성
-    public PaymentResponse createPayment(Payment payment){
+    public PaymentResponse createPayment(long userId, Payment payment){
         // 특정 주문에 대한 payment가 존재하는지 확인 정도.
         Long orderId = payment.getOrder().getId();
         Optional<Payment> optionalPayment = paymentRepository.findByOrderId(orderId);
@@ -99,6 +94,15 @@ public class PaymentService {
             throw new PaymentAlreadyExistsException(orderId);
         }
         Payment savePayment = paymentRepository.save(payment);
+
+        //TODO 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
+        // 포인트 사용 및 적립
+        eventPublisher.publishEvent(
+                new PointHistoryAfterPaymentEven(
+                        userId,
+                        payment.getOrder().getId(),
+                        payment.getPaymentAmount(),
+                        payment.getUsedPoint()));
         return PaymentResponse.from(savePayment);
     }
 

@@ -1,11 +1,11 @@
 package shop.ink3.api.payment.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record TossPaymentResponse (
         String paymentKey,
         int totalAmount,
-        LocalDateTime requestedAt,
-        LocalDateTime approvedAt
+        OffsetDateTime requestedAt,
+        OffsetDateTime  approvedAt
 ){
 }
