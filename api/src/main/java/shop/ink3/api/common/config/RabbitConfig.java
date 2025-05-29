@@ -33,14 +33,22 @@ public class RabbitConfig {
     */
     @Bean
     public Queue welcomeQueue() {
-        return new Queue("coupon.welcome", true);
+        return QueueBuilder.durable("coupon.welcome")
+                .withArgument("x-dead-letter-exchange", "dlx.exchange")
+                .withArgument("x-dead-letter-routing-key", "dlx.coupon.welcome")
+                .build();
+    }
+
+    @Bean
+    public Queue welcomeQueueDead() {
+        return new Queue("coupon.welcome.dead", true);
     }
 
     @Bean
     public Queue birthdayQueue() {
         return QueueBuilder.durable("coupon.birthday")
                 .withArgument("x-dead-letter-exchange", "dlx.exchange")
-                .withArgument("x-dead-letter-routing-key","dlx.coupon")
+                .withArgument("x-dead-letter-routing-key","dlx.coupon.birthday")
                 .build();
     }
 
@@ -70,7 +78,12 @@ public class RabbitConfig {
 
     @Bean
     public Binding bindWelcomeQueue() {
-        return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.issue.welcome");
+        return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.welcome");
+    }
+
+    @Bean
+    public Binding bindWelcomeDLQ() {
+        return BindingBuilder.bind(welcomeQueueDead()).to(dlxExchange()).with("dlx.coupon.welcome");
     }
 
     @Bean
@@ -80,7 +93,7 @@ public class RabbitConfig {
 
     @Bean
     public Binding bindBirthdayDLQ() {
-        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon");
+        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon.birthday");
     }
     /*
      message를 자동으로 Json <-> java객체로 직렬화/역직렬화 해주는 변환기

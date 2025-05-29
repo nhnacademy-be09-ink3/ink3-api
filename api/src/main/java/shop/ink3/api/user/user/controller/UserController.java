@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.coupon.rabbitMq.message.WelcomeCouponMessage;
+import shop.ink3.api.coupon.rabbitMq.produce.WelcomeCouponProducer;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
@@ -37,6 +39,7 @@ import shop.ink3.api.user.user.service.UserService;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final WelcomeCouponProducer welcomeCouponProducer;
 
     @GetMapping("/{userId}")
     public ResponseEntity<CommonResponse<UserResponse>> getUser(@PathVariable long userId) {
@@ -85,15 +88,20 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody @Valid UserCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
+        UserResponse userResponse = userService.createUser(request);
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
+        welcomeCouponProducer.send(message);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userResponse));
     }
 
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(
             @RequestBody @Valid SocialUserCreateRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CommonResponse.create(userService.createSocialUser(request)));
+        UserResponse userResponse = userService.createSocialUser(request);
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
+        welcomeCouponProducer.send(message);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userResponse));
     }
 
     @PutMapping("/{userId}")

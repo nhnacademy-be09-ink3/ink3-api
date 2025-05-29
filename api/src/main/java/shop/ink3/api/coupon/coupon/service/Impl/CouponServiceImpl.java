@@ -11,9 +11,7 @@ import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
-import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
@@ -41,6 +39,7 @@ public class CouponServiceImpl implements CouponService {
                 .couponPolicy(policyRepository.findById(req.policyId()).orElse(null))
                 .issuableFrom(req.issuableFrom())
                 .expiresAt(req.expiresAt())
+                .createdAt(req.createdAt())
                 .build();
 
         if (!req.bookIdList().isEmpty()) {
