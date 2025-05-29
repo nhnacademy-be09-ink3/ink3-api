@@ -1,4 +1,4 @@
-package shop.ink3.api.review.service;
+package shop.ink3.api.review.review.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,13 +24,17 @@ import org.springframework.test.util.ReflectionTestUtils;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
-import shop.ink3.api.review.exception.ReviewNotFoundException;
-import shop.ink3.api.review.dto.ReviewRequest;
-import shop.ink3.api.review.dto.ReviewResponse;
-import shop.ink3.api.review.entity.Review;
-import shop.ink3.api.review.repository.ReviewRepository;
+import shop.ink3.api.review.review.dto.ReviewListResponse;
+import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
+import shop.ink3.api.review.review.exception.ReviewNotFoundException;
+import shop.ink3.api.review.review.dto.ReviewRequest;
+import shop.ink3.api.review.review.dto.ReviewResponse;
+import shop.ink3.api.review.review.entity.Review;
+import shop.ink3.api.review.review.repository.ReviewRepository;
+import shop.ink3.api.review.review.service.ReviewService;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
 import shop.ink3.api.user.user.repository.UserRepository;
@@ -165,6 +169,7 @@ class ReviewServiceTest {
     @DisplayName("한 도서의 리뷰 전체 조회")
     void getReviewsByBookId() {
         List<Review> reviews = new ArrayList<>();
+
         ReviewRequest reviewRequest1 = new ReviewRequest(user.getId(), orderBook1.getId(), "title1", "content1", 5);
         Review review1 = Review.builder()
             .user(user)
@@ -188,16 +193,58 @@ class ReviewServiceTest {
         reviews.add(review1);
         reviews.add(review2);
 
-        Page<Review> reviewPage = new PageImpl<>(reviews, PageRequest.of(0, 10), reviews.size());
+        List<ReviewListResponse> reviewListResponses = List.of(
+            new ReviewListResponse(1L, user.getId(), orderBook1.getId(), "user1", "title1", "content1", 5, LocalDateTime.now(), LocalDateTime.now()),
+            new ReviewListResponse(2L, user.getId(), orderBook2.getId(), "user1", "title2", "content2", 4, LocalDateTime.now(), LocalDateTime.now())
+        );
+        Page<ReviewListResponse> reviewPage = new PageImpl<>(reviewListResponses, PageRequest.of(0, 10), reviewListResponses.size());
+        when(reviewRepository.findListByBookId(any(), eq(book.getId()))).thenReturn(reviewPage);
 
-        when(reviewRepository.findAllByOrderBook_BookId(any(), eq(book.getId()))).thenReturn(reviewPage);
+        PageResponse<ReviewListResponse> response = reviewService.getReviewsByBookId(PageRequest.of(0, 10), book.getId());
 
-        Page<ReviewResponse> responses = reviewService.getReviewsByBookId(PageRequest.of(0, 10), book.getId());
-
-        assertThat(responses).hasSize(2);
-        assertThat(responses.getContent().get(0).id()).isEqualTo(1L);
-        assertThat(responses.getContent().get(1).id()).isEqualTo(2L);
+        assertThat(response.content()).hasSize(2);
+        assertThat(response.content().get(0).id()).isEqualTo(1L);
+        assertThat(response.content().get(1).id()).isEqualTo(2L);
     }
+
+    @Test
+    @DisplayName("리뷰 수정 성공")
+    void updateReviewSuccess() {
+        Review review = Review.builder()
+            .user(user)
+            .orderBook(orderBook1)
+            .title("oldTitle")
+            .content("oldContent")
+            .rating(3)
+            .build();
+        ReflectionTestUtils.setField(review, "id", 1L);
+
+        ReviewUpdateRequest updateRequest = new ReviewUpdateRequest("newTitle", "newContent", 4);
+
+        when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
+        when(reviewRepository.save(any(Review.class))).thenReturn(review);
+
+        ReviewResponse response = reviewService.updateReview(1L, updateRequest);
+
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.title()).isEqualTo("newTitle");
+        assertThat(response.content()).isEqualTo("newContent");
+        assertThat(response.rating()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("리뷰 수정 실패")
+    void updateReviewFailure() {
+        Long nonExistentReviewId = 0L;
+        ReviewUpdateRequest request = new ReviewUpdateRequest("제목", "내용", 5);
+
+        when(reviewRepository.findById(nonExistentReviewId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reviewService.updateReview(nonExistentReviewId, request))
+            .isInstanceOf(ReviewNotFoundException.class)
+            .hasMessageContaining("존재하지 않는 리뷰입니다. id: " + nonExistentReviewId);
+    }
+
 
     @Test
     @DisplayName("리뷰 삭제 성공")

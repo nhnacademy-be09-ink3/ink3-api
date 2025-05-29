@@ -1,4 +1,4 @@
-package shop.ink3.api.review.exception;
+package shop.ink3.api.review.review.exception;
 
 public class ReviewNotFoundException extends RuntimeException {
     public ReviewNotFoundException(long reviewId) {

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev
-      
+
 env:
   RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
   RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
@@ -15,7 +15,9 @@ env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   TTB_KEY: ${{ secrets.TTB_KEY }}
   REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-  
+  TOSS_PAYMENT_CLIENT_KEY: ${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+  TOSS_PAYMENT_SECRET_KEY: ${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
+
 jobs:
   build:
     name: Build JAR
@@ -71,7 +73,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} sonar:sonar \
+          mvn clean verify -Dspring.profiles.active=test \
+          -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} \
+          -DTTB_KEY=${{ secrets.TTB_KEY }} \
+          -DTOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }} \
+          -DTOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }} \
+          sonar:sonar \
             -Dsonar.projectKey=ink3_api_server \
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
@@ -95,6 +102,7 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+
     services:
       redis:
         image: redis
@@ -142,20 +150,35 @@ jobs:
         run: sleep 30
 
       - name: Check health endpoint
-        run: curl --fail http://localhost:10270/shop/actuator/health
+        run: |
+          for i in {1..10}; do
+            echo ":hourglass_flowing_sand: Waiting for server to start... attempt $i"
+            if curl --fail http://localhost:10270/shop/actuator/health; then
+              echo ":white_check_mark: Server is up"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo ":x: Server failed to start in time"
+          exit 1
 
       - name: Stop application
         run: kill $(cat app.pid)
 
       - name: Run unit tests
-        env:
-          EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
-          TTB_KEY: ${{ secrets.TTB_KEY }}
-        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -B
+
+        run: |
+          mvn test \
+          -Dspring.profiles.active=test \
+          -DTTB_KEY=$TTB_KEY \
+          -DTOSS_PAYMENT_CLIENT_KEY=$TOSS_PAYMENT_CLIENT_KEY \
+          -DTOSS_PAYMENT_SECRET_KEY=$TOSS_PAYMENT_SECRET_KEY \
+          -B
 
       - name: Print app log if health check fails
         if: failure()
         run: cat app.log
+
 
   deploy:
     name: Deploy to Linux Server
@@ -216,5 +239,7 @@ jobs:
             export RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}
             export RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+            export TOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+            export TOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
