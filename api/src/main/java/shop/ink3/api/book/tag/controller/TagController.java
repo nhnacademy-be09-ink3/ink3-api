@@ -1,5 +1,6 @@
 package shop.ink3.api.book.tag.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -46,14 +47,14 @@ public class TagController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<TagResponse>> createTag(@RequestBody TagCreateRequest tagCreateRequest) {
+    public ResponseEntity<CommonResponse<TagResponse>> createTag(@RequestBody @Valid TagCreateRequest tagCreateRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(tagService.createTag(tagCreateRequest)));
     }
 
     @PutMapping("/{tagId}")
     public ResponseEntity<CommonResponse<TagResponse>> updateTag(
             @PathVariable Long tagId,
-            @RequestBody TagUpdateRequest request
+            @RequestBody @Valid TagUpdateRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.success(tagService.updateTag(tagId, request)));
     }
