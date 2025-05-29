@@ -22,7 +22,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/authors")
+@RequestMapping("/admin/authors")
 public class AuthorController {
 
     private final AuthorService authorService;

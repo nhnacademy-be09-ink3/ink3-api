@@ -23,7 +23,7 @@ import shop.ink3.api.common.dto.PageResponse;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/admin/tags")
 public class TagController {
     private final TagService tagService;
 
