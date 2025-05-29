@@ -19,7 +19,7 @@ public class PaymentProcessorResolver {
     public PaymentProcessor getPaymentProcessor(String paymentType){
         PaymentProcessor processor = processorMap.get(paymentType.toUpperCase());
         if(Objects.isNull(processor)){
-            // fix : 예외처리를 어떻게 할지.
+            //TODO 예외처리를 어떻게 할지.
             throw new IllegalArgumentException();
         }
         return processor;

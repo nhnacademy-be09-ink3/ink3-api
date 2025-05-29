@@ -95,7 +95,6 @@ class ShipmentServiceTest {
     @DisplayName("배송 생성 - 성공")
     void createShipment_성공() {
         ShipmentCreateRequest request = new ShipmentCreateRequest(
-                1L,
                 LocalDate.now(),
                 "수령인",
                 "01012345678",
@@ -111,7 +110,7 @@ class ShipmentServiceTest {
         when(shipmentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // when
-        ShipmentResponse response = shipmentService.createShipment(request);
+        ShipmentResponse response = shipmentService.createShipment(1L, request);
 
         // then
         assertNotNull(response);

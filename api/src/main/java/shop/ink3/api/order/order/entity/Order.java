@@ -37,10 +37,6 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    @OneToOne
-    @JoinColumn(name = "point_history_id", nullable = true)
-    private PointHistory pointHistory;
-
     @Column(name = "order_uuid", nullable = true, length = 64, unique = true)
     private String orderUUID;
 
@@ -64,10 +60,6 @@ public class Order {
 
     public void setOrderUUID(String orderUUID) {
         this.orderUUID = orderUUID;
-    }
-
-    public void setPointHistory(PointHistory pointHistory) {
-        this.pointHistory = pointHistory;
     }
 
     public void updateStatus(OrderStatus orderStatus) {

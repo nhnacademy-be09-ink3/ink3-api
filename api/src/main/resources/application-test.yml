@@ -8,7 +8,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-
   jpa:
     hibernate:
       ddl-auto: create
@@ -20,8 +19,16 @@ spring:
   h2:
     console:
       enabled: true
-
+  cloud:
+    bus:
+      enabled: false
+management:
+  health:
+    rabbit:
+      enabled: false
 logging:
   level:
     org.hibernate.SQL: debug
 
+aladin:
+  ttb-key: ${TTB_KEY}

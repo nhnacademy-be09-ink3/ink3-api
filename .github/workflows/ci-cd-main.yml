@@ -10,11 +10,14 @@ env:
   RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
   RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
   RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-  EUREKA_URL: ${{ secrets.EUREKA_URL }}
+  RABBITMQ_VIRTUAL_HOST: ${{ secrets.RABBITMQ_VIRTUAL_HOST }}
+  EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   TTB_KEY: ${{ secrets.TTB_KEY }}
   REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+  TOSS_PAYMENT_CLIENT_KEY: ${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+  TOSS_PAYMENT_SECRET_KEY: ${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
 
 jobs:
   build:
@@ -71,7 +74,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify -Dspring.profiles.active=test -DEUREKA_URL=${{ secrets.EUREKA_URL }} -DTTB_KEY=${{ secrets.TTB_KEY }} sonar:sonar \
+          mvn clean verify -Dspring.profiles.active=test \
+          -DEUREKA_URL=${{ secrets.DEV_EUREKA_URL }} \
+          -DTTB_KEY=${{ secrets.TTB_KEY }} \
+          -DTOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }} \
+          -DTOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }} \
+          sonar:sonar \
             -Dsonar.projectKey=ink3_api_server \
             -Dsonar.projectName='ink3_api_server' \
             -Dsonar.host.url=http://s4.java21.net:9000 \
@@ -149,10 +157,13 @@ jobs:
         run: kill $(cat app.pid)
 
       - name: Run unit tests
-        env:
-          EUREKA_URL: ${{ secrets.EUREKA_URL }}
-          TTB_KEY: ${{ secrets.TTB_KEY }}
-        run: mvn test -Dspring.profiles.active=test -DTTB_KEY=$TTB_KEY -B
+        run: |
+          mvn test \
+          -Dspring.profiles.active=test \
+          -DTTB_KEY=$TTB_KEY \
+          -DTOSS_PAYMENT_CLIENT_KEY=$TOSS_PAYMENT_CLIENT_KEY \
+          -DTOSS_PAYMENT_SECRET_KEY=$TOSS_PAYMENT_SECRET_KEY \
+          -B
 
       - name: Print app log if health check fails
         if: failure()
@@ -215,7 +226,10 @@ jobs:
             export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             export RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }}
             export RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}
+            export RABBITMQ_RABBITMQ_VIRTUAL_HOST=${{ secrets.RABBITMQ_VIRTUAL_HOST }}
             export RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+            export TOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
+            export TOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
