@@ -1,11 +1,15 @@
 package shop.ink3.api.coupon.store.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
@@ -30,20 +34,19 @@ public class CouponStoreService {
     private final BookCouponRepository bookCouponRepository;
     private final CategoryCouponRepository categoryCouponRepository;
     private final CouponStoreRepository couponStoreRepository;
+    private final BookRepository bookRepository;
 
     /** 1) 쿠폰 발급 */
     public CouponStore issueCoupon(CouponIssueRequest request) {
-        boolean isIssued;
 
         if (request.originId() == null) {
-            isIssued = userCouponRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginIdIsNull(
-                    request.userId(), request.couponId(), request.originType()
-            );
-        } else {
-            isIssued = userCouponRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginId(
-                    request.userId(), request.couponId(), request.originType(), request.originId()
-            );
+            boolean isIssued = userCouponRepository.existsByUserIdAndOriginType(request.userId(), request.originType());
+            if (isIssued) {
+                throw new DuplicateCouponException("이미 발급된 쿠폰입니다.");
+            }
         }
+
+
         CouponStore couponStore = CouponStore.builder()
                 .user(userRepository.getReferenceById(request.userId()))
                 .coupon(couponRepository.getReferenceById(request.couponId()))
@@ -97,15 +100,24 @@ public class CouponStoreService {
 
     /** 7) 상품에 적용가능한 쿠폰 조회 */
     @Transactional(readOnly = true)
-    public List<CouponStore> getApplicableCouponStores(Long userId, Long bookId, Long categoryId) {
+    public List<CouponStore> getApplicableCouponStores(Long userId, Long bookId) {
         // 1) book origin
         List<Long> bookCouponIds = bookCouponRepository.findIdsByBookId(bookId);
         List<CouponStore> bookStores = couponStoreRepository
                 .findByUserIdAndOriginTypeAndOriginIdInAndStatus(
                         userId, OriginType.BOOK, bookCouponIds, CouponStatus.READY);
 
-        // 2) category origin
-        List<Long> categoryCouponIds = categoryCouponRepository.findIdsByCategoryId(categoryId);
+        // 2) category origin — book 에서 카테고리 ID 리스트 가져오기
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
+        List<Long> categoryIds = book.getBookCategories().stream()
+                .map(bookCategory -> bookCategory.getCategory().getId())
+                .toList();
+
+        List<Long> categoryCouponIds = categoryIds.stream()
+                .flatMap(catId -> categoryCouponRepository.findIdsByCategoryId(catId).stream())
+                .toList();
+
         List<CouponStore> categoryStores = couponStoreRepository
                 .findByUserIdAndOriginTypeAndOriginIdInAndStatus(
                         userId, OriginType.CATEGORY, categoryCouponIds, CouponStatus.READY);
@@ -124,5 +136,6 @@ public class CouponStoreService {
                 .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
                 .toList();
     }
+
 
 }

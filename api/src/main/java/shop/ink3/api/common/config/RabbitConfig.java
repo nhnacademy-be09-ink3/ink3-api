@@ -102,25 +102,31 @@ public class RabbitConfig {
      message를 자동으로 Json <-> java객체로 직렬화/역직렬화 해주는 변환기
      RebbitTemplate 및 @RabbitListener에서 DTO객체를 바로 주고받을 수 있게 해줌
     */
-    @Bean
-    public Jackson2JsonMessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
 
+    // 1) POJO용 Jackson 컨버터
     @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
-
-    @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
-            ConnectionFactory connectionFactory,
-            MessageConverter messageConverter
+    public SimpleRabbitListenerContainerFactory pojoListenerContainerFactory(
+            ConnectionFactory cf,
+            Jackson2JsonMessageConverter jacksonConverter
     ) {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(messageConverter);
-        return factory;
+        SimpleRabbitListenerContainerFactory f = new SimpleRabbitListenerContainerFactory();
+        f.setConnectionFactory(cf);
+        f.setMessageConverter(jacksonConverter);
+        return f;
+    }
+    // 2) String(raw)용 컨테이너 팩토리
+    @Bean
+    public SimpleRabbitListenerContainerFactory stringListenerContainerFactory(
+            ConnectionFactory cf
+    ) {
+        SimpleRabbitListenerContainerFactory f = new SimpleRabbitListenerContainerFactory();
+        f.setConnectionFactory(cf);
+        return f;
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jacksonConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 }
 

@@ -85,13 +85,12 @@ public class CouponStoreController {
     }
 
     // 상품에 적용가능한 쿠폰 조회
-    @GetMapping("/users/{userId}/applicable-coupons")
+    @GetMapping("/applicable-coupons")
     public ResponseEntity<List<CouponResponse>> getApplicableCoupons(
             @RequestParam Long userId,
-            @RequestParam Long bookId,
-            @RequestParam Long categoryId
+            @RequestParam Long bookId
     ) {
-        List<CouponStore> stores = couponStoreService.getApplicableCouponStores(userId, bookId, categoryId);
+        List<CouponStore> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
 
         List<CouponResponse> responses = stores.stream()
                 .map(store -> {

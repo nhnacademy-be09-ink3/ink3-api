@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
-import shop.ink3.api.coupon.rabbitMq.message.BirthdayBulkMessage;
+import shop.ink3.api.coupon.rabbitMq.message.BirthdayCouponMessage;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
@@ -36,7 +36,7 @@ public class BirthdayCouponConsumer {
     )
     public void consumeBulk(String payload){
         try{
-            BirthdayBulkMessage message = objectMapper.readValue(payload, BirthdayBulkMessage.class);
+            BirthdayCouponMessage message = objectMapper.readValue(payload, BirthdayCouponMessage.class);
             System.out.println(message.userIds());
             CouponCreateRequest couponCreateRequest = new CouponCreateRequest(1L, "BIRTHDAY", LocalDateTime.now(), LocalDateTime.now().plusDays(30), LocalDateTime.now(), Collections.emptyList(), Collections.emptyList());
             CouponResponse coupon = couponService.createCoupon(couponCreateRequest);
@@ -57,6 +57,13 @@ public class BirthdayCouponConsumer {
 
     @RabbitListener(queues = "coupon.birthday.dead")
     public void consumeFailedMessage(String payload) {
-        // 로그 저장, 수동 재처리, DB 기록 등
+        try {
+            BirthdayCouponMessage message = objectMapper.readValue(payload, BirthdayCouponMessage.class);
+            log.error("💀 DLQ에 빠진 메시지 처리: {}", message);
+            // TODO: DB 기록, 수동 재처리 로직 등
+        } catch (Exception e) {
+            log.error("❌ DLQ 메시지 파싱 실패 - payload: {}", payload, e);
+            // 필요시 예외 던지거나 별도 알림
+        }
     }
 }

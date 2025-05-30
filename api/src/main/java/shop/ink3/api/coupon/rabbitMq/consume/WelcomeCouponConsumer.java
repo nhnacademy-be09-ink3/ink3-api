@@ -24,15 +24,14 @@ import shop.ink3.api.coupon.store.service.CouponStoreService;
 public class WelcomeCouponConsumer {
     private final CouponStoreService couponStoreService;
     private final CouponServiceImpl couponService;
-    private final ObjectMapper objectMapper;
 
-    @RabbitListener(queues = "coupon.welcome")
+    @RabbitListener(queues = "coupon.welcome",
+    containerFactory = "pojoListenerContainerFactory")
     @Retryable(
             maxAttempts = 3,
             backoff = @Backoff(delay = 2000, multiplier = 2)
     )
     public void consumeWelcome(WelcomeCouponMessage message) {
-        System.out.printf("Welcome to Coupon Consumer [%s]\n", message);
         try{
             System.out.println(message.userId());
             CouponCreateRequest couponCreateRequest = new CouponCreateRequest(1L, "WELCOME", LocalDateTime.now(), LocalDateTime.now().plusDays(30), LocalDateTime.now(), Collections.emptyList(), Collections.emptyList());
@@ -47,6 +46,15 @@ public class WelcomeCouponConsumer {
             log.error("❌ 쿠폰 발급 실패 - payload: {}", message, e);
             throw new AmqpRejectAndDontRequeueException("Failed to process message", e);
         }
+    }
+
+    @RabbitListener(
+            queues = "coupon.welcome.dead",
+            containerFactory = "pojoListenerContainerFactory"
+    )
+    public void consumeFailedMessage(WelcomeCouponMessage message) {
+        log.error("💀 DLQ에 빠진 WelcomeCouponMessage 처리: {}", message);
+        // TODO: DB 기록, 수동 재처리 로직 등
     }
 }
 

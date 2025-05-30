@@ -18,6 +18,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.user.user.entity.User;
 
@@ -33,12 +35,15 @@ public class CouponStore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    @ManyToOne
+    // Coupon 삭제 시 DB 레벨에서 ON DELETE CASCADE
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "coupon_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Coupon coupon;
 
     @Column(nullable = false)
