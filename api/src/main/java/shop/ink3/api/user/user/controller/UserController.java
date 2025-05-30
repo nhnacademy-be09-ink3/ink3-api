@@ -89,8 +89,8 @@ public class UserController {
     @PostMapping
     public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody @Valid UserCreateRequest request) {
         UserResponse userResponse = userService.createUser(request);
-        //WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
-        //welcomeCouponProducer.send(message);
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
+        welcomeCouponProducer.send(message);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userResponse));
     }
 
@@ -99,8 +99,8 @@ public class UserController {
             @RequestBody @Valid SocialUserCreateRequest request
     ) {
         UserResponse userResponse = userService.createSocialUser(request);
-        //WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
-        //welcomeCouponProducer.send(message);
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
+        welcomeCouponProducer.send(message);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userResponse));
     }
 
