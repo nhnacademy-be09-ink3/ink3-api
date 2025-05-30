@@ -90,7 +90,7 @@ public class PaymentService {
         // 특정 주문에 대한 payment가 존재하는지 확인 정도.
         Long orderId = payment.getOrder().getId();
         Optional<Payment> optionalPayment = paymentRepository.findByOrderId(orderId);
-        if(Objects.nonNull(optionalPayment)){
+        if(Objects.isNull(optionalPayment)){
             throw new PaymentAlreadyExistsException(orderId);
         }
         Payment savePayment = paymentRepository.save(payment);
