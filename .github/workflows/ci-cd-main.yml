@@ -10,7 +10,7 @@ env:
   RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
   RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
   RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
-  RABBITMQ_VIRTUAL_HOST: ${{ secrets.RABBITMQ_VIRTUAL_HOST }}
+  RABBITMQ_VIRTUAL_HOST: ${{ secrets.RABBITMQ_VIRTUAL_HOST_PROD }}
   EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -226,7 +226,7 @@ jobs:
             export REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             export RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }}
             export RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}
-            export RABBITMQ_RABBITMQ_VIRTUAL_HOST=${{ secrets.RABBITMQ_VIRTUAL_HOST }}
+            export RABBITMQ_VIRTUAL_HOST=${{ secrets.RABBITMQ_VIRTUAL_HOST_PROD }}
             export RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
             export TOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
