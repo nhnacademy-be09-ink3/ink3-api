@@ -1,11 +1,13 @@
 package shop.ink3.api.payment.dto;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.OffsetDateTime;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record TossPaymentResponse (
         String paymentKey,
         int totalAmount,
-        LocalDateTime requestedAt,
-        LocalDateTime approvedAt
+        OffsetDateTime requestedAt,
+        OffsetDateTime  approvedAt
 ){
 }
