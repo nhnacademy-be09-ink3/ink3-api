@@ -11,7 +11,8 @@ public enum OrderStatus {
     SHIPPING("배송중"),
     DELIVERED("배송완료"),
     REFUNDED("반품완료"),
-    CANCELLED("주문취소");
+    CANCELLED("주문취소"),
+    FAILED("결제실패");
 
     private final String label;
 
