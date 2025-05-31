@@ -17,6 +17,7 @@ public class OrderBookResponse {
     private Long couponId;
     private String bookName;
     private Integer bookSalePrice;
+    private String thumbnailUrl;
     private String packagingName;
     private Integer packagingPrice;
     private String couponName;
@@ -33,6 +34,7 @@ public class OrderBookResponse {
             orderBook.getCouponStore() != null ? orderBook.getCouponStore().getId() : null,
             orderBook.getBook().getTitle(),
             orderBook.getBook().getSalePrice(),
+            orderBook.getBook().getThumbnailUrl(),
             orderBook.getPackaging() != null ? orderBook.getPackaging().getName() : null,
             orderBook.getPackaging() != null ? orderBook.getPackaging().getPrice() : null,
             orderBook.getCouponStore() != null ? orderBook.getCouponStore().getCoupon().getName() : null,

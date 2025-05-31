@@ -34,8 +34,8 @@ public class PaymentController {
             @RequestBody PaymentConfirmRequest confirmRequest
     ) {
         log.info("payType={}", confirmRequest.paymentType());
-        Payment payment = paymentService.callPaymentAPI(confirmRequest);
-        PaymentResponse paymentResponse = paymentService.createPayment(confirmRequest.userId(), payment);
+        String paymentApproveResponse = paymentService.callPaymentAPI(confirmRequest);
+        PaymentResponse paymentResponse = paymentService.createPayment(confirmRequest.userId(), confirmRequest, paymentApproveResponse);
         return ResponseEntity.ok(CommonResponse.success(paymentResponse));
     }
 
