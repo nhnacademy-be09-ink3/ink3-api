@@ -49,18 +49,21 @@ public class MeReviewController {
     }
 
     @PostMapping(value = "/reviews/{review-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<CommonResponse<ReviewResponse>> updateReview(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable(name = "review-id") Long reviewId,
+    public ResponseEntity<CommonResponse<ReviewResponse>> updateReview(@RequestHeader(name = "X-User-Id") Long userId,
+        @PathVariable(name = "review-id") Long reviewId,
         // @RequestPart("review") @Valid ReviewUpdateRequest reviewUpdateRequest,
         @RequestParam String title,
         @RequestParam String content,
         @RequestParam int rating,
         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         return ResponseEntity.ok(
-            CommonResponse.update(reviewService.updateReview(reviewId, new ReviewUpdateRequest(title, content, rating), images, userId)));
+            CommonResponse.update(
+                reviewService.updateReview(reviewId, new ReviewUpdateRequest(title, content, rating), images, userId)));
     }
 
     @GetMapping("/users/reviews")
-    public ResponseEntity<PageResponse<ReviewListResponse>> getReviewsByUserId(@RequestHeader(name = "X-User-Id") Long userId,
+    public ResponseEntity<PageResponse<ReviewListResponse>> getReviewsByUserId(
+        @RequestHeader(name = "X-User-Id") Long userId,
         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(reviewService.getReviewsByUserId(pageable, userId));
     }
@@ -73,7 +76,8 @@ public class MeReviewController {
     }
 
     @DeleteMapping("/reviews/{review-id}")
-    public ResponseEntity<Void> deleteReview(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable(name = "review-id") Long reviewId) {
+    public ResponseEntity<Void> deleteReview(@RequestHeader(name = "X-User-Id") Long userId,
+        @PathVariable(name = "review-id") Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
