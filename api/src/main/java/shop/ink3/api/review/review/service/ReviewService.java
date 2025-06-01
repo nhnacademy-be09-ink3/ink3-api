@@ -1,5 +1,6 @@
 package shop.ink3.api.review.review.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,12 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
 import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
+import shop.ink3.api.review.review.exception.ReviewAlreadyRegisterException;
+import shop.ink3.api.review.review.exception.UnauthorizedOrderBookAccessException;
 import shop.ink3.api.review.reviewImage.dto.ReviewImageResponse;
 import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewRequest;
@@ -32,6 +37,7 @@ import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -51,6 +57,14 @@ public class ReviewService {
         OrderBook orderBook = orderBookRepository.findById(request.orderBookId())
             .orElseThrow(() -> new OrderBookNotFoundException(request.orderBookId()));
 
+        if (!orderBook.getOrder().getUser().getId().equals(request.userId())) {
+            throw new UnauthorizedOrderBookAccessException(user.getId(), orderBook.getId());
+        }
+
+        if (reviewRepository.existsByOrderBookId(orderBook.getId())) {
+            throw new ReviewAlreadyRegisterException(orderBook.getId());
+        }
+
         Review review = Review.builder()
             .user(user)
             .orderBook(orderBook)
@@ -61,33 +75,43 @@ public class ReviewService {
         Review savedReview = reviewRepository.save(review);
 
         List<String> imageUrls = saveImages(images, savedReview);
+        log.warn("ReviewService===========imageUrls={}", Arrays.toString(imageUrls.toArray()));
 
         return ReviewResponse.from(savedReview, imageUrls);
     }
 
-    public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request, List<MultipartFile> images) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
-        review.update(request.title(), request.content(), request.rating());
+    public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request, List<MultipartFile> images, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ReviewNotFoundException(reviewId));
 
-        reviewImageRepository.findByReviewId(review.getId()).forEach(image -> reviewImageRepository.deleteById(image.getId()));
-        saveImages(images, review);
+        if (!review.getUser().getId().equals(userId)) {
+            throw new UnauthorizedOrderBookAccessException(userId, review.getOrderBook().getId());
+        }
 
-        List<String> imageUrls = saveImages(images, review);
+        review.update(request.getTitle(), request.getContent(), request.getRating());
 
-        return ReviewResponse.from(review, imageUrls);
-    }
+        List<String> imageUrls;
+        if (images != null && !images.isEmpty()) {
+            List<ReviewImage> existingImages = reviewImageRepository.findByReviewId(review.getId());
+            for (ReviewImage image : existingImages) {
+                minioUploader.delete(image.getImageUrl(), bucket);
+                reviewImageRepository.deleteById(image.getId());
+            }
 
-    public ReviewResponse getReviewByUserId(Long userId) {
-        Review review = reviewRepository.findByUserId(userId);
-        List<String> imageUrls = reviewImageRepository.findByReviewId(review.getId()).stream()
-            .map(ReviewImage::getImageUrl)
-            .collect(Collectors.toList());
+            imageUrls = saveImages(images, review);
+        } else {
+            imageUrls = reviewImageRepository.findByReviewId(review.getId()).stream()
+                .map(ReviewImage::getImageUrl)
+                .map(url -> minioUploader.getPresignedUrl(url, bucket))
+                .toList();
+        }
+
         return ReviewResponse.from(review, imageUrls);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ReviewListResponse> getReviewsByBookId(Pageable pageable, Long bookId) {
-        Page<ReviewDefaultListResponse> page = reviewRepository.findListByBookId(pageable, bookId);
+    public PageResponse<ReviewListResponse> getReviewsByUserId(Pageable pageable, Long userId) {
+        Page<ReviewDefaultListResponse> page = reviewRepository.findListByUserId(pageable, userId);
 
         List<Long> reviewIds = page.getContent().stream()
             .map(ReviewDefaultListResponse::id)
@@ -98,7 +122,7 @@ public class ReviewService {
 
         Page<ReviewListResponse> mappedPage = page.map(dto -> {
             List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
-                .map(ReviewImageResponse::from)
+                .map(image -> new ReviewImageResponse(minioUploader.getPresignedUrl(image.getImageUrl(), bucket)))
                 .toList();
 
             return new ReviewListResponse(
@@ -118,14 +142,51 @@ public class ReviewService {
         return PageResponse.from(mappedPage);
     }
 
-    public void deleteReview(Long id) {
-        Review review = reviewRepository.findById(id)
-            .orElseThrow(() -> new ReviewNotFoundException(id));
+    @Transactional(readOnly = true)
+    public PageResponse<ReviewListResponse> getReviewsByBookId(Pageable pageable, Long bookId) {
+        Page<ReviewDefaultListResponse> page = reviewRepository.findListByBookId(pageable, bookId);
 
-        reviewImageRepository.findByReviewId(review.getId())
-            .forEach(image -> reviewImageRepository.deleteById(image.getId()));
+        List<Long> reviewIds = page.getContent().stream()
+            .map(ReviewDefaultListResponse::id)
+            .toList();
 
-        reviewRepository.deleteById(id);
+        Map<Long, List<ReviewImage>> imageMap = reviewImageRepository.findByReviewIdIn(reviewIds).stream()
+            .collect(Collectors.groupingBy(image -> image.getReview().getId()));
+
+        Page<ReviewListResponse> mappedPage = page.map(dto -> {
+            List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
+                .map(image -> new ReviewImageResponse(minioUploader.getPresignedUrl(image.getImageUrl(), bucket)))
+                .toList();
+
+            return new ReviewListResponse(
+                dto.id(),
+                dto.userId(),
+                dto.orderBookId(),
+                dto.userName(),
+                dto.title(),
+                dto.content(),
+                dto.rating(),
+                dto.createdAt(),
+                dto.modifiedAt(),
+                images
+            );
+        });
+
+        return PageResponse.from(mappedPage);
+    }
+
+    public void deleteReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+
+        List<ReviewImage> images = reviewImageRepository.findByReviewId(review.getId());
+
+        for (ReviewImage image : images) {
+            minioUploader.delete(image.getImageUrl(), bucket);
+            reviewImageRepository.deleteById(image.getId());
+        }
+
+        reviewRepository.deleteById(reviewId);
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {
@@ -133,7 +194,7 @@ public class ReviewService {
 
         return images.stream()
             .map(image -> {
-                String imageUrl = minioUploader.upload(image, bucket, "reviews");
+                String imageUrl = minioUploader.upload(image, bucket);
                 reviewImageRepository.save(
                     ReviewImage.builder()
                         .review(review)

@@ -1,18 +1,22 @@
 package shop.ink3.api.review.review.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
-public record ReviewUpdateRequest(
-    @NotBlank @Size(max = 50)
-    String title,
+@Getter
+@Setter
+public class ReviewUpdateRequest {
+    private String title;
+    private String content;
+    private int rating;
 
-    @NotBlank
-    String content,
+    public ReviewUpdateRequest() {}
 
-    @Min(1) @Max(5)
-    int rating
-) {
+    public ReviewUpdateRequest(String title, String content, int rating) {
+        this.title = title;
+        this.content = content;
+        this.rating = rating;
+    }
+
+    // Getters and Setters
 }
