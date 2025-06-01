@@ -65,7 +65,7 @@ public class MeReviewController {
                 reviewService.updateReview(reviewId, new ReviewUpdateRequest(title, content, rating), images, userId)));
     }
 
-    @GetMapping("/users/reviews")
+    @GetMapping("/reviews")
     public ResponseEntity<PageResponse<ReviewListResponse>> getReviewsByUserId(
         @RequestHeader(name = "X-User-Id") Long userId,
         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
