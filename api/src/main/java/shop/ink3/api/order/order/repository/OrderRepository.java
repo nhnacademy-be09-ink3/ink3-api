@@ -11,7 +11,8 @@ import shop.ink3.api.order.order.entity.OrderStatus;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // querydsl은 limit 사용에 제한이 있으며 전체적으로 querydsl을 프로젝트에서 사용안함 + 쿼리 성능 향상이 목표이기 때문에 native query 사용
+    // 전체적으로 querydsl을 프로젝트에서 사용안함 + 쿼리 성능 향상이 목표이기 때문에 native query 사용
+    //TODO 유지보수를 위해 querydsl 방식으로 수정 해야할거 같음
     @Query(
             value = """
         SELECT 
@@ -22,25 +23,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             o.orderer_name AS ordererName,
             o.orderer_phone AS ordererPhone,
             p.payment_amount AS paymentAmount,
-            rep.book_name AS representativeBookName,
-            rep.thumbnail_url AS representativeThumbnailUrl,
+            b.title AS representativeBookName,
+            b.thumbnail_url AS representativeThumbnailUrl,
             (
-                SELECT COUNT(DISTINCT ob.book_id) 
-                FROM order_books ob 
-                WHERE ob.order_id = o.id
+                SELECT COUNT(DISTINCT ob2.book_id)
+                FROM order_books ob2
+                WHERE ob2.order_id = o.id
             ) AS bookTypeCount
         FROM orders o
         JOIN payments p ON p.order_id = o.id
-        JOIN (
-            SELECT ob1.id, ob1.order_id, b.title AS book_name, b.thumbnail_url
-            FROM order_books ob1
-            JOIN books b ON ob1.book_id = b.id
-            WHERE ob1.id IN (
-                SELECT MIN(ob2.id)
-                FROM order_books ob2
-                GROUP BY ob2.order_id
-            )
-        ) rep ON rep.order_id = o.id
+        JOIN order_books ob ON ob.id = (
+            SELECT MIN(ob_sub.id)
+            FROM order_books ob_sub
+            WHERE ob_sub.order_id = o.id
+        )
+        JOIN books b ON ob.book_id = b.id
         WHERE o.user_id = :userId
         """,
             countQuery = "SELECT COUNT(*) FROM orders o WHERE o.user_id = :userId",
