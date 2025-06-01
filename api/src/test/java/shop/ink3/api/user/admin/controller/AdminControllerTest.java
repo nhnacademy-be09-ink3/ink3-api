@@ -123,7 +123,7 @@ class AdminControllerTest {
                 .build();
         AdminAuthResponse response = AdminAuthResponse.from(admin);
         when(adminService.getAdminAuth("test")).thenReturn(response);
-        mockMvc.perform(get("/admins/auth/test"))
+        mockMvc.perform(get("/admins/test/auth"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -136,7 +136,7 @@ class AdminControllerTest {
     @Test
     void getAdminAuthWithNotFound() throws Exception {
         when(adminService.getAdminAuth("test")).thenThrow(new AdminAuthNotFoundException("test"));
-        mockMvc.perform(get("/admins/auth/test"))
+        mockMvc.perform(get("/admins/test/auth"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))

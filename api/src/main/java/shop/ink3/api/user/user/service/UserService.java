@@ -13,6 +13,7 @@ import shop.ink3.api.user.common.exception.WithdrawnException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
+import shop.ink3.api.user.social.dto.SocialUserResponse;
 import shop.ink3.api.user.social.entity.Social;
 import shop.ink3.api.user.social.repository.SocialRepository;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
@@ -74,16 +75,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserAuthResponse getSocialUserAuth(String provider, String providerUserId) {
-        User user = socialRepository.findByProviderAndProviderUserId(provider, providerUserId)
-                .orElseThrow(() -> new SocialUserAuthNotFoundException(provider, providerUserId)).getUser();
-        if (user.getStatus() == UserStatus.DORMANT) {
-            throw new DormantException(user.getId());
+    public SocialUserResponse getSocialUser(String provider, String providerUserId) {
+        Social social = socialRepository.findByProviderAndProviderId(provider, providerUserId)
+                .orElseThrow(() -> new SocialUserAuthNotFoundException(provider, providerUserId));
+        if (social.getUser().getStatus() == UserStatus.DORMANT) {
+            throw new DormantException(social.getUser().getId());
         }
-        if (user.getStatus() == UserStatus.WITHDRAWN) {
-            throw new WithdrawnException(user.getId());
+        if (social.getUser().getStatus() == UserStatus.WITHDRAWN) {
+            throw new WithdrawnException(social.getUser().getId());
         }
-        return UserAuthResponse.from(user);
+        return SocialUserResponse.from(social);
     }
 
     @Transactional(readOnly = true)
@@ -130,7 +131,7 @@ public class UserService {
         Social social = Social.builder()
                 .user(user)
                 .provider(request.provider())
-                .providerUserId(request.providerUserId())
+                .providerId(request.providerId())
                 .build();
         socialRepository.save(social);
 

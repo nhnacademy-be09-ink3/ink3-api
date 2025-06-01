@@ -1,11 +1,12 @@
 package shop.ink3.api.user.user.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,10 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.user.social.dto.SocialUserResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
@@ -48,17 +47,17 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserDetail(userId)));
     }
 
-    @GetMapping("/auth/{loginId}")
+    @GetMapping("/{loginId}/auth")
     public ResponseEntity<CommonResponse<UserAuthResponse>> getUserAuth(@PathVariable String loginId) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserAuth(loginId)));
     }
 
-    @GetMapping("/auth/social/{provider}/{providerUserId}")
-    public ResponseEntity<CommonResponse<UserAuthResponse>> getSocialUserAuth(
+    @GetMapping("/social/{provider}/{providerUserId}")
+    public ResponseEntity<CommonResponse<SocialUserResponse>> getSocialUser(
             @PathVariable String provider,
             @PathVariable String providerUserId
     ) {
-        return ResponseEntity.ok(CommonResponse.success(userService.getSocialUserAuth(provider, providerUserId)));
+        return ResponseEntity.ok(CommonResponse.success(userService.getSocialUser(provider, providerUserId)));
     }
 
     @GetMapping

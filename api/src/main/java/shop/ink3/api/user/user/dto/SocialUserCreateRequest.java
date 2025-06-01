@@ -13,6 +13,6 @@ public record SocialUserCreateRequest(
         @NotBlank String phone,
         @NotNull LocalDate birthday,
         @NotBlank String provider,
-        @NotBlank String providerUserId
+        @NotBlank String providerId
 ) {
 }

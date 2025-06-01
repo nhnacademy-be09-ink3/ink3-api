@@ -47,7 +47,7 @@ public class AdminController {
         return ResponseEntity.ok(CommonResponse.success(adminService.getAdmin(adminId)));
     }
 
-    @GetMapping("/auth/{loginId}")
+    @GetMapping("/{loginId}/auth")
     public ResponseEntity<CommonResponse<AdminAuthResponse>> getAdminAuth(@PathVariable String loginId) {
         return ResponseEntity.ok(CommonResponse.success(adminService.getAdminAuth(loginId)));
     }
