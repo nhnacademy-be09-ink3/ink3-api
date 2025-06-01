@@ -40,10 +40,14 @@ public class MeReviewController {
 
     @PostMapping(value = "/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<ReviewResponse>> addReview(@RequestHeader(name = "X-User-Id") Long userId,
-        @RequestPart("review") @Valid MeReviewRequest request,
+        // @RequestPart("review") @Valid MeReviewRequest request,
+        @RequestParam Long orderBookId,
+        @RequestParam String title,
+        @RequestParam String content,
+        @RequestParam int rating,
         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-        ReviewRequest reviewRequest = new ReviewRequest(userId, request.orderBookId(), request.title(),
-            request.content(), request.rating());
+
+        ReviewRequest reviewRequest = new ReviewRequest(userId, orderBookId, title, content, rating);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(CommonResponse.create(reviewService.addReview(reviewRequest, images)));
     }
