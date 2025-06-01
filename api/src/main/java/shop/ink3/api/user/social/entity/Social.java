@@ -44,5 +44,5 @@ public class Social {
     private String provider;
 
     @Column(nullable = false, length = 100)
-    private String providerUserId;
+    private String providerId;
 }
