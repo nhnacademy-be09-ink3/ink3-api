@@ -10,7 +10,25 @@ import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
 import shop.ink3.api.review.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Review findByUserId(Long userId);
+    @Query("""
+            SELECT new shop.ink3.api.review.review.dto.ReviewDefaultListResponse(
+                r.id,
+                u.id,
+                ob.id,
+                u.name,
+                r.title,
+                r.content,
+                r.rating,
+                r.createdAt,
+                r.modifiedAt
+            )
+            FROM Review r
+            JOIN r.user u
+            JOIN r.orderBook ob
+            WHERE u.id = :userId
+            ORDER BY r.createdAt DESC
+        """)
+    Page<ReviewDefaultListResponse> findListByUserId(Pageable pageable, @Param("userId") Long userId);
 
     @Query("""
             SELECT new shop.ink3.api.review.review.dto.ReviewDefaultListResponse(
@@ -32,4 +50,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             ORDER BY r.createdAt DESC
         """)
     Page<ReviewDefaultListResponse> findListByBookId(Pageable pageable, @Param("bookId") Long bookId);
+
+    boolean existsByOrderBookId(Long orderBookId);
 }
