@@ -15,9 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import shop.ink3.api.book.book.dto.AuthorDto;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.MainBookResponse;
@@ -34,9 +31,6 @@ class BookControllerTest {
 
     @MockitoBean
     private BookService bookService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private BookResponse bookResponse;
     private MainBookResponse mainBookResponse;
