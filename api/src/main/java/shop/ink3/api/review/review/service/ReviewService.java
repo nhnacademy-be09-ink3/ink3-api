@@ -91,7 +91,7 @@ public class ReviewService {
         review.update(request.getTitle(), request.getContent(), request.getRating());
 
         List<String> imageUrls;
-        if (images != null && !images.isEmpty()) {
+        if (images != null && images.stream().anyMatch(image -> !image.isEmpty())) {
             List<ReviewImage> existingImages = reviewImageRepository.findByReviewId(review.getId());
             for (ReviewImage image : existingImages) {
                 minioUploader.delete(image.getImageUrl(), bucket);
