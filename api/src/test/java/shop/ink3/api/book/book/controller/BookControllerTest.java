@@ -18,10 +18,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import shop.ink3.api.book.book.dto.AuthorDto;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.service.BookService;
+import shop.ink3.api.book.category.dto.CategoryResponse;
+import shop.ink3.api.book.tag.dto.TagResponse;
 import shop.ink3.api.common.dto.PageResponse;
 
 @WebMvcTest(BookController.class)
@@ -38,18 +41,63 @@ class BookControllerTest {
     private BookResponse bookResponse;
     private MainBookResponse mainBookResponse;
 
+
     @BeforeEach
     void setUp() {
-        bookResponse = new BookResponse(
-            1L, "1234567890123", "책 제목", "책 내용 요약", "상세 설명",
-            "출판사", LocalDate.of(2024, 1, 1), 20000, 18000, 10,
-            100, BookStatus.AVAILABLE, true, "https://example.com/image.jpg",
-            List.of("소설>한국소설"), List.of("홍길동 (저자)"), List.of("베스트셀러")
+        // 1) CategoryResponse 리스트 준비
+        CategoryResponse category = new CategoryResponse(
+                3L,               // id
+                "한국소설",         // name
+                1L,               // parentId
+                List.of()         // children = 빈 리스트
+        );
+        List<CategoryResponse> categories = List.of(category);
+
+        // 2) AuthorDto 리스트 준비
+        AuthorDto author = new AuthorDto(
+                100L,             // authorId
+                "홍길동",          // authorName
+                "저자"             // role
+        );
+        List<AuthorDto> authors = List.of(author);
+
+        // 3) TagResponse 리스트 준비
+        TagResponse tag = new TagResponse(
+                50L,              // tagId
+                "베스트셀러"        // tagName
+        );
+        List<TagResponse> tags = List.of(tag);
+
+        // 4) BookResponse 필드에 직접 할당해야 한다!
+        this.bookResponse = new BookResponse(
+                1L,                             // id
+                "1234567890123",                // isbn
+                "책 제목",                        // title
+                "책 내용 요약",                   // contents
+                "상세 설명",                      // description
+                "출판사",                          // publisherName
+                LocalDate.of(2024, 1, 1),       // publishedAt
+                20000,                          // originalPrice
+                18000,                          // salePrice
+                10,                             // discountRate
+                100,                            // quantity
+                BookStatus.AVAILABLE,           // status
+                true,                           // isPackable
+                "https://example.com/image.jpg", // thumbnailUrl
+                categories,                     // List<CategoryResponse>
+                authors,                        // List<AuthorDto>
+                tags                             // List<TagResponse>
         );
 
-        mainBookResponse = new MainBookResponse(
-            1L, "책 제목", 20000, 18000, 10, "https://example.com/image.jpg",
-            List.of("홍길동 (저자)")
+        // 5) MainBookResponse도 필드에 직접 할당해야 한다!
+        this.mainBookResponse = new MainBookResponse(
+                1L,                            // id
+                "책 제목",                       // title
+                20000,                         // originalPrice
+                18000,                         // salePrice
+                10,                            // discountRate
+                "https://example.com/image.jpg", // thumbnailUrl
+                List.of("홍길동 (저자)")          // authorNames
         );
     }
 
