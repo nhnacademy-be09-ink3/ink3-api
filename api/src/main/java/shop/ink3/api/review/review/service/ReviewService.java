@@ -29,6 +29,7 @@ import shop.ink3.api.review.review.exception.ReviewAlreadyRegisterException;
 import shop.ink3.api.review.review.exception.ReviewNotFoundException;
 import shop.ink3.api.review.review.exception.UnauthorizedOrderBookAccessException;
 import shop.ink3.api.review.review.repository.ReviewRepository;
+import shop.ink3.api.review.reviewImage.dto.ReviewImageMapping;
 import shop.ink3.api.review.reviewImage.dto.ReviewImageResponse;
 import shop.ink3.api.review.reviewImage.entity.ReviewImage;
 import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
@@ -111,67 +112,13 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public PageResponse<ReviewListResponse> getReviewsByUserId(Pageable pageable, Long userId) {
         Page<ReviewDefaultListResponse> page = reviewRepository.findListByUserId(pageable, userId);
-
-        List<Long> reviewIds = page.getContent().stream()
-            .map(ReviewDefaultListResponse::id)
-            .toList();
-
-        Map<Long, List<ReviewImage>> imageMap = reviewImageRepository.findByReviewIdIn(reviewIds).stream()
-            .collect(Collectors.groupingBy(image -> image.getReview().getId()));
-
-        Page<ReviewListResponse> mappedPage = page.map(dto -> {
-            List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
-                .map(image -> new ReviewImageResponse(minioUploader.getPresignedUrl(image.getImageUrl(), bucket)))
-                .toList();
-
-            return new ReviewListResponse(
-                dto.id(),
-                dto.userId(),
-                dto.orderBookId(),
-                dto.userName(),
-                dto.title(),
-                dto.content(),
-                dto.rating(),
-                dto.createdAt(),
-                dto.modifiedAt(),
-                images
-            );
-        });
-
-        return PageResponse.from(mappedPage);
+        return getReviewListResponsePage(page);
     }
 
     @Transactional(readOnly = true)
     public PageResponse<ReviewListResponse> getReviewsByBookId(Pageable pageable, Long bookId) {
         Page<ReviewDefaultListResponse> page = reviewRepository.findListByBookId(pageable, bookId);
-
-        List<Long> reviewIds = page.getContent().stream()
-            .map(ReviewDefaultListResponse::id)
-            .toList();
-
-        Map<Long, List<ReviewImage>> imageMap = reviewImageRepository.findByReviewIdIn(reviewIds).stream()
-            .collect(Collectors.groupingBy(image -> image.getReview().getId()));
-
-        Page<ReviewListResponse> mappedPage = page.map(dto -> {
-            List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
-                .map(image -> new ReviewImageResponse(minioUploader.getPresignedUrl(image.getImageUrl(), bucket)))
-                .toList();
-
-            return new ReviewListResponse(
-                dto.id(),
-                dto.userId(),
-                dto.orderBookId(),
-                dto.userName(),
-                dto.title(),
-                dto.content(),
-                dto.rating(),
-                dto.createdAt(),
-                dto.modifiedAt(),
-                images
-            );
-        });
-
-        return PageResponse.from(mappedPage);
+        return getReviewListResponsePage(page);
     }
 
     public void deleteReview(Long reviewId) {
@@ -203,5 +150,39 @@ public class ReviewService {
                 return imageUrl;
             })
             .toList();
+    }
+
+    private PageResponse<ReviewListResponse> getReviewListResponsePage(Page<ReviewDefaultListResponse> page) {
+        List<Long> reviewIds = page.getContent().stream()
+            .map(ReviewDefaultListResponse::id)
+            .toList();
+
+        Map<Long, List<String>> imageMap = reviewImageRepository.findByReviewIdIn(reviewIds).stream()
+            .map(image -> new ReviewImageMapping(image.getReview().getId(), image.getImageUrl()))
+            .collect(Collectors.groupingBy(
+                ReviewImageMapping::reviewId,
+                Collectors.mapping(ReviewImageMapping::imageUrl, Collectors.toList())
+            ));
+
+        Page<ReviewListResponse> mappedPage = page.map(dto -> {
+            List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
+                .map(url -> new ReviewImageResponse(minioUploader.getPresignedUrl(url, bucket)))
+                .toList();
+
+            return new ReviewListResponse(
+                dto.id(),
+                dto.userId(),
+                dto.orderBookId(),
+                dto.userName(),
+                dto.title(),
+                dto.content(),
+                dto.rating(),
+                dto.createdAt(),
+                dto.modifiedAt(),
+                images
+            );
+        });
+
+        return PageResponse.from(mappedPage);
     }
 }
