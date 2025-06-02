@@ -44,7 +44,6 @@ class BookControllerTest {
 
     @BeforeEach
     void setUp() {
-        // 1) CategoryResponse 리스트 준비
         CategoryResponse category = new CategoryResponse(
                 3L,               // id
                 "한국소설",         // name
@@ -53,7 +52,6 @@ class BookControllerTest {
         );
         List<CategoryResponse> categories = List.of(category);
 
-        // 2) AuthorDto 리스트 준비
         AuthorDto author = new AuthorDto(
                 100L,             // authorId
                 "홍길동",          // authorName
@@ -61,14 +59,12 @@ class BookControllerTest {
         );
         List<AuthorDto> authors = List.of(author);
 
-        // 3) TagResponse 리스트 준비
         TagResponse tag = new TagResponse(
                 50L,              // tagId
                 "베스트셀러"        // tagName
         );
         List<TagResponse> tags = List.of(tag);
 
-        // 4) BookResponse 필드에 직접 할당해야 한다!
         this.bookResponse = new BookResponse(
                 1L,                             // id
                 "1234567890123",                // isbn
@@ -89,7 +85,6 @@ class BookControllerTest {
                 tags                             // List<TagResponse>
         );
 
-        // 5) MainBookResponse도 필드에 직접 할당해야 한다!
         this.mainBookResponse = new MainBookResponse(
                 1L,                            // id
                 "책 제목",                       // title
