@@ -24,6 +24,7 @@ import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookRegisterRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
+import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
@@ -64,6 +65,42 @@ public class BookService {
     public PageResponse<BookResponse> getBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAll(pageable);
         return PageResponse.from(books.map(BookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getTop5BestSellerBooks() {
+        Page<Book> top5BestSellerBooks = bookRepository.findBestSellerBooks(Pageable.ofSize(5));
+        return PageResponse.from(top5BestSellerBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getAllBestSellerBooks(Pageable pageable) {
+        Page<Book> bestSellerBooks = bookRepository.findBestSellerBooks(pageable);
+        return PageResponse.from(bestSellerBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getTop5NewBooks() {
+        Page<Book> top5RecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(Pageable.ofSize(5));
+        return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getAllNewBooks(Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(pageable);
+        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getTop5RecommendedBooks() {
+        Page<Book> top5RecommendedBooks = bookRepository.findRecommendedBooks(Pageable.ofSize(5));
+        return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getAllRecommendedBooks(Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findRecommendedBooks(pageable);
+        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
     public BookResponse createBook(BookCreateRequest request) {
@@ -184,8 +221,8 @@ public class BookService {
 
         bookRepository.delete(book);
     }
-
     // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
+
     public BookResponse registerBook(BookRegisterRequest request) {
         AladinBookResponse dto = request.aladinBookResponse();
         if (bookRepository.existsByIsbn(dto.isbn13())) {
@@ -231,8 +268,8 @@ public class BookService {
 
         return BookResponse.from(book);
     }
-
     // 카테고리는 최소 2단계
+
     private void validateCategoryDepth(List<Category> categories) {
         for (Category category : categories) {
             if (category.getParent() == null) {
@@ -240,8 +277,8 @@ public class BookService {
             }
         }
     }
-
     // 알라딘 API로 가져온 작가 이름 파싱
+
     public static List<AuthorDto> parseAuthors(String authorString) {
         List<String> parts = Arrays.stream(authorString.split(","))
                 .map(String::trim)
@@ -266,8 +303,8 @@ public class BookService {
         }
         return result;
     }
-
     // 알라딘 api에서 가져온 카테고리 이름 분리 > 계층 구조 생성 (국내도서>소설/시/희곡/한국소설)
+
     public Category createCategoryHierarchy(String categoryPath) {
         String[] categoryNames = categoryPath.split(">");
         Category parent = null;
