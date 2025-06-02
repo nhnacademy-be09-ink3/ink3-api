@@ -53,7 +53,7 @@ public class PaymentController {
     public ResponseEntity<CommonResponse<Void>> cancelPayment(
             @PathVariable long orderId,
             @RequestHeader("X-User-Id") long userId){
-        paymentService.cancelPayment(orderId, userId);
+        paymentService.cancelPayment(orderId, userId);  
         return ResponseEntity.noContent().build();
     }
 

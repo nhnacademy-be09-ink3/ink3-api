@@ -1,9 +1,11 @@
 package shop.ink3.api.payment.service;
 
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.order.order.dto.OrderResponse;
@@ -37,13 +39,10 @@ public class PaymentService {
     private final PaymentResponseParserResolver paymentResponseParserResolver;
     private final ApplicationEventPublisher eventPublisher;
 
-    private static final String PARSER = "PARSER";
-    private static final String PROCESSOR = "PROCESSOR";
-
     // 결제 승인 API 호출 및 ApproveResponse 반환
     public String callPaymentAPI(PaymentConfirmRequest confirmRequest) {
         PaymentProcessor paymentProcessor = paymentProcessorResolver.getPaymentProcessor(
-                String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), PROCESSOR));
+                String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), "PROCESSOR"));
         return paymentProcessor.processPayment(confirmRequest);
     }
 
@@ -52,7 +51,7 @@ public class PaymentService {
     @Transactional
     public PaymentResponse createPayment(long userId, PaymentConfirmRequest confirmRequest, String paymentApproveResponse) {
         PaymentParser paymentParser = paymentResponseParserResolver.getPaymentParser(
-                String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), PARSER));
+                String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), "PARSER"));
         Payment payment = paymentParser.paymentResponseParser(confirmRequest, paymentApproveResponse);
         payment.updateDiscountAndPoint(confirmRequest.usedPointAmount(), confirmRequest.discountAmount());
 
@@ -61,6 +60,8 @@ public class PaymentService {
         if (optionalPayment.isPresent()) {
             throw new PaymentAlreadyExistsException(confirmRequest.orderId());
         }
+
+        // user-id 값이 있으면 회원 아니면 비회원 결제 (Long이어야함.)
 
         return PaymentResponse.from(paymentRepository.save(payment));
     }
