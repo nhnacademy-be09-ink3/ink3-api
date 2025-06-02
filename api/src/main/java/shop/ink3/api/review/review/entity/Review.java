@@ -42,6 +42,15 @@ public class Review extends BaseTimeEntity {
     private String content;
     private int rating;
 
+    /**
+     * Constructs a new Review with the specified user, order book, title, content, and rating.
+     *
+     * @param user the user who wrote the review
+     * @param orderBook the associated order book, or null if not applicable
+     * @param title the title of the review
+     * @param content the content of the review
+     * @param rating the rating given in the review
+     */
     public Review(User user, OrderBook orderBook, String title, String content, int rating) {
         this.user = user;
         this.orderBook = orderBook;
@@ -50,6 +59,13 @@ public class Review extends BaseTimeEntity {
         this.rating = rating;
     }
 
+    /**
+     * Updates the title, content, and rating of this review.
+     *
+     * @param title   the new title for the review
+     * @param content the new content for the review
+     * @param rating  the new rating value
+     */
     public void update(String title, String content, int rating) {
         this.title = title;
         this.content = content;

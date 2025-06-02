@@ -62,6 +62,15 @@ public class UserService {
         return UserDetailResponse.from(user);
     }
 
+    /**
+     * Retrieves authentication information for a user by login ID.
+     *
+     * @param loginId the login ID of the user
+     * @return a UserAuthResponse containing authentication details
+     * @throws UserAuthNotFoundException if no user with the given login ID exists
+     * @throws DormantException if the user account is dormant
+     * @throws WithdrawnException if the user account is withdrawn
+     */
     @Transactional(readOnly = true)
     public UserAuthResponse getUserAuth(String loginId) {
         User user = userRepository.findByLoginId(loginId).orElseThrow(() -> new UserAuthNotFoundException(loginId));
@@ -74,6 +83,15 @@ public class UserService {
         return UserAuthResponse.from(user);
     }
 
+    /****
+     * Retrieves social user information by provider and provider user ID.
+     *
+     * Throws a `SocialUserAuthNotFoundException` if the social account is not found, or a `DormantException` or `WithdrawnException` if the associated user is dormant or withdrawn.
+     *
+     * @param provider the social authentication provider (e.g., "google", "facebook")
+     * @param providerUserId the unique identifier for the user from the provider
+     * @return a response containing social user information
+     */
     @Transactional(readOnly = true)
     public SocialUserResponse getSocialUser(String provider, String providerUserId) {
         Social social = socialRepository.findByProviderAndProviderId(provider, providerUserId)
@@ -87,6 +105,12 @@ public class UserService {
         return SocialUserResponse.from(social);
     }
 
+    /**
+     * Retrieves a list of users who have the specified birthday.
+     *
+     * @param birthday the date of birth to match
+     * @return a list of user responses for users with the given birthday
+     */
     @Transactional(readOnly = true)
     public List<UserResponse> getUsersByBirthday(LocalDate birthday) {
         return userRepository.findAllByBirthday(birthday).stream().map(UserResponse::from).toList();
@@ -110,6 +134,15 @@ public class UserService {
         return UserResponse.from(userRepository.save(user));
     }
 
+    /**
+     * Creates a new user with an associated social account using the provided information.
+     *
+     * The user is initialized with active status, zero points, and the default membership. The password is securely encoded. 
+     * Throws an IllegalStateException if the default membership is not configured.
+     *
+     * @param request the social user creation details
+     * @return the created user's response DTO
+     */
     public UserResponse createSocialUser(SocialUserCreateRequest request) {
         Membership defaultMembership = membershipRepository.findByIsDefault(true)
                 .orElseThrow(() -> new IllegalStateException("Default membership is not configured."));

@@ -29,14 +29,26 @@ public class CouponStoreController {
     private final BookCouponRepository bookCouponRepository;
     private final CategoryCouponRepository categoryCouponRepository;
 
-    // 쿠폰 발급 (store 생성)
+    /**
+     * Issues a new coupon store entry for a user.
+     *
+     * Accepts a coupon issuance request, delegates creation to the service layer, and returns the created coupon store details with HTTP 201 status.
+     *
+     * @param request the coupon issuance request containing user and coupon information
+     * @return the created coupon store details wrapped in a common response
+     */
     @PostMapping("/users/{userId}/coupon-stores")
     public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(@RequestBody CouponIssueRequest request) {
         CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
     }
 
-    // ✅ 유저의 전체 쿠폰 조회 → /users/{userId}/stores
+    /**
+     * Retrieves all coupon stores associated with the specified user.
+     *
+     * @param userId the ID of the user whose coupon stores are to be retrieved
+     * @return a response containing a list of coupon store details for the user
+     */
     @GetMapping("/users/{userId}/coupon-stores")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByUserId(@PathVariable Long userId) {
         List<CouponStore> stores = couponStoreService.getStoresByUserId(userId);
@@ -46,7 +58,12 @@ public class CouponStoreController {
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
-    // ✅ 유저의 미사용 쿠폰만 조회 → /users/{userId}/stores/unused
+    /****
+     * Retrieves all unused coupon stores for a specified user.
+     *
+     * @param userId the ID of the user whose unused coupon stores are to be retrieved
+     * @return a response containing a list of unused coupon store details for the user
+     */
     @GetMapping("/users/{userId}/coupon-stores/status-unused")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getUnusedStores(@PathVariable Long userId) {
         List<CouponStore> stores = couponStoreService.getUnusedStoresByUserId(userId);
@@ -56,7 +73,12 @@ public class CouponStoreController {
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
-    // ✅ 특정 쿠폰으로 발급된 store 전체 조회 → /coupons/{couponId}/stores
+    /****
+     * Retrieves all coupon store entries issued for a specific coupon.
+     *
+     * @param couponId the ID of the coupon to look up
+     * @return a response containing a list of coupon store details associated with the given coupon
+     */
     @GetMapping("/coupons/{couponId}/coupon-stores")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByCouponId(@PathVariable Long couponId) {
         List<CouponStore> stores = couponStoreService.getStoresByCouponId(couponId);
@@ -66,7 +88,13 @@ public class CouponStoreController {
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
-    // ✅ 쿠폰 사용 여부 업데이트
+    /**
+     * Updates the details of a coupon store entry, such as its usage status.
+     *
+     * @param storeId the ID of the coupon store to update
+     * @param request the update request containing new coupon store details
+     * @return a response entity containing the updated coupon store information
+     */
     @PutMapping("/coupon-stores/{storeId}")
     public ResponseEntity<CommonResponse<CouponStoreUpdateResponse>> updateStore(
             @PathVariable Long storeId,
@@ -77,14 +105,30 @@ public class CouponStoreController {
         return ResponseEntity.ok(CommonResponse.update(response));
     }
 
-    // ✅ 쿠폰 발급 삭제
+    /**
+     * Deletes a coupon store entry by its ID.
+     *
+     * Removes the specified coupon store and returns a success response with no content.
+     *
+     * @param storeId the ID of the coupon store to delete
+     * @return a response indicating successful deletion
+     */
     @DeleteMapping("/coupon-stores/{storeId}")
     public ResponseEntity<CommonResponse<Void>> deleteStore(@PathVariable Long storeId) {
         couponStoreService.deleteStore(storeId);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
-    // 상품에 적용가능한 쿠폰 조회
+    /**
+     * Retrieves coupons applicable to a user for a specific book and category.
+     *
+     * Returns a list of coupon responses, each including detailed book or category information if relevant to the coupon's origin.
+     *
+     * @param userId the ID of the user for whom applicable coupons are retrieved
+     * @param bookId the ID of the book to check coupon applicability
+     * @param categoryId the ID of the category to check coupon applicability
+     * @return a response entity containing a list of applicable coupons with associated book or category details
+     */
     @GetMapping("/users/{userId}/applicable-coupons")
     public ResponseEntity<List<CouponResponse>> getApplicableCoupons(
             @RequestParam Long userId,

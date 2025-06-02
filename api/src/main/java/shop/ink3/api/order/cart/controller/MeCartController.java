@@ -29,12 +29,25 @@ import shop.ink3.api.order.cart.service.CartService;
 public class MeCartController {
     private final CartService cartService;
 
+    /****
+     * Adds a new item to the authenticated user's shopping cart.
+     *
+     * @param userId the ID of the authenticated user, extracted from the "X-User-Id" request header
+     * @param request the cart item details to add, including book ID and quantity
+     * @return a response containing the created cart item and HTTP status 201 (Created)
+     */
     @PostMapping
     public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestHeader(name = "X-User-Id") Long userId, @RequestBody @Valid MeCartRequest request) {
         CartRequest cartRequest = new CartRequest(userId, request.bookId(), request.quantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(cartService.addCartItem(cartRequest)));
     }
 
+    /**
+     * Merges guest cart items into the authenticated user's cart.
+     *
+     * Adds each item from the provided guest cart to the user's cart, identified by the X-User-Id header.
+     * Responds with HTTP 200 (OK) upon successful merge.
+     */
     @PostMapping("/merge-guest")
     public ResponseEntity<Void> mergeGuestCart(@RequestBody List<MeCartRequest> guestItems,
         @RequestHeader("X-User-Id") Long userId) {
@@ -45,6 +58,13 @@ public class MeCartController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Updates the quantity of a specific cart item for the authenticated user.
+     *
+     * @param cartId the identifier of the cart item to update
+     * @param request the request containing the new quantity
+     * @return the updated cart item wrapped in a CommonResponse
+     */
     @PutMapping("/{cartId}")
     public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable Long cartId, @RequestBody @Valid CartUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(cartService.updateCartQuantity(cartId, request)));

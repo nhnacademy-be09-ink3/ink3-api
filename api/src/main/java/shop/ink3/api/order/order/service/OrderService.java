@@ -87,7 +87,13 @@ public class OrderService {
         return PageResponse.from(pageResponse);
     }
 
-    // 기간 별 주문 리스트 조회 (관리자)
+    /**
+     * Retrieves a paginated list of all orders placed within a specified date range.
+     *
+     * @param request the date range for filtering orders
+     * @param pageable pagination information
+     * @return a paginated response containing orders within the specified date range
+     */
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderListByDate(OrderDateRequest request, Pageable pageable) {
         Page<Order> page = orderRepository.findAllByOrderedAtBetween(request.getStartDate(), request.getEndDate(),
@@ -96,7 +102,12 @@ public class OrderService {
         return PageResponse.from(pageResponse);
     }
 
-    // 전체 주문 리스트 조회 (관리자)
+    /**
+     * Retrieves a paginated list of all orders for administrative purposes.
+     *
+     * @param pageable pagination and sorting information
+     * @return a paginated response containing order details
+     */
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getOrderList(Pageable pageable) {
         Page<Order> page = orderRepository.findAll(pageable);
@@ -133,6 +144,15 @@ public class OrderService {
     }
 
 
+    /****
+     * Generates a unique order UUID string using the order ID and a random UUID.
+     *
+     * The resulting string is prefixed with "order-{orderId}-" followed by a random UUID (without dashes),
+     * and is truncated to a maximum length of 64 characters.
+     *
+     * @param orderId the ID of the order to include in the UUID prefix
+     * @return a unique order UUID string, up to 64 characters long
+     */
     public static String generateOrderUUID(long orderId) {
         String prefix = String.format("order-%d-", orderId);
         String uuid = UUID.randomUUID().toString().replace("-", "");

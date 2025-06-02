@@ -53,56 +53,112 @@ public class BookService {
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
 
-    // 단건 조회
+    /**
+     * Retrieves a book by its ID.
+     *
+     * @param bookId the unique identifier of the book to retrieve
+     * @return the book details as a BookResponse
+     * @throws BookNotFoundException if no book with the given ID exists
+     */
     @Transactional(readOnly = true)
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         return BookResponse.from(book);
     }
 
-    // 전체 조회
+    /**
+     * Retrieves a paginated list of all books.
+     *
+     * @param pageable pagination and sorting information
+     * @return a paginated response containing book details
+     */
     @Transactional(readOnly = true)
     public PageResponse<BookResponse> getBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAll(pageable);
         return PageResponse.from(books.map(BookResponse::from));
     }
 
+    /**
+     * Retrieves the top 5 best-selling books.
+     *
+     * @return a page response containing up to 5 best-selling books as MainBookResponse DTOs
+     */
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5BestSellerBooks() {
         Page<Book> top5BestSellerBooks = bookRepository.findBestSellerBooks(Pageable.ofSize(5));
         return PageResponse.from(top5BestSellerBooks.map(MainBookResponse::from));
     }
 
+    /**
+     * Retrieves a paginated list of best-selling books.
+     *
+     * @param pageable pagination and sorting information
+     * @return a paginated response containing best-selling books as MainBookResponse DTOs
+     */
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllBestSellerBooks(Pageable pageable) {
         Page<Book> bestSellerBooks = bookRepository.findBestSellerBooks(pageable);
         return PageResponse.from(bestSellerBooks.map(MainBookResponse::from));
     }
 
+    /**
+     * Retrieves the top 5 newest books ordered by publication date descending.
+     *
+     * @return a page response containing up to 5 newest books as MainBookResponse DTOs
+     */
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5NewBooks() {
         Page<Book> top5RecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(Pageable.ofSize(5));
         return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
     }
 
+    /**
+     * Retrieves a paginated list of the newest books, ordered by publication date descending.
+     *
+     * @param pageable pagination and sorting information
+     * @return a paginated response containing the newest books
+     */
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllNewBooks(Pageable pageable) {
         Page<Book> bestRecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(pageable);
         return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
+    /**
+     * Retrieves the top 5 recommended books.
+     *
+     * @return a page response containing up to 5 recommended books mapped to MainBookResponse DTOs
+     */
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5RecommendedBooks() {
         Page<Book> top5RecommendedBooks = bookRepository.findRecommendedBooks(Pageable.ofSize(5));
         return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
     }
 
+    /**
+     * Retrieves a paginated list of recommended books.
+     *
+     * @param pageable pagination and sorting information
+     * @return a paginated response containing recommended books
+     */
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllRecommendedBooks(Pageable pageable) {
         Page<Book> bestRecommendedBooks = bookRepository.findRecommendedBooks(pageable);
         return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
+    /**
+     * Creates a new book with the provided details, including categories, authors with roles, publisher, and tags.
+     *
+     * Validates that at least one and no more than ten categories are selected, and that each category meets minimum depth requirements. Throws exceptions if referenced publisher or authors are not found.
+     *
+     * @param request the details for the new book, including category IDs, author-role pairs, publisher ID, and tag IDs
+     * @return the created book as a BookResponse DTO
+     * @throws InvalidCategorySelectionException if the number of categories is invalid
+     * @throws InvalidCategoryDepthException if any selected category does not meet minimum depth requirements
+     * @throws PublisherNotFoundException if the specified publisher does not exist
+     * @throws AuthorNotFoundException if any specified author does not exist
+     */
     public BookResponse createBook(BookCreateRequest request) {
 
         if (request.categoryIds() == null || request.categoryIds().isEmpty()) {
@@ -215,13 +271,29 @@ public class BookService {
         return BookResponse.from(book);
     }
 
+    /**
+     * Deletes a book by its ID.
+     *
+     * @param bookId the ID of the book to delete
+     * @throws BookNotFoundException if the book with the specified ID does not exist
+     */
     public void deleteBook(@PathVariable Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new BookNotFoundException(bookId));
 
         bookRepository.delete(book);
     }
-    // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
+    /**
+     * Registers a new book using data from an Aladin API response and additional request details.
+     *
+     * Checks for duplicate ISBNs and throws a {@link DuplicateIsbnException} if the ISBN already exists.
+     * Finds or creates the publisher and authors as needed, builds the book entity, and associates it with categories and tags.
+     * Parses and adds authors with their roles, creates or retrieves the category hierarchy, and attaches tags if provided.
+     *
+     * @param request the registration request containing Aladin API data and additional book details
+     * @return the registered book as a {@link BookResponse}
+     * @throws DuplicateIsbnException if a book with the same ISBN already exists
+     */
 
     public BookResponse registerBook(BookRegisterRequest request) {
         AladinBookResponse dto = request.aladinBookResponse();
@@ -268,7 +340,12 @@ public class BookService {
 
         return BookResponse.from(book);
     }
-    // 카테고리는 최소 2단계
+    /**
+     * Validates that each category in the list has a parent category, ensuring a minimum depth of two levels.
+     *
+     * @param categories the list of categories to validate
+     * @throws InvalidCategoryDepthException if any category is a top-level category without a parent
+     */
 
     private void validateCategoryDepth(List<Category> categories) {
         for (Category category : categories) {
@@ -277,7 +354,15 @@ public class BookService {
             }
         }
     }
-    // 알라딘 API로 가져온 작가 이름 파싱
+    /**
+     * Parses a comma-separated author string from the Aladin API, extracting author names and their roles.
+     *
+     * For each author, retrieves the corresponding author entity from the repository. If a role is specified in parentheses, it is assigned to the author; otherwise, the default role "지은이" is used. Throws an exception if any author is not found.
+     *
+     * @param authorString a comma-separated string of author names, optionally with roles in parentheses (e.g., "홍길동(역자), 김철수")
+     * @return a list of AuthorDto objects containing author IDs, names, and roles
+     * @throws AuthorNotFoundException if any author name does not exist in the repository
+     */
 
     public List<AuthorDto> parseAuthors(String authorString) {
         List<String> parts = Arrays.stream(authorString.split(","))
@@ -303,7 +388,15 @@ public class BookService {
         }
         return result;
     }
-    // 알라딘 api에서 가져온 카테고리 이름 분리 > 계층 구조 생성 (국내도서>소설/시/희곡/한국소설)
+    /**
+     * Creates or retrieves a hierarchical category structure from a delimited category path string.
+     *
+     * Splits the given category path by the ">" delimiter, trims each category name, and for each level,
+     * finds an existing category by name or creates a new one with the previous category as its parent.
+     *
+     * @param categoryPath the delimited category path (e.g., "국내도서>소설/시/희곡/한국소설")
+     * @return the deepest category in the created or found hierarchy
+     */
 
     public Category createCategoryHierarchy(String categoryPath) {
         String[] categoryNames = categoryPath.split(">");

@@ -45,7 +45,15 @@ public class PaymentService {
     private static final String PROCESSOR = "PROCESSOR";
 
     // 결제 승인 API 호출 및 Payment 객체 반환
-    // 트랜잭션 안거쳐야함 외부 API이기 때문.
+    /**
+     * Calls an external payment API to approve a payment and parses the response into a Payment entity.
+     *
+     * Resolves the appropriate payment processor and parser based on the payment type in the request.
+     * Sets the discount and used point amounts on the resulting Payment.
+     *
+     * @param confirmRequest the payment confirmation request containing payment details
+     * @return the Payment entity created from the API response
+     */
     @Transactional(readOnly = true)
     public Payment callPaymentAPI(PaymentConfirmRequest confirmRequest){
         // 결제 승인 요청
@@ -64,7 +72,15 @@ public class PaymentService {
     }
 
 
-    // 결제 취소
+    /**
+     * Cancels a confirmed payment for the specified order.
+     *
+     * Restores book stock and updates the order status to cancelled. Throws an exception if the order is not in a confirmed state.
+     *
+     * @param orderId the ID of the order to cancel
+     * @param userId the ID of the user requesting the cancellation
+     * @throws PaymentCancelNotAllowedException if the order is not eligible for cancellation
+     */
     public void cancelPayment(long orderId, long userId){
         OrderResponse orderResponse = orderService.getOrder(orderId);
         // 결제 취소 가능 여부 확인
@@ -85,7 +101,14 @@ public class PaymentService {
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.CANCELLED));
     }
 
-    // 생성
+    /**
+     * Creates and saves a new payment for an order, publishing a point history event for point usage and accrual.
+     *
+     * @param userId the ID of the user making the payment
+     * @param payment the payment entity to be created
+     * @return a PaymentResponse representing the saved payment
+     * @throws PaymentAlreadyExistsException if a payment already exists for the specified order
+     */
     public PaymentResponse createPayment(long userId, Payment payment){
         // 특정 주문에 대한 payment가 존재하는지 확인 정도.
         Long orderId = payment.getOrder().getId();

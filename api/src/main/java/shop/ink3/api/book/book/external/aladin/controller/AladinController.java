@@ -26,13 +26,26 @@ public class AladinController {
     private final BookService bookService;
     private final AladinClient aladinClient;
 
-    // Keyword로 알라딘 API의 도서 리스트 조회, /aladin?keyword=도서
+    /**
+     * Retrieves a paginated list of books from the Aladin API that match the specified keyword.
+     *
+     * @param keyword the search keyword to filter books
+     * @param pageable pagination information for the result set
+     * @return a response entity containing a common response with a page of Aladin book data
+     */
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<AladinBookResponse>>> getBooksByKeyword(@RequestParam String keyword, Pageable pageable) {
         return ResponseEntity.ok(CommonResponse.success(aladinClient.fetchBookByKeyword(keyword, pageable)));
     }
 
-    // 알라딘 API에서 Keyword로 조회한 도서 리스트에서 하나의 도서를 선택하고 자체적으로 설정할 내용 입력하여 도서 등록
+    /**
+     * Registers a new book in the system using details provided in the request.
+     *
+     * Accepts book information selected from the Aladin API along with additional user-defined details, and registers the book in the system.
+     *
+     * @param request the book registration data, including Aladin book selection and custom fields
+     * @return a response containing the registered book's information
+     */
     @PostMapping("/register-book")
     public ResponseEntity<CommonResponse<BookResponse>> registerBook(@RequestBody @Valid BookRegisterRequest request) {
         return ResponseEntity.ok(CommonResponse.success(bookService.registerBook(request)));

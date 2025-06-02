@@ -26,6 +26,14 @@ public class BirthdayCouponConsumer {
     private final CouponServiceImpl couponService;
     private final CouponStoreService couponStoreService;
 
+    /**
+     * Consumes and processes bulk birthday coupon messages from the "coupon.birthday" RabbitMQ queue.
+     *
+     * Deserializes the incoming JSON payload into a list of user IDs, creates a birthday coupon valid for 30 days,
+     * and issues the coupon to each user in the list. If processing fails, logs the error and prevents message requeueing.
+     *
+     * @param payload the JSON message containing user IDs for coupon issuance
+     */
     @Async
     @RabbitListener(queues = "coupon.birthday", concurrency = "3")
     public void consumeBulk(String payload){
@@ -49,6 +57,13 @@ public class BirthdayCouponConsumer {
         }
     }
 
+    /**
+     * Handles messages from the "coupon.birthday.dead" dead-letter queue.
+     *
+     * Intended for processing failed birthday coupon messages, such as logging, manual retry, or database recording.
+     *
+     * @param payload the raw message payload from the dead-letter queue
+     */
     @RabbitListener(queues = "coupon.birthday.dead")
     public void consumeFailedMessage(String payload) {
         // 로그 저장, 수동 재처리, DB 기록 등

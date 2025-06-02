@@ -21,12 +21,18 @@ public class BaseTimeEntity {
 
     private LocalDateTime modifiedAt;
 
+    /**
+     * Sets the creation and modification timestamps to the current time before the entity is persisted.
+     */
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.modifiedAt = this.createdAt;
     }
 
+    /**
+     * Updates the modification timestamp to the current time before the entity is updated.
+     */
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

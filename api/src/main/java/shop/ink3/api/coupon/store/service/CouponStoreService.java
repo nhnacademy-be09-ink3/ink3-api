@@ -31,7 +31,14 @@ public class CouponStoreService {
     private final CategoryCouponRepository categoryCouponRepository;
     private final CouponStoreRepository couponStoreRepository;
 
-    /** 1) 쿠폰 발급 */
+    /****
+     * Issues a coupon to a user, ensuring that the coupon has not already been issued with the same origin type and origin ID.
+     *
+     * If a coupon with the specified user, coupon, origin type, and (optionally) origin ID already exists, no duplicate is created. Otherwise, a new coupon store entry is created with status READY and the current issue timestamp.
+     *
+     * @param request the coupon issuance request containing user ID, coupon ID, origin type, and optionally origin ID
+     * @return the newly issued CouponStore entity
+     */
     public CouponStore issueCoupon(CouponIssueRequest request) {
         boolean isIssued;
 
@@ -63,14 +70,24 @@ public class CouponStoreService {
         return userCouponRepository.findByUserId(userId);
     }
 
-    /** 3) 특정 쿠폰을 가진 유저들 조회 */
+    /****
+     * Retrieves all coupon stores associated with a specific coupon ID.
+     *
+     * @param couponId the ID of the coupon
+     * @return a list of CouponStore entities linked to the given coupon ID
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByCouponId(Long couponId) {
         // 이 메서드가 없다면 UserCouponRepository에 추가해야 함
         return userCouponRepository.findByCouponId(couponId);
     }
 
-    /** 4) 미사용 쿠폰만 조회 */
+    /**
+     * Retrieves all unused coupon stores for a given user.
+     *
+     * @param userId the ID of the user whose unused coupons are to be retrieved
+     * @return a list of coupon stores with status READY for the specified user
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
 
@@ -87,7 +104,12 @@ public class CouponStoreService {
         return store;
     }
 
-    /** 6) 삭제 */
+    /**
+     * Deletes a coupon store by its ID.
+     *
+     * @param id the ID of the coupon store to delete
+     * @throws CouponStoreNotFoundException if the coupon store does not exist
+     */
     public void deleteStore(Long id) {
         if (!userCouponRepository.existsById(id)) {
             throw new CouponStoreNotFoundException(id + " coupon not found");
@@ -95,7 +117,16 @@ public class CouponStoreService {
         userCouponRepository.deleteById(id);
     }
 
-    /** 7) 상품에 적용가능한 쿠폰 조회 */
+    /**
+     * Retrieves all applicable and unexpired coupon stores for a user based on book and category.
+     *
+     * Gathers coupons issued to the user that are associated with the specified book, category, or have a WELCOME or BIRTHDAY origin, and are in READY status. Filters out coupons that have expired.
+     *
+     * @param userId the ID of the user
+     * @param bookId the ID of the book to check for applicable coupons
+     * @param categoryId the ID of the category to check for applicable coupons
+     * @return a list of applicable and unexpired CouponStore entities for the user
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getApplicableCouponStores(Long userId, Long bookId, Long categoryId) {
         // 1) book origin

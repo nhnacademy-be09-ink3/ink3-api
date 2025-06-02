@@ -13,6 +13,14 @@ public record MainBookResponse(
     String thumbnailUrl,
     List<String> authorNames
 ) {
+    /**
+     * Creates a MainBookResponse instance from a Book entity.
+     *
+     * Converts the Book's details into a DTO, formatting author names with their roles and defaulting null prices to zero.
+     *
+     * @param book the Book entity to convert
+     * @return a MainBookResponse representing the book's main details
+     */
     public static MainBookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;

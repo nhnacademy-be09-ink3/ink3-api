@@ -19,6 +19,14 @@ public record CouponStoreResponse(
         CouponStatus status,
         LocalDateTime issuedAt
 ) {
+    /**
+     * Creates a {@code CouponStoreResponse} from a {@code CouponStore} entity.
+     *
+     * Extracts relevant fields from the given entity and its related objects to populate the response record.
+     *
+     * @param cs the {@code CouponStore} entity to convert
+     * @return a {@code CouponStoreResponse} representing the entity's data
+     */
     public static CouponStoreResponse fromEntity(shop.ink3.api.coupon.store.entity.CouponStore cs) {
         return new CouponStoreResponse(
                 cs.getId(),

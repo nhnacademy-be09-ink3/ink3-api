@@ -26,16 +26,26 @@ public class RabbitConfig {
 
     public static final String EXCHANGE_NAME = "coupon.exchange";
 
-    /*
-     coupon을 담을 queue 생성
-     durable = true : 서버를 재시작해도 큐가 (영구적으로) 지속됨
-     message는 이 큐에 쌓이고, 이후 @RabbitListener에서 소비됨.
-    */
+    /**
+     * Creates a durable queue for storing welcome coupon messages.
+     *
+     * The queue is named "coupon.welcome" and persists across server restarts.
+     * Messages sent to this queue are later consumed by RabbitMQ listeners.
+     *
+     * @return a durable Queue instance for welcome coupons
+     */
     @Bean
     public Queue welcomeQueue() {
         return new Queue("coupon.welcome", true);
     }
 
+    /**
+     * Creates a durable queue for birthday coupon messages with dead-lettering enabled.
+     *
+     * Messages that cannot be processed are redirected to the "dlx.exchange" exchange using the "dlx.coupon" routing key.
+     *
+     * @return a durable Queue instance for birthday coupons with dead-letter configuration
+     */
     @Bean
     public Queue birthdayQueue() {
         return QueueBuilder.durable("coupon.birthday")
@@ -44,40 +54,66 @@ public class RabbitConfig {
                 .build();
     }
 
+    /****
+     * Defines a durable dead-letter queue for birthday coupon messages that cannot be processed.
+     *
+     * @return a durable queue named "coupon.birthday.dead"
+     */
     @Bean
     public Queue birthdayQueueDead(){ return new Queue("coupon.birthday.dead", true); }
 
-    /*
-     message를 어디로 보낼지 라우팅해주는 교환기 생성
-     Topic 타입은 "coupon.* -> coupon.routing, coupon.created : 모두 수신 가능
-                 "coupon.welcome : 특정 type에서 수신
-    */
+    /**
+     * Defines the main topic exchange for routing coupon-related messages.
+     *
+     * Creates a topic exchange named "coupon.exchange" to enable flexible routing of messages to queues based on routing keys.
+     *
+     * @return the configured TopicExchange for coupon messaging
+     */
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE_NAME);
     }
 
+    /****
+     * Defines a topic exchange named "dlx.exchange" for routing dead-lettered messages.
+     *
+     * @return the dead-letter topic exchange
+     */
     @Bean
     public TopicExchange dlxExchange() {
         return new TopicExchange("dlx.exchange");
     }
 
-    /*
-     특정 Routing key를 통해 message를 Exchange -> Queue로 연결
-     즉, "coupon.routing" 키를 가진 message가 오면 coupon.queue로 전달
-     이걸 해줘야 message가 queue로 들어가게 됨
-    */
+    /**
+     * Binds the welcome coupon queue to the coupon exchange using the "coupon.issue.welcome" routing key.
+     *
+     * Messages sent to the "coupon.exchange" exchange with this routing key will be routed to the "coupon.welcome" queue.
+     *
+     * @return the binding between the welcome queue and the exchange
+     */
 
     @Bean
     public Binding bindWelcomeQueue() {
         return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.issue.welcome");
     }
 
+    /****
+     * Binds the birthday coupon queue to the main coupon exchange with the routing key "coupon.birthday".
+     *
+     * @return the binding between the "coupon.birthday" queue and the "coupon.exchange" exchange
+     */
     @Bean
     public Binding bindBirthdayQueue() {
         return BindingBuilder.bind(birthdayQueue()).to(exchange()).with("coupon.birthday");
     }
 
+    /**
+     * Creates a binding between the dead-letter queue for birthday coupons and the dead-letter exchange using the routing key "dlx.coupon".
+     *
+     * This ensures that messages dead-lettered from the birthday coupon queue are routed to the appropriate dead-letter queue.
+     *
+     * @return the binding for the birthday coupon dead-letter queue
+     */
     @Bean
     public Binding bindBirthdayDLQ() {
         return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon");

@@ -21,6 +21,14 @@ public class TossPaymentParser implements PaymentParser {
     private final OrderRepository orderRepository;
     private static final String PAYMENT_METHOD = "TOSS";
 
+    /**
+     * Parses a Toss payment response JSON and constructs a Payment entity using request and response data.
+     *
+     * @param paymentConfirmRequest the payment confirmation request containing order and payment details
+     * @param json the JSON string representing the Toss payment response
+     * @return a Payment entity populated with order, payment, and timestamp information from both the request and response
+     * @throws PaymentParserFailException if parsing fails or the order is not found
+     */
     @Override
     public Payment paymentResponseParser(PaymentConfirmRequest paymentConfirmRequest, String json) {
         try{

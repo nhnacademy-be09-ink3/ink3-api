@@ -34,6 +34,17 @@ public class CouponServiceImpl implements CouponService {
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
 
+    /**
+     * Creates a new coupon with the specified properties and associations.
+     *
+     * Builds a coupon entity from the provided request, associates it with books and categories if specified,
+     * validates the existence of referenced books and categories, and saves the coupon. Returns a response DTO
+     * containing the created coupon and its associated books and categories.
+     *
+     * @param req the request containing coupon details and optional book and category associations
+     * @return a response representing the created coupon with associated books and categories
+     * @throws IllegalArgumentException if any provided book or category ID does not exist
+     */
     @Override
     public CouponResponse createCoupon(CouponCreateRequest req) {
         Coupon coupon = Coupon.builder()
@@ -70,12 +81,25 @@ public class CouponServiceImpl implements CouponService {
         return CouponResponse.from(coupon, books, categories);
     }
 
+    /**
+     * Converts a list of Coupon entities into a list of CouponResponse DTOs.
+     *
+     * @param coupons the list of Coupon entities to convert
+     * @return a list of CouponResponse objects representing the provided coupons
+     */
     private List<CouponResponse> getCouponResponses(List<Coupon> coupons) {
         return coupons.stream()
                 .map(this::getCouponResponse)
                 .collect(Collectors.toList());
     }
 
+    /****
+     * Retrieves a coupon by its ID and returns its details.
+     *
+     * @param id the unique identifier of the coupon to retrieve
+     * @return a CouponResponse containing the coupon's information
+     * @throws CouponNotFoundException if no coupon with the specified ID exists
+     */
     @Override
     @Transactional(readOnly = true)
     public CouponResponse getCouponById(long id) {
@@ -85,6 +109,12 @@ public class CouponServiceImpl implements CouponService {
         return getCouponResponse(coupon);
     }
 
+    /**
+     * Converts a Coupon entity into a CouponResponse DTO, including associated books and categories.
+     *
+     * @param coupon the Coupon entity to convert
+     * @return a CouponResponse containing coupon details and lists of associated books and categories
+     */
     private CouponResponse getCouponResponse(Coupon coupon) {
         Set<BookCoupon> bookCoupons = coupon.getBookCoupons();
         Set<CategoryCoupon> categoryCoupons = coupon.getCategoryCoupons();
@@ -117,6 +147,11 @@ public class CouponServiceImpl implements CouponService {
         return getCouponResponses(coupons);
     }
 
+    /**
+     * Retrieves all coupons along with their associated books and categories.
+     *
+     * @return a list of CouponResponse DTOs representing all coupons and their associations
+     */
     @Override
     @Transactional(readOnly = true)
     public List<CouponResponse> getAllCoupons() {
@@ -125,6 +160,11 @@ public class CouponServiceImpl implements CouponService {
     }
 
 
+    /****
+     * Deletes a coupon by its unique identifier.
+     *
+     * @param couponId the ID of the coupon to delete
+     */
     @Override
     public void deleteCouponById(Long couponId) {
         couponRepository.deleteById(couponId);

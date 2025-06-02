@@ -15,6 +15,13 @@ public class PaymentResponseParserResolver {
         this.parserMap = parserMap;
     }
 
+    /**
+     * Retrieves the {@link PaymentParser} associated with the specified payment type.
+     *
+     * @param paymentType the payment type identifier
+     * @return the corresponding {@code PaymentParser} instance
+     * @throws IllegalArgumentException if no parser is found for the given payment type
+     */
     public PaymentParser getPaymentParser(String paymentType){
         PaymentParser paymentParser = parserMap.get(paymentType.toUpperCase());
         if(Objects.isNull(paymentParser)){

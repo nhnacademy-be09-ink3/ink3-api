@@ -13,6 +13,15 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 @RequiredArgsConstructor
 public class RabbitTemplateConfig {
     private final JacksonConfig jacksonConfig;
+    /**
+     * Creates and configures a {@link RabbitTemplate} bean with a JSON message converter.
+     *
+     * <p>This bean is only created if the property {@code rabbit.enabled} is set to {@code true} or is missing.
+     * The {@link RabbitTemplate} is configured to use a Jackson-based JSON message converter provided by the injected {@link JacksonConfig}.</p>
+     *
+     * @param connectionFactory the connection factory used to create the RabbitTemplate
+     * @return a configured RabbitTemplate instance with JSON message conversion
+     */
     @Bean
     @ConditionalOnProperty(name = "rabbit.enabled", havingValue = "true", matchIfMissing = true)
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {

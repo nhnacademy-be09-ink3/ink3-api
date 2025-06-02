@@ -28,16 +28,37 @@ import shop.ink3.api.review.review.service.ReviewService;
 public class ReviewController {
     private final ReviewService reviewService;
 
+    /**
+     * Creates a new book review.
+     *
+     * Accepts a validated review request and returns the created review wrapped in a common response with HTTP status 201 Created.
+     *
+     * @param request the review details to be created
+     * @return the created review in a common response entity with status 201 Created
+     */
     @PostMapping("/reviews")
     public ResponseEntity<CommonResponse<ReviewResponse>> addReview(@RequestBody @Valid ReviewRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(reviewService.addReview(request)));
     }
 
+    /**
+     * Retrieves the review written by the specified user.
+     *
+     * @param userId the ID of the user whose review is to be retrieved
+     * @return a response entity containing the user's review wrapped in a common response object
+     */
     @GetMapping("/users/{userId}/reviews")
     public ResponseEntity<CommonResponse<ReviewResponse>> getReviewByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(CommonResponse.success(reviewService.getReviewByUserId(userId)));
     }
 
+    /**
+     * Retrieves a paginated list of reviews for a specific book.
+     *
+     * @param pageable pagination and sorting information, defaults to sorting by creation date descending
+     * @param bookId the ID of the book for which to retrieve reviews
+     * @return a response entity containing a paginated list of reviews for the specified book
+     */
     @GetMapping("/books/{bookId}/reviews")
     public ResponseEntity<PageResponse<ReviewListResponse>> getReviewsByBookId(
         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -45,6 +66,13 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByBookId(pageable, bookId));
     }
 
+    /**
+     * Updates an existing review with the provided information.
+     *
+     * @param reviewId the ID of the review to update
+     * @param request the updated review data
+     * @return a response containing the updated review details
+     */
     @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<CommonResponse<ReviewResponse>> updateReview(@PathVariable Long reviewId,
         @RequestBody @Valid ReviewUpdateRequest request) {
@@ -52,6 +80,12 @@ public class ReviewController {
     }
 
 
+    /**
+     * Deletes a review identified by its ID.
+     *
+     * @param reviewId the ID of the review to delete
+     * @return a response with HTTP status 204 (No Content) if deletion is successful
+     */
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);

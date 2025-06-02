@@ -24,14 +24,24 @@ public class CouponController {
 
     private final CouponServiceImpl couponService;
 
-    /** 쿠폰 생성 */
+    /**
+     * Handles HTTP POST requests to create a new coupon.
+     *
+     * @param request the coupon creation request data
+     * @return a ResponseEntity containing the created coupon wrapped in a CommonResponse, with HTTP status 201 Created
+     */
     @PostMapping
     public ResponseEntity<CommonResponse<CouponResponse>> create(@RequestBody @Valid CouponCreateRequest request) {
         CouponResponse coupon = couponService.createCoupon(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(coupon));
     }
 
-    /** ID로 쿠폰 단건 조회 */
+    /**
+     * Retrieves a coupon by its unique ID.
+     *
+     * @param couponId the ID of the coupon to retrieve
+     * @return a response containing the coupon details wrapped in a CommonResponse
+     */
     @GetMapping("/{couponId}")
     public ResponseEntity<CommonResponse<CouponResponse>> getById(@PathVariable long couponId) {
         CouponResponse resp = couponService.getCouponById(couponId);
@@ -52,7 +62,12 @@ public class CouponController {
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
-    /** 쿠폰 ID로 삭제 */
+    /**
+     * Deletes a coupon by its ID.
+     *
+     * @param couponId the ID of the coupon to delete
+     * @return a response indicating successful deletion with no data
+     */
     @DeleteMapping("/{couponId}")
     public ResponseEntity<CommonResponse<Void>> deleteById(@PathVariable long couponId) {
         couponService.deleteCouponById(couponId);

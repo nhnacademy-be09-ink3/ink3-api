@@ -42,11 +42,23 @@ public class AdminController {
         return ResponseEntity.ok(CommonResponse.success(result));
     }
 
+    /**
+     * Retrieves details of an admin by their unique ID.
+     *
+     * @param adminId the unique identifier of the admin
+     * @return a response entity containing the admin details wrapped in a common response
+     */
     @GetMapping("/{adminId}")
     public ResponseEntity<CommonResponse<AdminResponse>> getAdmin(@PathVariable long adminId) {
         return ResponseEntity.ok(CommonResponse.success(adminService.getAdmin(adminId)));
     }
 
+    /**
+     * Retrieves authentication information for the admin identified by the given login ID.
+     *
+     * @param loginId the login ID of the admin
+     * @return a response containing the admin's authentication details
+     */
     @GetMapping("/{loginId}/auth")
     public ResponseEntity<CommonResponse<AdminAuthResponse>> getAdminAuth(@PathVariable String loginId) {
         return ResponseEntity.ok(CommonResponse.success(adminService.getAdminAuth(loginId)));

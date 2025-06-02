@@ -34,6 +34,14 @@ public record BookResponse(
         List<AuthorDto> authors,
         List<TagResponse> tags
 ) {
+    /****
+     * Creates a {@link BookResponse} from a {@link Book} entity, mapping all relevant fields and associated entities.
+     *
+     * Converts the book's categories, authors, and tags into their respective DTO representations. Handles null values for pricing, publisher, and quantity by providing default values.
+     *
+     * @param book the {@link Book} entity to convert
+     * @return a fully populated {@link BookResponse} representing the given book
+     */
     public static BookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
@@ -69,6 +77,14 @@ public record BookResponse(
         );
     }
 
+    /**
+     * Builds a hierarchical path string for the given category by traversing from the category up to its root parent.
+     *
+     * The resulting path lists category names from root to leaf, separated by the '>' character.
+     *
+     * @param category the starting category
+     * @return the category path as a string, or an empty string if the input is null
+     */
     private static String buildCategoryPath(Category category) {
         List<String> categoryNames = new ArrayList<>();
         while (category != null) {

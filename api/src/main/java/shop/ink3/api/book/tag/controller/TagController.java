@@ -32,6 +32,16 @@ public class TagController {
         return ResponseEntity.ok(CommonResponse.success(tagService.getTags(pageable)));
     }
 
+    /**
+     * Retrieves a tag by its ID or name.
+     *
+     * If the `id` parameter is provided, returns the tag with the specified ID. If the `name` parameter is provided, returns the tag with the specified name. Throws an exception if neither parameter is provided.
+     *
+     * @param id the unique identifier of the tag (optional)
+     * @param name the name of the tag (optional)
+     * @return a response containing the tag details
+     * @throws IllegalArgumentException if neither `id` nor `name` is provided
+     */
     @GetMapping("/detail")
     public ResponseEntity<CommonResponse<TagResponse>> getTag(
             @RequestParam(required = false) Long id,
@@ -46,11 +56,24 @@ public class TagController {
         }
     }
 
+    /**
+     * Creates a new tag using the provided request data.
+     *
+     * @param tagCreateRequest the validated request body containing tag creation details
+     * @return a response entity with the created tag wrapped in a common response and HTTP 201 status
+     */
     @PostMapping
     public ResponseEntity<CommonResponse<TagResponse>> createTag(@RequestBody @Valid TagCreateRequest tagCreateRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(tagService.createTag(tagCreateRequest)));
     }
 
+    /**
+     * Updates an existing tag with the provided information.
+     *
+     * @param tagId the ID of the tag to update
+     * @param request the updated tag data
+     * @return the updated tag wrapped in a common response
+     */
     @PutMapping("/{tagId}")
     public ResponseEntity<CommonResponse<TagResponse>> updateTag(
             @PathVariable Long tagId,

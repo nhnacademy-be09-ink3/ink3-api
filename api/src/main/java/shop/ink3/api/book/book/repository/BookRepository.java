@@ -9,8 +9,20 @@ import shop.ink3.api.book.book.entity.Book;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    boolean existsByIsbn(String isbn);
+    /****
+ * Checks if a book with the specified ISBN exists in the repository.
+ *
+ * @param isbn the ISBN to check for existence
+ * @return true if a book with the given ISBN exists, false otherwise
+ */
+boolean existsByIsbn(String isbn);
 
+    /****
+     * Retrieves a paginated list of best-selling books based on the total quantity sold in delivered orders.
+     *
+     * @param pageable pagination and sorting information
+     * @return a page of books ordered by total quantity sold in descending order
+     */
     @Query("""
         SELECT b
         FROM Book b
@@ -22,8 +34,20 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     """)
     Page<Book> findBestSellerBooks(Pageable pageable);
 
-    Page<Book> findAllByOrderByPublishedAtDesc(Pageable pageable);
+    /****
+ * Retrieves a paginated list of all books ordered by publication date in descending order.
+ *
+ * @param pageable pagination and sorting information
+ * @return a page of books sorted by most recently published first
+ */
+Page<Book> findAllByOrderByPublishedAtDesc(Pageable pageable);
 
+    /****
+     * Retrieves a paginated list of books ordered by the number of likes in descending order.
+     *
+     * @param pageable pagination information
+     * @return a page of books with the most likes first
+     */
     @Query("""
         SELECT b
         FROM Book b

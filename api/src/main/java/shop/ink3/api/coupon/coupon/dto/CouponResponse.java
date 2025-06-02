@@ -14,6 +14,16 @@ public record CouponResponse(
         List<BookInfo> books,
         List<CategoryInfo> categories
 ) {
+    /**
+     * Creates a {@code CouponResponse} from a {@code Coupon} entity and optional lists of associated books and categories.
+     *
+     * If the {@code books} or {@code categories} lists are {@code null}, they will be set to empty lists in the response.
+     *
+     * @param coupon      the coupon entity to convert
+     * @param books       the list of associated book information, or {@code null}
+     * @param categories  the list of associated category information, or {@code null}
+     * @return a {@code CouponResponse} representing the coupon and its related books and categories
+     */
     public static CouponResponse from(Coupon coupon,
                                       List<BookInfo> books,
                                       List<CategoryInfo> categories) {

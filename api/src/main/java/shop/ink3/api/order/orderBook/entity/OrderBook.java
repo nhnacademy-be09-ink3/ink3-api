@@ -52,7 +52,13 @@ public class OrderBook {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    //TODO : 적용 쿠폰에 따라 할인 금액도 수정되어야함.
+    /****
+     * Updates the packaging, coupon, quantity, and price of this order book item based on the provided request and entities.
+     *
+     * @param request the update request containing new quantity and price values
+     * @param packaging the new packaging to associate with this order book item
+     * @param couponStore the new coupon store to associate with this order book item
+     */
     public void update(OrderBookUpdateRequest request, Packaging packaging,CouponStore couponStore) {
         this.packaging = packaging;
         this.couponStore = couponStore;

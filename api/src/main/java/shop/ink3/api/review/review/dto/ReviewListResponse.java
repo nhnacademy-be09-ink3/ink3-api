@@ -15,6 +15,12 @@ public record ReviewListResponse(
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
+    /**
+     * Creates a {@code ReviewListResponse} instance from a given {@code Review} entity.
+     *
+     * @param review the {@code Review} entity to convert
+     * @return a {@code ReviewListResponse} containing data extracted from the provided review
+     */
     public static ReviewListResponse from(Review review) {
         return new ReviewListResponse(review.getId(), review.getUser().getId(), review.getOrderBook().getId(), review.getUser().getName(),
             review.getTitle(), review.getContent(), review.getRating(), review.getCreatedAt(), review.getModifiedAt());

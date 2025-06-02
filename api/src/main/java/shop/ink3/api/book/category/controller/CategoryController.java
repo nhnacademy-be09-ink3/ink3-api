@@ -27,6 +27,14 @@ import shop.ink3.api.common.dto.PageResponse;
 public class CategoryController {
     private final CategoryService categoryService;
 
+    /****
+     * Creates a new book category.
+     *
+     * Accepts a validated category creation request and returns the created category in a standardized response format.
+     *
+     * @param categoryCreateRequest the details of the category to create
+     * @return a response entity containing the created category and a 201 Created status
+     */
     @PostMapping
     public ResponseEntity<CommonResponse<CategoryResponse>> createCategory(@RequestBody @Valid CategoryCreateRequest categoryCreateRequest) {
         return ResponseEntity

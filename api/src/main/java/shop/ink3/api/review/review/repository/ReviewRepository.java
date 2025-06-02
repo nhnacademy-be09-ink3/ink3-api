@@ -10,8 +10,23 @@ import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Review findReviewByUserId(Long userId);
+    /****
+ * Retrieves the review written by the user with the specified user ID.
+ *
+ * @param userId the ID of the user whose review is to be retrieved
+ * @return the Review entity associated with the given user ID, or null if none exists
+ */
+Review findReviewByUserId(Long userId);
 
+    /**
+     * Retrieves a paginated list of review summaries for a specific book.
+     *
+     * Each summary includes review and user details, order book ID, review content, rating, and timestamps.
+     *
+     * @param pageable pagination information
+     * @param bookId the ID of the book for which to fetch reviews
+     * @return a page of review summary DTOs for the specified book
+     */
     @Query("""
             SELECT new shop.ink3.api.review.review.dto.ReviewListResponse(
                 r.id,

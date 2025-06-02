@@ -42,16 +42,35 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getUser(userId)));
     }
 
+    /**
+     * Retrieves detailed information for a user by user ID.
+     *
+     * @param userId the unique identifier of the user
+     * @return a response containing detailed user information with HTTP 200 status
+     */
     @GetMapping("/{userId}/detail")
     public ResponseEntity<CommonResponse<UserDetailResponse>> getUserDetail(@PathVariable long userId) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserDetail(userId)));
     }
 
+    /**
+     * Retrieves authentication information for a user by login ID.
+     *
+     * @param loginId the user's login identifier
+     * @return a response containing the user's authentication details
+     */
     @GetMapping("/{loginId}/auth")
     public ResponseEntity<CommonResponse<UserAuthResponse>> getUserAuth(@PathVariable String loginId) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserAuth(loginId)));
     }
 
+    /**
+     * Retrieves social user information by provider and provider user ID.
+     *
+     * @param provider the name of the social authentication provider
+     * @param providerUserId the unique user ID assigned by the social provider
+     * @return a response containing the social user information with HTTP 200 status
+     */
     @GetMapping("/social/{provider}/{providerUserId}")
     public ResponseEntity<CommonResponse<SocialUserResponse>> getSocialUser(
             @PathVariable String provider,
@@ -60,6 +79,12 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getSocialUser(provider, providerUserId)));
     }
 
+    /****
+     * Retrieves a list of users who have the specified birthday.
+     *
+     * @param birthday the date of birth to filter users by
+     * @return a response containing a list of users matching the given birthday
+     */
     @GetMapping
     public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
             @RequestParam LocalDate birthday

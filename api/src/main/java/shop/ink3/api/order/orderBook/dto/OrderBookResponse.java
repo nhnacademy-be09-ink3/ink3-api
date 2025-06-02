@@ -24,6 +24,12 @@ public class OrderBookResponse {
     private Integer quantity;
 
 
+    /**
+     * Creates an OrderBookResponse DTO from an OrderBook entity, mapping all relevant fields and handling optional associations.
+     *
+     * @param orderBook the OrderBook entity to convert
+     * @return an OrderBookResponse representing the provided OrderBook
+     */
     public static OrderBookResponse from(OrderBook orderBook) {
         return new OrderBookResponse(
             orderBook.getId(),

@@ -16,6 +16,13 @@ public class PaymentProcessorResolver {
         this.processorMap = processorMap;
     }
 
+    /**
+     * Retrieves the {@code PaymentProcessor} associated with the specified payment type.
+     *
+     * @param paymentType the payment type identifier
+     * @return the corresponding {@code PaymentProcessor}
+     * @throws IllegalArgumentException if no processor is found for the given payment type
+     */
     public PaymentProcessor getPaymentProcessor(String paymentType){
         PaymentProcessor processor = processorMap.get(paymentType.toUpperCase());
         if(Objects.isNull(processor)){

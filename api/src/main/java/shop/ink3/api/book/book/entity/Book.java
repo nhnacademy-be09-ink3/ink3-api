@@ -102,6 +102,11 @@ public class Book {
         orphanRemoval = true)
     private List<BookTag> bookTags = new ArrayList<>();
 
+    /**
+     * Calculates and updates the discount rate based on the original and sale prices before persisting or updating the entity.
+     *
+     * If the original price is zero, sets the discount rate to zero to avoid division by zero.
+     */
     @PrePersist
     @PreUpdate
     public void updateDiscountRate() {
@@ -112,6 +117,11 @@ public class Book {
         }
     }
 
+    /**
+     * Associates this book with the specified category by creating and linking a new BookCategory entity.
+     *
+     * @param category the category to associate with this book
+     */
     public void addBookCategory(Category category) {
         BookCategory bookCategory = new BookCategory(this, category);
         this.bookCategories.add(bookCategory);

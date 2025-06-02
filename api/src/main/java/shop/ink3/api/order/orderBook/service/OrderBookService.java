@@ -38,7 +38,20 @@ public class OrderBookService {
     private final PackagingRepository packagingRepository;
     private final CouponStoreRepository couponStoreRepository;
 
-    // 생성
+    /**
+     * Creates and saves one or more OrderBook entities for a given order based on the provided creation requests.
+     *
+     * For each request, associates the order with a book, optional packaging, and optional coupon store, while updating book stock accordingly.
+     *
+     * @param orderId the ID of the order to associate with the new OrderBook entities
+     * @param requestList the list of requests specifying book, packaging, coupon, price, and quantity for each OrderBook
+     *
+     * @throws OrderNotFoundException if the specified order does not exist
+     * @throws BookNotFoundException if a requested book does not exist
+     * @throws PackagingNotFoundException if a specified packaging does not exist
+     * @throws CouponStoreNotFoundException if a specified coupon store does not exist
+     * @throws InsufficientBookStockException if the requested quantity exceeds available book stock
+     */
     public void createOrderBook(long orderId, List<OrderBookCreateRequest> requestList) {
         for (OrderBookCreateRequest request : requestList) {
             Order order = orderRepository.findById(orderId)
@@ -89,7 +102,17 @@ public class OrderBookService {
         return PageResponse.from(pageResponse);
     }
 
-    // 수정
+    /**
+     * Updates an existing order book entry with new packaging and coupon information.
+     *
+     * @param orderBookId the ID of the order book to update
+     * @param request the update request containing new packaging and coupon details
+     * @return the updated order book as a response DTO
+     *
+     * @throws OrderBookNotFoundException if the order book does not exist
+     * @throws PackagingNotFoundException if the specified packaging does not exist
+     * @throws CouponStoreNotFoundException if the specified coupon store does not exist
+     */
     public OrderBookResponse updateOrderBook(long orderBookId, OrderBookUpdateRequest request) {
         OrderBook orderBook = orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new OrderBookNotFoundException(orderBookId));

@@ -28,7 +28,14 @@ import shop.ink3.api.user.point.eventListener.PointEventListener;
 public class PaymentController {
     private final PaymentService paymentService;
 
-    // 결제 승인 API 호출 및 결과 저장
+    /**
+     * Confirms a payment by processing the payment request and saving the result.
+     *
+     * Handles POST requests to /payments/confirm. Calls the external payment API using the provided payment confirmation request, saves the payment result, and returns the payment response wrapped in a success response.
+     *
+     * @param confirmRequest the payment confirmation request containing payment details
+     * @return a response entity containing the payment response in a common success wrapper
+     */
     @PostMapping("/confirm")
     public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(
             @RequestBody PaymentConfirmRequest confirmRequest

@@ -32,11 +32,23 @@ public class AuthorController {
         return ResponseEntity.ok(CommonResponse.success(authorService.getAuthor(authorId)));
     }
 
+    /**
+     * Retrieves a paginated list of authors.
+     *
+     * @param pageable pagination and sorting information
+     * @return a response containing a page of author data
+     */
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<AuthorResponse>>> getAuthors(Pageable pageable) {
         return ResponseEntity.ok(CommonResponse.success(authorService.getAuthors(pageable)));
     }
 
+    /**
+     * Creates a new author using the provided request data.
+     *
+     * @param request the validated data for creating a new author
+     * @return a response entity containing the created author's information with HTTP 201 Created status
+     */
     @PostMapping
     public ResponseEntity<CommonResponse<AuthorResponse>> createAuthor(@RequestBody @Valid AuthorCreateRequest request) {
         return ResponseEntity
@@ -44,6 +56,13 @@ public class AuthorController {
                 .body(CommonResponse.create(authorService.createAuthor(request)));
     }
 
+    /****
+     * Updates an existing author with the provided information.
+     *
+     * @param authorId the ID of the author to update
+     * @param request the updated author data
+     * @return a response containing the updated author information
+     */
     @PutMapping("/{authorId}")
     public ResponseEntity<CommonResponse<AuthorResponse>> updateAuthor(@PathVariable Long authorId,
                                                                        @RequestBody @Valid AuthorUpdateRequest request) {

@@ -8,6 +8,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JacksonConfig {
+    /****
+     * Creates a Jackson2JsonMessageConverter bean with support for Java 8 date and time types.
+     *
+     * @return a Jackson2JsonMessageConverter configured with an ObjectMapper that handles Java time types such as LocalDate
+     */
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
         ObjectMapper mapper = new ObjectMapper();
