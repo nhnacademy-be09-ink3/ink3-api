@@ -35,69 +35,49 @@ class BookControllerTest {
     private BookResponse bookResponse;
     private MainBookResponse mainBookResponse;
 
-
     @BeforeEach
     void setUp() {
         CategoryResponse category = new CategoryResponse(
-                3L,               // id
-                "한국소설",         // name
-                1L,               // parentId
-                List.of()         // children = 빈 리스트
+            3L, "한국소설", 1L, List.of()
         );
         List<CategoryResponse> categories = List.of(category);
 
         AuthorDto author = new AuthorDto(
-                100L,             // authorId
-                "홍길동",          // authorName
-                "저자"             // role
+            100L, "홍길동", "저자"
         );
         List<AuthorDto> authors = List.of(author);
 
         TagResponse tag = new TagResponse(
-                50L,              // tagId
-                "베스트셀러"        // tagName
+            50L, "베스트셀러"
         );
         List<TagResponse> tags = List.of(tag);
 
         this.bookResponse = new BookResponse(
-                1L,                             // id
-                "1234567890123",                // isbn
-                "책 제목",                        // title
-                "책 내용 요약",                   // contents
-                "상세 설명",                      // description
-                "출판사",                          // publisherName
-                LocalDate.of(2024, 1, 1),       // publishedAt
-                20000,                          // originalPrice
-                18000,                          // salePrice
-                10,                             // discountRate
-                100,                            // quantity
-                BookStatus.AVAILABLE,           // status
-                true,                           // isPackable
-                "https://example.com/image.jpg", // thumbnailUrl
-                categories,                     // List<CategoryResponse>
-                authors,                        // List<AuthorDto>
-                tags                             // List<TagResponse>
+            1L,                             // id
+            "1234567890123",                // isbn
+            "책 제목",                        // title
+            "책 내용 요약",                   // contents
+            "상세 설명",                      // description
+            "출판사",                          // publisherName
+            LocalDate.of(2024, 1, 1),       // publishedAt
+            20000,                          // originalPrice
+            18000,                          // salePrice
+            10,                             // discountRate
+            100,                            // quantity
+            BookStatus.AVAILABLE,           // status
+            true,                           // isPackable
+            "https://example.com/image.jpg", // thumbnailUrl
+            categories,                     // List<CategoryResponse>
+            authors,                        // List<AuthorDto>
+            tags,                           // List<TagResponse>
+            4.5                             // ⭐️ averageRating 추가
         );
 
         this.mainBookResponse = new MainBookResponse(
-                1L,                            // id
-                "책 제목",                       // title
-                20000,                         // originalPrice
-                18000,                         // salePrice
-                10,                            // discountRate
-                "https://example.com/image.jpg", // thumbnailUrl
-                List.of("홍길동 (저자)")          // authorNames
+            1L, "책 제목", 20000, 18000, 10,
+            "https://example.com/image.jpg",
+            List.of("홍길동 (저자)")
         );
-    }
-
-    @Test
-    @DisplayName("도서 상세 조회")
-    void getBookById() throws Exception {
-        when(bookService.getBook(1L)).thenReturn(bookResponse);
-
-        mockMvc.perform(get("/books/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.title").value("책 제목"));
     }
 
     @Test

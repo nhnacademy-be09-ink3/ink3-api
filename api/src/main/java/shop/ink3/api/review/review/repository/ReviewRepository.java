@@ -52,4 +52,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<ReviewDefaultListResponse> findListByBookId(Pageable pageable, @Param("bookId") Long bookId);
 
     boolean existsByOrderBookId(Long orderBookId);
+
+    @Query("""
+            SELECT AVG(r.rating)
+            FROM Review r
+            JOIN r.orderBook ob
+            WHERE ob.book.id = :bookId
+        """)
+    Double findAverageRatingByBookId(@Param("bookId") Long bookId);
 }

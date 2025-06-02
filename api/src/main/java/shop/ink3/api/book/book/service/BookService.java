@@ -42,12 +42,14 @@ import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.exception.TagNotFoundException;
 import shop.ink3.api.book.tag.repository.TagRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.review.review.repository.ReviewRepository;
 
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class BookService {
     private final BookRepository bookRepository;
+    private final ReviewRepository reviewRepository;
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
@@ -57,16 +59,18 @@ public class BookService {
     @Transactional(readOnly = true)
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-        return BookResponse.from(book);
+        double averageRating = getAverageRating(bookId);
+
+        return BookResponse.from(book, averageRating);
     }
 
     // 전체 조회
+
     @Transactional(readOnly = true)
     public PageResponse<BookResponse> getBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAll(pageable);
         return PageResponse.from(books.map(BookResponse::from));
     }
-
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5BestSellerBooks() {
         Page<Book> top5BestSellerBooks = bookRepository.findBestSellerBooks(Pageable.ofSize(5));
@@ -221,8 +225,8 @@ public class BookService {
 
         bookRepository.delete(book);
     }
-    // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
 
+    // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
     public BookResponse registerBook(BookRegisterRequest request) {
         AladinBookResponse dto = request.aladinBookResponse();
         if (bookRepository.existsByIsbn(dto.isbn13())) {
@@ -267,6 +271,10 @@ public class BookService {
         }
 
         return BookResponse.from(book);
+    }
+
+    private double getAverageRating(Long bookId) {
+        return reviewRepository.findAverageRatingByBookId(bookId);
     }
     // 카테고리는 최소 2단계
 
