@@ -23,10 +23,14 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.review.review.repository.ReviewRepository;
 
 class BookServiceTest {
     @Mock
     private BookRepository bookRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @InjectMocks
     private BookService bookService;
@@ -57,9 +61,12 @@ class BookServiceTest {
     @DisplayName("도서 단건 조회 성공")
     void getBookSuccess() {
         when(bookRepository.findById(1L)).thenReturn(java.util.Optional.of(book));
+        when(reviewRepository.findAverageRatingByBookId(1L)).thenReturn(4.5);
+
         BookResponse result = bookService.getBook(1L);
         assertThat(result.id()).isEqualTo(1L);
         assertThat(result.title()).isEqualTo("책 제목");
+        assertThat(result.averageRating()).isEqualTo(4.5);
     }
 
     @Test
