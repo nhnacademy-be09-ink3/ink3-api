@@ -1,9 +1,16 @@
 package shop.ink3.api.common.uploader;
 
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import shop.ink3.api.common.exception.MinioUploadFailException;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -13,14 +20,6 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-
-import java.io.IOException;
-import java.net.URL;
-import java.text.Normalizer;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @Slf4j
 @Component
