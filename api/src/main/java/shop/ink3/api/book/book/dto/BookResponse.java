@@ -4,10 +4,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.bookTag.entity.BookTag;
+import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.tag.dto.TagResponse;
+import shop.ink3.api.book.tag.entity.Tag;
 
 public record BookResponse(
         Long id,
@@ -24,9 +30,9 @@ public record BookResponse(
         BookStatus status,
         boolean isPackable,
         String thumbnailUrl,
-        List<String> categoryNames,
-        List<String> authorNames,
-        List<String> tagNames
+        List<CategoryResponse> categories,
+        List<AuthorDto> authors,
+        List<TagResponse> tags
 ) {
     public static BookResponse from(Book book) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
@@ -47,17 +53,18 @@ public record BookResponse(
                 book.getStatus(),
                 book.isPackable(),
                 book.getThumbnailUrl(),
-                book.getBookCategories()
-                        .stream()
-                        .map(bc -> buildCategoryPath(bc.getCategory()))
-                        .toList(),
+                book.getBookCategories().stream().map(bc -> CategoryResponse.from(bc.getCategory())).toList(),
                 book.getBookAuthors()
                         .stream()
-                        .map(ba -> ba.getAuthor().getName() + " (" + ba.getRole() + ")")
+                        .map(ba -> new AuthorDto(
+                                ba.getAuthor().getId(),
+                                ba.getAuthor().getName(),  // Author 엔티티에 name 필드가 있다고 가정
+                                ba.getRole()
+                        ))
                         .toList(),
                 book.getBookTags()
                         .stream()
-                        .map(bt -> bt.getTag().getName())
+                        .map(bt -> TagResponse.from(bt.getTag()))
                         .toList()
         );
     }

@@ -250,8 +250,8 @@ public class BookService {
 
         List<AuthorDto> authorDtos = parseAuthors(dto.author());
         for (AuthorDto authorDto : authorDtos) {
-            Author author = authorRepository.findByName(authorDto.name())
-                    .orElseGet(() -> authorRepository.save(Author.builder().name(authorDto.name()).build()));
+            Author author = authorRepository.findByName(authorDto.authorName())
+                    .orElseGet(() -> authorRepository.save(Author.builder().name(authorDto.authorName()).build()));
             book.addBookAuthor(author, authorDto.role());
         }
 
@@ -279,7 +279,7 @@ public class BookService {
     }
     // 알라딘 API로 가져온 작가 이름 파싱
 
-    public static List<AuthorDto> parseAuthors(String authorString) {
+    public List<AuthorDto> parseAuthors(String authorString) {
         List<String> parts = Arrays.stream(authorString.split(","))
                 .map(String::trim)
                 .toList();
@@ -288,17 +288,17 @@ public class BookService {
 
         Pattern pattern = Pattern.compile("^(.*)\\(([^()]+)\\)$");
         String currentRole = null;
-
         for (int i = parts.size() - 1; i >= 0; i--) {
             String part = parts.get(i);
             Matcher matcher = pattern.matcher(part);
-
             if (matcher.matches()) {
                 String nameWithPossibleParens = matcher.group(1).trim();
                 currentRole = matcher.group(2).trim();
-                result.set(i, new AuthorDto(nameWithPossibleParens, currentRole));
+                Author author = authorRepository.findByName(nameWithPossibleParens).orElseThrow(() -> new AuthorNotFoundException(nameWithPossibleParens));
+                result.set(i, new AuthorDto(author.getId(),nameWithPossibleParens, currentRole));
             } else {
-                result.set(i, new AuthorDto(part, currentRole != null ? currentRole : "지은이"));
+                Author author = authorRepository.findByName(part).orElseThrow(() -> new AuthorNotFoundException(part));
+                result.set(i, new AuthorDto(author.getId(), part, currentRole != null ? currentRole : "지은이"));
             }
         }
         return result;
