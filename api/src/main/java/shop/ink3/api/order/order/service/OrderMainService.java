@@ -13,7 +13,6 @@ import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.service.RefundService;
 import shop.ink3.api.order.shipment.service.ShipmentService;
 import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
-import shop.ink3.api.user.point.eventListener.PointHistoryAfterCancelPaymentEven;
 
 @Transactional
 @RequiredArgsConstructor
@@ -34,23 +33,14 @@ public class OrderMainService {
         return orderResponse;
     }
 
+    //TODO 금액 환불 및 포인트 내역 추가
+    //TODO : 사용된 쿠폰 재발급
     // 반품 생성
     public RefundResponse createRefund(RefundCreateRequest request) {
         // 반품 가능 여부 확인
         refundService.availableRefund(request);
         RefundResponse refund = refundService.createRefund(request);
-        //TODO : 논의 사항 = 포인트를 이벤트 리스너로 분리   OR    MQ로 분리하여 처리
-        //TODO 금액 환불 및 포인트 내역 추가
-/*        OrderResponse order = orderService.getOrder(refund.getOrderId());
-        applicationEventPublisher.publishEvent(
-                new PointHistoryAfterCancelPaymentEven(order.getId(), order.getPointHistoryId())
-        );*/
-        //TODO : 사용된 쿠폰 재발급
-
         orderService.updateOrderStatus(request.getOrderId(), new OrderStatusUpdateRequest(OrderStatus.REFUNDED));
         return refund;
     }
-
-
-    //TODO : 결제 실패 시
 }

@@ -58,7 +58,7 @@ public class Order {
         this.ordererPhone = request.getOrdererPhone();
     }
 
-    public void setOrderUUID(String orderUUID) {
+    public void assignOrderUUID(String orderUUID) {
         this.orderUUID = orderUUID;
     }
 

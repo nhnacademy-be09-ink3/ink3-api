@@ -15,6 +15,7 @@ import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusRequest;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
+import shop.ink3.api.order.order.dto.OrderWithDetailsResponse;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
@@ -47,7 +48,7 @@ public class OrderService {
                 .build();
 
         Order saveOrder = orderRepository.save(order);
-        saveOrder.setOrderUUID(generateOrderUUID(saveOrder.getId()));
+        saveOrder.assignOrderUUID(generateOrderUUID(saveOrder.getId()));
         orderRepository.save(saveOrder);
         return OrderResponse.from(saveOrder);
     }
@@ -62,10 +63,9 @@ public class OrderService {
 
     // 사용자의 주문 리스트 조회 (사용자)
     @Transactional(readOnly = true)
-    public PageResponse<OrderResponse> getOrderListByUser(long userId, Pageable pageable) {
-        Page<Order> page = orderRepository.findAllByUserId(userId, pageable);
-        Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
-        return PageResponse.from(pageResponse);
+    public PageResponse<OrderWithDetailsResponse> getOrderListByUser(long userId, Pageable pageable) {
+        Page<OrderWithDetailsResponse> orderWithDetailsResponsePage = orderRepository.findAllByUserId(userId, pageable);
+        return PageResponse.from(orderWithDetailsResponsePage);
     }
 
     // 사용자 + 상태별 주문 조회 (사용자)
