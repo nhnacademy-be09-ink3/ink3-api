@@ -249,8 +249,8 @@ jobs:
             export RABBITMQ_VIRTUAL_HOST=${{ secrets.RABBITMQ_VIRTUAL_HOST_DEV }}
             export TOSS_PAYMENT_CLIENT_KEY=${{ secrets.TOSS_PAYMENT_CLIENT_KEY }}
             export TOSS_PAYMENT_SECRET_KEY=${{ secrets.TOSS_PAYMENT_SECRET_KEY }}
-            export MINIO_HOST: ${{ secrets.MINIO_HOST }}
-            export MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
-            export MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+            export MINIO_HOST=${{ secrets.MINIO_HOST }}
+            export MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
+            export MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
