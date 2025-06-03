@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.common.exception.DormantException;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.common.exception.WithdrawnException;
@@ -20,6 +22,7 @@ import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
+import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
@@ -90,6 +93,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<UserResponse> getUsersByBirthday(LocalDate birthday) {
         return userRepository.findAllByBirthday(birthday).stream().map(UserResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<UserListItemDto> getUsersForManagement(String keyword, Pageable pageable) {
+        return PageResponse.from(userRepository.getUsersForManagement(keyword, pageable));
     }
 
     public UserResponse createUser(UserCreateRequest request) {
