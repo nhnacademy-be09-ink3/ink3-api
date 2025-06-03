@@ -17,7 +17,7 @@ public class RefundPolicyResponse {
     private Integer defectReturnDeadLine;
     private Boolean isAvailable;
     private LocalDateTime createdAt;
-
+    private Integer refundShippingFee;
 
     public static RefundPolicyResponse from(RefundPolicy refundPolicy) {
         return new RefundPolicyResponse(
@@ -26,7 +26,8 @@ public class RefundPolicyResponse {
                 refundPolicy.getReturnDeadLine(),
                 refundPolicy.getDefectReturnDeadLine(),
                 refundPolicy.getIsAvailable(),
-                refundPolicy.getCreatedAt()
+                refundPolicy.getCreatedAt(),
+                refundPolicy.getRefundShippingFee()
         );
     }
 }
