@@ -29,6 +29,3 @@ management:
 logging:
   level:
     org.hibernate.SQL: debug
-
-aladin:
-  ttb-key: ${TTB_KEY}
