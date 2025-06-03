@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.common.exception.DormantException;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.common.exception.WithdrawnException;
@@ -20,6 +22,7 @@ import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
+import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
@@ -29,6 +32,7 @@ import shop.ink3.api.user.user.entity.UserStatus;
 import shop.ink3.api.user.user.exception.SocialUserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserAuthNotFoundException;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
+import shop.ink3.api.user.user.repository.UserJooqRepository;
 import shop.ink3.api.user.user.repository.UserRepository;
 
 @Transactional
@@ -36,6 +40,7 @@ import shop.ink3.api.user.user.repository.UserRepository;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final UserJooqRepository userJooqRepository;
     private final MembershipRepository membershipRepository;
     private final SocialRepository socialRepository;
     private final PasswordEncoder passwordEncoder;
@@ -90,6 +95,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<UserResponse> getUsersByBirthday(LocalDate birthday) {
         return userRepository.findAllByBirthday(birthday).stream().map(UserResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<UserListItemDto> getUsersForManagement(String keyword, Pageable pageable) {
+        return PageResponse.from(userJooqRepository.getUsersForManagementOrderByUserIdAsc(keyword, pageable));
     }
 
     public UserResponse createUser(UserCreateRequest request) {
