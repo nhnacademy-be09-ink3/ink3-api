@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,9 +20,8 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
 import shop.ink3.api.book.publisher.entity.Publisher;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
-import shop.ink3.api.review.review.dto.ReviewListResponse;
+import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
 import shop.ink3.api.review.review.entity.Review;
-import shop.ink3.api.review.review.repository.ReviewRepository;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -44,9 +42,7 @@ class ReviewRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        Publisher publisher = Publisher.builder()
-            .name("출판사1")
-            .build();
+        Publisher publisher = Publisher.builder().name("출판사1").build();
         em.persist(publisher);
 
         book = Book.builder()
@@ -105,21 +101,31 @@ class ReviewRepositoryTest {
     }
 
     @Test
-    @DisplayName("단일 리뷰 조회")
-    void findByUserId() {
-        Optional<Review> result = Optional.ofNullable(reviewRepository.findReviewByUserId(user.getId()));
-        assertThat(result).isPresent();
-        assertThat(result.get().getTitle()).isEqualTo("좋아요");
-    }
-
-    @Test
-    @DisplayName("한 도서에 대한 모든 리뷰 조회")
-    void findAllByBookId() {
-        Page<ReviewListResponse> page = reviewRepository.findListByBookId(
+    @DisplayName("도서에 대한 리뷰 목록 조회")
+    void findListByBookId() {
+        Page<ReviewDefaultListResponse> page = reviewRepository.findListByBookId(
             PageRequest.of(0, 10), book.getId()
         );
         assertThat(page.getTotalElements()).isEqualTo(1);
         assertThat(page.getContent().getFirst().rating()).isEqualTo(5);
+        assertThat(page.getContent().getFirst().title()).isEqualTo("좋아요");
+    }
+
+    @Test
+    @DisplayName("사용자에 대한 리뷰 목록 조회")
+    void findListByUserId() {
+        Page<ReviewDefaultListResponse> page = reviewRepository.findListByUserId(
+            PageRequest.of(0, 10), user.getId()
+        );
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().getFirst().rating()).isEqualTo(5);
+        assertThat(page.getContent().getFirst().title()).isEqualTo("좋아요");
+    }
+
+    @Test
+    @DisplayName("orderBookId로 리뷰 존재 여부 확인")
+    void existsByOrderBookId() {
+        boolean exists = reviewRepository.existsByOrderBookId(orderBook.getId());
+        assertThat(exists).isTrue();
     }
 }
-

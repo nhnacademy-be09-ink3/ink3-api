@@ -29,3 +29,6 @@ management:
 logging:
   level:
     org.hibernate.SQL: debug
+minio:
+  review-bucket: ink3-dev-reviews-images
+  book-bucket: ink3-dev-books-images
