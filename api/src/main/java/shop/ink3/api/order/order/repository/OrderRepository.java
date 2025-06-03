@@ -39,6 +39,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         )
         JOIN books b ON ob.book_id = b.id
         WHERE o.user_id = :userId
+        ORDER BY o.ordered_at DESC
         """,
             countQuery = "SELECT COUNT(*) FROM orders o WHERE o.user_id = :userId",
             nativeQuery = true

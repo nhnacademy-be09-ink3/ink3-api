@@ -46,7 +46,7 @@ public class PaymentService {
         return paymentProcessor.processPayment(confirmRequest);
     }
 
-    //TODO 포인트 내역 추가
+    //TODO : 포인트 내역 추가
     // 생성 (결제 성공)
     @Transactional
     public PaymentResponse createPayment(long userId, PaymentConfirmRequest confirmRequest, String paymentApproveResponse) {
@@ -55,18 +55,17 @@ public class PaymentService {
         Payment payment = paymentParser.paymentResponseParser(confirmRequest, paymentApproveResponse);
         payment.updateDiscountAndPoint(confirmRequest.usedPointAmount(), confirmRequest.discountAmount());
 
-        // 특정 주문에 대한 payment가 존재하는지 확인.
-        Optional<Payment> optionalPayment = paymentRepository.findByOrderId(confirmRequest.orderId());
-        if (optionalPayment.isPresent()) {
-            throw new PaymentAlreadyExistsException(confirmRequest.orderId());
-        }
+        // 결제 상태 변경
+        orderService.updateOrderStatus(confirmRequest.orderId(), new OrderStatusUpdateRequest(OrderStatus.CONFIRMED));
 
-        // user-id 값이 있으면 회원 아니면 비회원 결제 (Long이어야함.)
+        // 특정 주문에 대한 payment가 존재하는지 확인.
+        paymentRepository.findByOrderId(confirmRequest.orderId())
+                .orElseThrow(() -> new PaymentAlreadyExistsException(confirmRequest.orderId()));
 
         return PaymentResponse.from(paymentRepository.save(payment));
     }
 
-    //TODO 금액 환불 및 포인트 내역 추가
+    //TODO : 금액 환불 및 포인트 내역 추가
     //TODO : 사용된 쿠폰 재발급
     // 결제 실패
     @Transactional
@@ -78,7 +77,7 @@ public class PaymentService {
     }
 
 
-    //TODO 금액 환불 및 포인트 내역 추가
+    //TODO : 금액 환불 및 포인트 내역 추가
     //TODO : 사용된 쿠폰 재발급
     // 결제 취소
     @Transactional

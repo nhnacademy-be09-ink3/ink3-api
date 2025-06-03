@@ -85,7 +85,6 @@ public class RefundPolicyService {
     }
 
 
-
     // 조회 로직
     protected RefundPolicy getRefundPolicyOrThrow(long refundPolicyId) {
         Optional<RefundPolicy> optionalRefundPolicy = refundPolicyRepository.findById(refundPolicyId);
