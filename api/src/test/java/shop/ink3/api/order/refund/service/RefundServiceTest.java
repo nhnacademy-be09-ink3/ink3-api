@@ -48,7 +48,7 @@ class RefundServiceTest {
     void getRefund_성공() {
         // given
         Order order = Order.builder().id(1L).build();
-        RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세",3000, LocalDateTime.now());
+        RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세",3000, LocalDateTime.now(), true);
         Refund refund = Refund.builder()
                 .id(1L)
                 .order(order)
@@ -104,7 +104,7 @@ class RefundServiceTest {
     @DisplayName("사용자의 반품 리스트 조회 - 성공")
     void createRefund_성공() {
         // given
-        RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세",3000, LocalDateTime.now());
+        RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세",3000, LocalDateTime.now(), true);
         Order order = Order.builder().id(1L).build();
         Refund refund = Refund.builder()
                 .id(1L)

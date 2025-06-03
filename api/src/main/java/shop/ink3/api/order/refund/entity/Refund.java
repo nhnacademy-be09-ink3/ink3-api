@@ -47,8 +47,15 @@ public class Refund {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private Boolean approved;
+
     public void update(RefundUpdateRequest request) {
         this.details = request.getDetails();
         this.reason = request.getReason();
+    }
+
+    public void approved(){
+        this.approved = true;
     }
 }

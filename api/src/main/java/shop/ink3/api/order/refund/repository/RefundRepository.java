@@ -8,6 +8,8 @@ import shop.ink3.api.order.refund.entity.Refund;
 
 public interface RefundRepository extends JpaRepository<Refund, Long> {
 
+
+    Page<Refund> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Optional<Refund> findByOrderId(long orderId);
     Page<Refund> findAllByOrderUserId(long userId, Pageable pageable);
 }

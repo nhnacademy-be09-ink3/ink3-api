@@ -24,7 +24,7 @@ import shop.ink3.api.user.user.dto.UserPointRequest;
 @RequiredArgsConstructor
 @Service
 public class OrderMainService {
-
+    private static final String REFUND_DESCRIPTION = "반품처리로 인한 환불금액 (반품비 (%d원) 제외)";
     private final OrderService orderService;
     private final OrderBookService orderBookService;
     private final ShipmentService shipmentService;
@@ -54,17 +54,17 @@ public class OrderMainService {
     //TODO : 사용된 쿠폰 재발급
     // 반품 승인
     public void approveRefund(long userId, long orderId){
-        RefundResponse refund = refundService.getOrderRefund(orderId);
+        RefundResponse refund = refundService.updateApproved(orderId);
         PaymentResponse payment = paymentService.getPayment(refund.getId());
 
         // 결제 금액 환불
-        String description = String.format("반품처리로 인한 환불금액 (반품비 (%d원) 제외)", refund.getRefundShippingFee());
+        String description = String.format(REFUND_DESCRIPTION, refund.getRefundShippingFee());
         pointService.earnPoint(userId, new UserPointRequest(payment.paymentAmount() - refund.getRefundShippingFee(), description));
 
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(refund.getId());
         for(OrderPoint orderPoint : orderPoints) {
-            pointService.cancelPoint(refund.getId(), orderPoint.getPointHistory().getId());
+            pointService.cancelPoint(userId, orderPoint.getPointHistory().getId());
         }
     }
 }

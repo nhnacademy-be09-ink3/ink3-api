@@ -22,7 +22,9 @@ public class RefundCreateRequest {
     @Length(max = 255)
     private String details;
     @NotNull
-    private Integer RefundShippingFee;
+    private Integer refundShippingFee;
     @NotNull
     private LocalDateTime createdAt;
+    @NotNull
+    private Boolean approved;
 }

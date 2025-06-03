@@ -17,8 +17,10 @@ public class RefundResponse {
     private Long orderId;
     private String reason;
     private String details;
-    private Integer RefundShippingFee;
+    private Integer refundShippingFee;
     private LocalDateTime createdAt;
+    private Boolean approved;
+
 
     public static RefundResponse from(Refund refund) {
         return new RefundResponse(
@@ -27,7 +29,8 @@ public class RefundResponse {
                 refund.getReason(),
                 refund.getDetails(),
                 refund.getRefundShippingFee(),
-                refund.getCreatedAt()
+                refund.getCreatedAt(),
+                refund.getApproved()
         );
     }
 }
