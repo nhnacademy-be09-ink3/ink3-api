@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.order.order.entity.Order;
@@ -22,12 +21,10 @@ import shop.ink3.api.order.refund.exception.RefundNotFoundException;
 import shop.ink3.api.order.refund.exception.ReturnDeadlineExceededException;
 import shop.ink3.api.order.refund.repository.RefundRepository;
 import shop.ink3.api.order.refundPolicy.entity.RefundPolicy;
-import shop.ink3.api.order.refundPolicy.exception.RefundPolicyNotFoundException;
 import shop.ink3.api.order.refundPolicy.repository.RefundPolicyRepository;
 import shop.ink3.api.order.shipment.entity.Shipment;
 import shop.ink3.api.order.shipment.exception.ShipmentNotFoundException;
 import shop.ink3.api.order.shipment.repository.ShipmentRepository;
-import shop.ink3.api.order.shipment.service.ShipmentService;
 
 @Transactional
 @RequiredArgsConstructor
@@ -50,8 +47,17 @@ public class RefundService {
                 .reason(request.getReason())
                 .RefundShippingFee(request.getRefundShippingFee())
                 .createdAt(LocalDateTime.now())
+                .approved(false)
                 .build();
         return RefundResponse.from(refundRepository.save(refund));
+    }
+
+    // 전체 반품 리스트 
+    @Transactional(readOnly = true)
+    public PageResponse<RefundResponse> getAllRefundList(Pageable pageable) {
+        Page<Refund> refundPage = refundRepository.findAllByOrderByCreatedAtDesc(pageable);
+        Page<RefundResponse> refundRepositories = refundPage.map(RefundResponse::from);
+        return PageResponse.from(refundRepositories);
     }
 
     // 주문 id에 대한 조회
@@ -80,6 +86,14 @@ public class RefundService {
     public void deleteRefund(long orderId) {
         getRefundOrThrow(orderId);
         refundRepository.deleteById(orderId);
+    }
+
+    // 반품 승인 true 변경
+    public RefundResponse updateApproved(long orderId){
+        Refund refund = getRefundOrThrow(orderId);
+        refund.approved();
+        Refund save = refundRepository.save(refund);
+        return RefundResponse.from(save);
     }
 
     // 조회 로직
