@@ -193,7 +193,8 @@ class PointControllerTest {
     @Test
     void earnPoints() throws Exception {
         UserPointRequest request = new UserPointRequest(1000, "test");
-        doNothing().when(pointService).earnPoint(1L, request);
+        PointHistory response = PointHistory.builder().id(1L).build();
+        when(pointService.earnPoint(1L, request)).thenReturn(response);
         mockMvc.perform(post("/users/1/points/earn")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -220,7 +221,8 @@ class PointControllerTest {
     @Test
     void usePoints() throws Exception {
         UserPointRequest request = new UserPointRequest(1000, "test");
-        doNothing().when(pointService).usePoint(1L, request);
+        PointHistory response = PointHistory.builder().id(1L).build();
+        when(pointService.usePoint(1L, request)).thenReturn(response);
         mockMvc.perform(post("/users/1/points/use")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

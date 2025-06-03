@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
@@ -47,6 +48,14 @@ public class RefundController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(orderMainService.createRefund(request)));
+    }
+
+    @PostMapping("/{orderId}")
+    public ResponseEntity<Void> approveRefund(
+            @PathVariable long orderId,
+            @RequestHeader("X-User-Id") long userId) {
+        orderMainService.approveRefund(userId, orderId);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{orderId}")

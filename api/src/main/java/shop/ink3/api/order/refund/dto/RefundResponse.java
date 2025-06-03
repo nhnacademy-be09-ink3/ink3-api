@@ -1,5 +1,6 @@
 package shop.ink3.api.order.refund.dto;
 
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,13 +17,17 @@ public class RefundResponse {
     private Long orderId;
     private String reason;
     private String details;
+    private Integer RefundShippingFee;
+    private LocalDateTime createdAt;
 
     public static RefundResponse from(Refund refund) {
         return new RefundResponse(
                 refund.getId(),
                 refund.getOrder().getId(),
                 refund.getReason(),
-                refund.getDetails()
+                refund.getDetails(),
+                refund.getRefundShippingFee(),
+                refund.getCreatedAt()
         );
     }
 }
