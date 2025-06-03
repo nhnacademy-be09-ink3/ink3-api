@@ -110,7 +110,7 @@ public class PaymentService {
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(orderId);
         for(OrderPoint orderPoint : orderPoints) {
-            pointService.cancelPoint(orderId, orderPoint.getPointHistory().getId());
+            pointService.cancelPoint(userId, orderPoint.getPointHistory().getId());
         }
     }
 
