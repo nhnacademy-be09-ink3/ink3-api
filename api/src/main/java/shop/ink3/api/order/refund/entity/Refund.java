@@ -45,7 +45,7 @@ public class Refund {
     private Integer RefundShippingFee;
 
     @Column(nullable = false)
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     public void update(RefundUpdateRequest request) {
         this.details = request.getDetails();

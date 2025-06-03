@@ -30,8 +30,5 @@ logging:
   level:
     org.hibernate.SQL: debug
 minio:
-  host: http://storage.java21.net:8000
-  access-key: 92WSlaAWFvHNsjE0UG5q
-  secret-key: Z9upwvEWa0pkp5nSPncGgZak0Wrdusu4sGsJlNtF
-  review-bucket: ink3-reviews-images
-  book-bucket: ink3-books-images
+  review-bucket: ink3-dev-reviews-images
+  book-bucket: ink3-dev-books-images
