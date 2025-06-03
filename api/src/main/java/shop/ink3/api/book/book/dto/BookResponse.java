@@ -53,7 +53,45 @@ public record BookResponse(
                 book.getStatus(),
                 book.isPackable(),
                 book.getThumbnailUrl(),
-                book.getBookCategories().stream().map(bc -> CategoryResponse.from(bc.getCategory())).toList(),
+                book.getBookCategories()
+                        .stream()
+                        .map(bc -> CategoryResponse.from(bc.getCategory()))
+                        .toList(),
+                book.getBookAuthors()
+                        .stream()
+                        .map(ba -> new AuthorDto(
+                                ba.getAuthor().getId(),
+                                ba.getAuthor().getName(),  // Author 엔티티에 name 필드가 있다고 가정
+                                ba.getRole()
+                        ))
+                        .toList(),
+                book.getBookTags()
+                        .stream()
+                        .map(bt -> TagResponse.from(bt.getTag()))
+                        .toList()
+        );
+    }
+
+    public static BookResponse from(Book book, List<CategoryResponse> categories) {
+        int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
+        int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
+
+        return new BookResponse(
+                book.getId(),
+                book.getIsbn(),
+                book.getTitle(),
+                book.getContents(),
+                book.getDescription(),
+                book.getPublisher() != null ? book.getPublisher().getName() : null,
+                book.getPublishedAt(),
+                originalPrice,
+                salePrice,
+                book.getDiscountRate(),
+                book.getQuantity() != null ? book.getQuantity() : 0,
+                book.getStatus(),
+                book.isPackable(),
+                book.getThumbnailUrl(),
+                categories,
                 book.getBookAuthors()
                         .stream()
                         .map(ba -> new AuthorDto(

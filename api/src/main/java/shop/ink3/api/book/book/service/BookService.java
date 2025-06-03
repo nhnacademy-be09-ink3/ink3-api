@@ -32,6 +32,8 @@ import shop.ink3.api.book.book.exception.InvalidCategoryDepthException;
 import shop.ink3.api.book.book.exception.InvalidCategorySelectionException;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
@@ -58,6 +60,20 @@ public class BookService {
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         return BookResponse.from(book);
+    }
+
+    @Transactional(readOnly = true)
+    public BookResponse getBookWithCategory(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        List<Category> categories = new ArrayList<>();
+        List<Category> list = book.getBookCategories()
+                .stream()
+                .map(BookCategory::getCategory)
+                .toList();
+        for(Category category:list) {
+            categories.addAll(categoryRepository.findAllAncestors(category.getId()));
+        }
+        return BookResponse.from(book, categories.stream().map(CategoryResponse::from).toList());
     }
 
     // 전체 조회
