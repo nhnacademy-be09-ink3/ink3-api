@@ -1,11 +1,9 @@
 package shop.ink3.api.payment.service;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.order.order.dto.OrderResponse;
@@ -15,6 +13,8 @@ import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.orderBook.service.OrderBookService;
+import shop.ink3.api.order.orderPoint.service.OrderPointService;
+import shop.ink3.api.order.orderPoint.entity.OrderPoint;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
 import shop.ink3.api.payment.entity.Payment;
@@ -26,6 +26,9 @@ import shop.ink3.api.payment.paymentUtil.processor.PaymentProcessor;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentProcessorResolver;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentResponseParserResolver;
 import shop.ink3.api.payment.repository.PaymentRepository;
+import shop.ink3.api.user.point.eventListener.PointHistoryAfterPaymentEven;
+import shop.ink3.api.user.point.service.PointService;
+import shop.ink3.api.user.user.dto.UserPointRequest;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +38,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private final OrderBookService orderBookService;
+    private final OrderPointService orderPointService;
+    private final PaymentService paymentService;
+    private final PointService pointService;
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
     private final ApplicationEventPublisher eventPublisher;
@@ -46,26 +52,32 @@ public class PaymentService {
         return paymentProcessor.processPayment(confirmRequest);
     }
 
-    //TODO : 포인트 사용 및 적용 내역 추가
     // 생성 (결제 성공)
     @Transactional
-    public PaymentResponse createPayment(long userId, PaymentConfirmRequest confirmRequest, String paymentApproveResponse) {
+    public PaymentResponse createPayment(PaymentConfirmRequest confirmRequest, String paymentApproveResponse) {
+        // 특정 주문에 대한 payment가 존재하는지 확인.
+        if (paymentRepository.findByOrderId(confirmRequest.orderId()).isPresent()) {
+            throw new PaymentAlreadyExistsException(confirmRequest.orderId());
+        }
+
         PaymentParser paymentParser = paymentResponseParserResolver.getPaymentParser(
                 String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), "PARSER"));
         Payment payment = paymentParser.paymentResponseParser(confirmRequest, paymentApproveResponse);
+
         payment.updateDiscountAndPoint(confirmRequest.usedPointAmount(), confirmRequest.discountAmount());
-
-        // 결제 상태 변경
         orderService.updateOrderStatus(confirmRequest.orderId(), new OrderStatusUpdateRequest(OrderStatus.CONFIRMED));
+        Payment savePayment = paymentRepository.save(payment);
 
-        // 특정 주문에 대한 payment가 존재하는지 확인.
-        paymentRepository.findByOrderId(confirmRequest.orderId())
-                .orElseThrow(() -> new PaymentAlreadyExistsException(confirmRequest.orderId()));
-
-        return PaymentResponse.from(paymentRepository.save(payment));
+        // 비동기 이벤트 핸들러 ( 포인트 사용 내역 및 적립 내역 추가 )
+        eventPublisher.publishEvent(new PointHistoryAfterPaymentEven(
+                confirmRequest.userId(),
+                confirmRequest.orderId(),
+                confirmRequest.amount(),
+                confirmRequest.usedPointAmount())
+        );
+        return PaymentResponse.from(savePayment);
     }
 
-    //TODO : 금액 환불 및 포인트 내역 추가
     //TODO : 사용된 쿠폰 재발급
     // 결제 실패
     @Transactional
@@ -76,8 +88,6 @@ public class PaymentService {
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.FAILED));
     }
 
-
-    //TODO : 금액 환불 및 포인트 내역 추가
     //TODO : 사용된 쿠폰 재발급
     // 결제 취소
     @Transactional
@@ -88,10 +98,20 @@ public class PaymentService {
             throw new PaymentCancelNotAllowedException();
         }
 
+        // 금액 환불
+        PaymentResponse payment = paymentService.getPayment(orderId);
+        pointService.earnPoint(userId, new UserPointRequest(payment.paymentAmount(), "결제 취소로 인한 환불금액"));
+
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
         // 주문 상태 변경
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.CANCELLED));
+
+        // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
+        List<OrderPoint> orderPoints = orderPointService.getOrderPoints(orderId);
+        for(OrderPoint orderPoint : orderPoints) {
+            pointService.cancelPoint(orderId, orderPoint.getPointHistory().getId());
+        }
     }
 
     // 조회

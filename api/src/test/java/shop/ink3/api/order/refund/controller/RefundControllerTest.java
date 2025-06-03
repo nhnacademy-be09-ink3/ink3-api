@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -129,7 +130,7 @@ class RefundControllerTest {
     void createRefund_성공() throws Exception {
         // given
         Order order = Order.builder().id(1L).build();
-        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세",3000, LocalDateTime.now());
         Refund refund = Refund.builder()
                 .order(order)
                 .reason(request.getReason())
@@ -155,7 +156,7 @@ class RefundControllerTest {
     @DisplayName("반품 생성 - 실패")
     void createRefund_실패() throws Exception {
         // given
-        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세", 3000, LocalDateTime.now());
         doThrow(new RefundNotFoundException(1L)).when(orderMainService).createRefund(any());
 
         // when, then

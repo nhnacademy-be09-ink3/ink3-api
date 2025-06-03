@@ -1,6 +1,7 @@
 package shop.ink3.api.order.refund.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,8 @@ public class RefundService {
                 .order(order)
                 .details(request.getDetails())
                 .reason(request.getReason())
+                .RefundShippingFee(request.getRefundShippingFee())
+                .createdAt(LocalDateTime.now())
                 .build();
         return RefundResponse.from(refundRepository.save(refund));
     }
