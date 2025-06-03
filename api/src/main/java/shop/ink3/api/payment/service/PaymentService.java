@@ -39,7 +39,6 @@ public class PaymentService {
     private final OrderService orderService;
     private final OrderBookService orderBookService;
     private final OrderPointService orderPointService;
-    private final PaymentService paymentService;
     private final PointService pointService;
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
@@ -99,8 +98,9 @@ public class PaymentService {
         }
 
         // 금액 환불
-        PaymentResponse payment = paymentService.getPayment(orderId);
-        pointService.earnPoint(userId, new UserPointRequest(payment.paymentAmount(), "결제 취소로 인한 환불금액"));
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(()-> new PaymentNotFoundException(orderId));
+        pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), "결제 취소로 인한 환불금액"));
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
