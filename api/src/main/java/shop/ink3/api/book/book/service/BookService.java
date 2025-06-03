@@ -3,6 +3,7 @@ package shop.ink3.api.book.book.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -290,7 +291,8 @@ public class BookService {
     }
 
     private double getAverageRating(Long bookId) {
-        return reviewRepository.findAverageRatingByBookId(bookId);
+        return reviewRepository.findAverageRatingByBookId(bookId)
+            .orElse(0.0);
     }
     // 카테고리는 최소 2단계
 
