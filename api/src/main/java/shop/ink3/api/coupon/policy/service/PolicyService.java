@@ -35,12 +35,6 @@ public class PolicyService {
         return PolicyResponse.from(Objects.requireNonNull(policy),"쿠폰 정책 조회 완료");
     }
 
-    public PolicyResponse getPolicyByName(String policyName) {
-        CouponPolicy policy = policyRepository.findByName(policyName)
-                .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
-        return PolicyResponse.from(Objects.requireNonNull(policy),"쿠폰 정책 조회 완료");
-    }
-
     @Transactional
     public PolicyResponse createPolicy(PolicyCreateRequest req) {
         // 중복 체크
@@ -56,7 +50,7 @@ public class PolicyService {
                 .discountValue(req.discountValue())
                 .discountPercentage(req.discountPercentage()) // ← 빠졌던 부분
                 .maximumDiscountAmount(req.maximumDiscountAmount())
-                .createdAt(req.createdAt())
+                .createdAt(LocalDateTime.now())
                 .build();
 
 
@@ -89,13 +83,5 @@ public class PolicyService {
                 .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
         policyRepository.delete(Objects.requireNonNull(policy));
         return PolicyResponse.from(policy,"쿠폰 정책이 삭제되었습니다.");
-    }
-
-    @Transactional
-    public PolicyResponse deletePolicyByName(String policyName) {
-        CouponPolicy policy = policyRepository.findByName(policyName)
-                .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
-        policyRepository.delete(Objects.requireNonNull(policy));
-        return PolicyResponse.from(policy, "쿠폰 정책이 삭제되었습니다.");
     }
 }

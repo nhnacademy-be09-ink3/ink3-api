@@ -30,7 +30,7 @@ public class CouponStoreController {
     private final CategoryCouponRepository categoryCouponRepository;
 
     // 쿠폰 발급 (store 생성)
-    @PostMapping("/users/{userId}/coupon-stores")
+    @PostMapping("/users/coupon-stores")
     public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(@RequestBody CouponIssueRequest request) {
         CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));

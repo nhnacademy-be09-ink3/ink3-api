@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
@@ -12,6 +13,8 @@ import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
@@ -21,6 +24,8 @@ import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
 import shop.ink3.api.coupon.store.exception.DuplicateCouponException;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
+import shop.ink3.api.user.user.entity.User;
+import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
 @Transactional
@@ -37,21 +42,31 @@ public class CouponStoreService {
     private final BookRepository bookRepository;
 
     /** 1) 쿠폰 발급 */
-    public CouponStore issueCoupon(CouponIssueRequest request) {
+    @Transactional // write 트랜잭션
+    public CouponStore issueCoupon(CouponIssueRequest req) {
+        // 1) 회원/쿠폰 존재 검증
+        User user = userRepository.findById(req.userId())
+                .orElseThrow(() -> new UserNotFoundException(req.userId()));
+        Coupon policy = couponRepository.findById(req.couponId())
+                .orElseThrow(() -> new CouponNotFoundException("Coupon not found"));
 
-        if (request.originId() == null) {
-            boolean isIssued = userCouponRepository.existsByUserIdAndOriginType(request.userId(), request.originType());
-            if (isIssued) {
-                throw new DuplicateCouponException("이미 발급된 쿠폰입니다.");
+        // 2) 중복 발급 검사 (originId 유·무 상관없이)
+        if (req.originId() == null) {
+            if (couponStoreRepository.existsByUserIdAndOriginType(user.getId(), req.originType())) {
+                throw new DuplicateCouponException("Duplicate coupon found");
+            }
+        } else {
+            if (couponStoreRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginId(
+                    user.getId(), policy.getId(), req.originType(), req.originId())) {
+                throw new DuplicateCouponException("Duplicate coupon found");
             }
         }
 
-
         CouponStore couponStore = CouponStore.builder()
-                .user(userRepository.getReferenceById(request.userId()))
-                .coupon(couponRepository.getReferenceById(request.couponId()))
-                .originType(request.originType())
-                .originId(request.originId())
+                .user(userRepository.getReferenceById(req.userId()))
+                .coupon(couponRepository.getReferenceById(req.couponId()))
+                .originType(req.originType())
+                .originId(req.originId())
                 .status(CouponStatus.READY)
                 .usedAt(null)
                 .issuedAt(LocalDateTime.now())
@@ -81,21 +96,24 @@ public class CouponStoreService {
     }
 
     /** 5) 사용 여부 업데이트 */
+    @Transactional
     public CouponStore updateStore(Long storeId, CouponStoreUpdateRequest req) {
-        CouponStore store = userCouponRepository.findById(storeId)
-                .orElseThrow(() -> new CouponStoreNotFoundException(storeId + " coupon not found"));
-        store.setStatus(req.couponStatus());
-        store.setUsedAt(req.usedAt());
-
-        return store;
+        CouponStore store = couponStoreRepository.findById(storeId)
+                .orElseThrow(() -> new CouponStoreNotFoundException(
+                        String.format("CouponStore not found: %d", storeId)));
+        store.update(req.couponStatus(), req.usedAt());
+        return store; // 트랜잭션 커밋 시점에 자동으로 반영
     }
 
     /** 6) 삭제 */
+    @Transactional
     public void deleteStore(Long id) {
-        if (!userCouponRepository.existsById(id)) {
-            throw new CouponStoreNotFoundException(id + " coupon not found");
+        try {
+            couponStoreRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new CouponStoreNotFoundException(
+                    String.format("CouponStore not found: %d", id));
         }
-        userCouponRepository.deleteById(id);
     }
 
     /** 7) 상품에 적용가능한 쿠폰 조회 */

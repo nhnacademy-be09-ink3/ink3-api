@@ -78,6 +78,7 @@ public class UserController {
     ) {
         Map<String, Boolean> result = new HashMap<>();
         if (Objects.nonNull(loginId)) {
+
             result.put("loginIdAvailable", userService.isLoginIdAvailable(loginId));
         }
         if (Objects.nonNull(email)) {

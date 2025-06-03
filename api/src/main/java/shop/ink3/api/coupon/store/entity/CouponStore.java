@@ -28,7 +28,6 @@ import shop.ink3.api.user.user.entity.User;
 @AllArgsConstructor
 @Builder
 @Getter
-@Setter
 @Table(name = "coupon_stores")
 public class CouponStore {
     @Id
@@ -60,4 +59,9 @@ public class CouponStore {
 
     @Column(nullable = false)
     private LocalDateTime issuedAt;
+
+    public void update(CouponStatus newStatus, LocalDateTime newUsedAt) {
+        this.status = newStatus;
+        this.usedAt = newUsedAt;
+    }
 }

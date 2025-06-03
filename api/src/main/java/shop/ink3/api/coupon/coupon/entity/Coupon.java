@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
@@ -37,7 +39,7 @@ public class Coupon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_policy_id")
     private CouponPolicy couponPolicy;
 
@@ -46,6 +48,7 @@ public class Coupon {
 
     private LocalDateTime issuableFrom;
 
+    @Setter
     private LocalDateTime expiresAt;
 
     private LocalDateTime createdAt;
@@ -70,6 +73,41 @@ public class Coupon {
         for(Category category : categoryList) {
             CategoryCoupon categoryCoupon = new CategoryCoupon(this, category);
             this.categoryCoupons.add(categoryCoupon);
+        }
+    }
+
+    public void update(
+            CouponPolicy newPolicy,
+            String newName,
+            LocalDateTime newIssuableFrom,
+            LocalDateTime newExpiresAt,
+            LocalDateTime newCreatedAt,
+            List<Book> newBookList,
+            List<Category> newCategoryList
+    ) {
+        // 1) 정책과 기본 필드
+        this.couponPolicy = newPolicy;
+        this.name = newName;
+        this.issuableFrom = newIssuableFrom;
+        this.expiresAt = newExpiresAt;
+        this.createdAt = newCreatedAt;
+
+        // 2) BookCoupon 관계 리셋
+        this.bookCoupons.clear();
+        if (!newBookList.isEmpty()) {
+            for (Book book : newBookList) {
+                BookCoupon bc = new BookCoupon(this, book);
+                this.bookCoupons.add(bc);
+            }
+        }
+
+        // 3) CategoryCoupon 관계 리셋
+        this.categoryCoupons.clear();
+        if (!newCategoryList.isEmpty()) {
+            for (Category category : newCategoryList) {
+                CategoryCoupon cc = new CategoryCoupon(this, category);
+                this.categoryCoupons.add(cc);
+            }
         }
     }
 }

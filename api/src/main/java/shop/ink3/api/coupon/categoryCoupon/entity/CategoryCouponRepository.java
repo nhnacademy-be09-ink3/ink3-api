@@ -10,6 +10,6 @@ public interface CategoryCouponRepository extends JpaRepository<CategoryCoupon, 
     @Query("select cc.id from CategoryCoupon cc where cc.category.id = :categoryId")
     List<Long> findIdsByCategoryId(@Param("categoryId") Long categoryId);
 
-    CategoryCoupon getByCouponIdAndCategoryId(Long couponId, Long categoryId);
+    List<CategoryCoupon> findAllByCategoryId(Long categoryId);
 }
 

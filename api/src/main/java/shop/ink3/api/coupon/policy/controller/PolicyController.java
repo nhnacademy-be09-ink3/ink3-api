@@ -31,12 +31,6 @@ public class PolicyController {
         return ResponseEntity.ok(CommonResponse.success(policyService.getPolicyById(policyId)));
     }
 
-    // 정책 이름으로 조회
-    @GetMapping("/by-name/{name}")
-    public ResponseEntity<CommonResponse<PolicyResponse>> getPolicyByName(@PathVariable String name) {
-        return ResponseEntity.ok(CommonResponse.success(policyService.getPolicyByName(name)));
-    }
-
     // 정책 생성
     @PostMapping
     public ResponseEntity<CommonResponse<PolicyResponse>> createPolicy(@Valid @RequestBody PolicyCreateRequest request) {
@@ -56,12 +50,6 @@ public class PolicyController {
     @DeleteMapping("/{policyId}")
     public ResponseEntity<CommonResponse<PolicyResponse>> deletePolicyById(@PathVariable long policyId) {
         return ResponseEntity.ok(CommonResponse.success(policyService.deletePolicyById(policyId)));
-    }
-
-    // 정책 이름으로 삭제
-    @DeleteMapping("/by-name/{name}")
-    public ResponseEntity<CommonResponse<PolicyResponse>> deletePolicyByName(@PathVariable String name) {
-        return ResponseEntity.ok(CommonResponse.success(policyService.deletePolicyByName(name)));
     }
 }
 

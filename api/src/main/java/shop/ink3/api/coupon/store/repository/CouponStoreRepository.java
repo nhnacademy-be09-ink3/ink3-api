@@ -25,9 +25,10 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
 
     boolean existsByUserIdAndOriginType(Long userId, OriginType originType);
 
+    boolean existsByUserIdAndCouponIdAndOriginTypeAndOriginId(Long userId, Long couponId, OriginType originType, Long originId);
+
     List<CouponStore> findByUserIdAndOriginTypeAndOriginIdInAndStatus(Long user_id, OriginType originType, List<Long> originIds, CouponStatus status);
 
     List<CouponStore> findByUserIdAndOriginTypeAndStatus(Long userId, OriginType originType, CouponStatus status);
 
-    CouponStore getByOriginIdAndOriginType(Long originId, OriginType originType);
 }

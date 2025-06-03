@@ -12,6 +12,6 @@ public interface BookCouponRepository extends JpaRepository<BookCoupon, Long> {
     @Query("select bc.id from BookCoupon bc where bc.book.id = :bookId")
     List<Long> findIdsByBookId(@Param("bookId") Long bookId);
 
-    BookCoupon getByCouponIdAndBookId(Long couponId, Long bookId);
+    List<BookCoupon> findAllByBookId(Long bookId);
 }
 
