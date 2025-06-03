@@ -2,6 +2,7 @@ package shop.ink3.api.user.point.service;
 
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import shop.ink3.api.user.user.exception.InsufficientPointException;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -70,11 +72,11 @@ public class PointService {
         pointHistoryRepository.delete(pointHistory);
     }
 
-    public void earnPoint(long userId, UserPointRequest request) {
+    public PointHistory earnPoint(long userId, UserPointRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.earnPoint(request.amount());
         userRepository.save(user);
-        pointHistoryRepository.save(
+        return pointHistoryRepository.save(
                 PointHistory.builder()
                         .user(user)
                         .delta(request.amount())
@@ -85,14 +87,15 @@ public class PointService {
         );
     }
 
-    public void usePoint(long userId, UserPointRequest request) {
+    public PointHistory usePoint(long userId, UserPointRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        log.info("usePoint={},  used amount= {}",user.getPoint(), request.amount());
         if (user.getPoint() < request.amount()) {
             throw new InsufficientPointException();
         }
         user.usePoint(request.amount());
         userRepository.save(user);
-        pointHistoryRepository.save(
+        return pointHistoryRepository.save(
                 PointHistory.builder()
                         .user(user)
                         .delta(-request.amount())
@@ -122,6 +125,7 @@ public class PointService {
         pointHistoryRepository.save(PointHistory.builder()
                 .user(user)
                 .delta(-pointHistory.getDelta())
+                .origin(pointHistory)
                 .status(PointHistoryStatus.CANCEL)
                 .description(pointHistory.getDescription() + " 취소")
                 .createdAt(LocalDateTime.now())
