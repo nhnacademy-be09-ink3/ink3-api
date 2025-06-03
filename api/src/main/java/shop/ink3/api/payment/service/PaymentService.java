@@ -46,7 +46,7 @@ public class PaymentService {
         return paymentProcessor.processPayment(confirmRequest);
     }
 
-    //TODO : 포인트 내역 추가
+    //TODO : 포인트 사용 및 적용 내역 추가
     // 생성 (결제 성공)
     @Transactional
     public PaymentResponse createPayment(long userId, PaymentConfirmRequest confirmRequest, String paymentApproveResponse) {
