@@ -15,7 +15,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     //TODO 유지보수를 위해 querydsl 방식으로 수정 해야할거 같음
     @Query(
             value = """
-        SELECT 
+        SELECT\s
             o.id AS id,
             o.order_uuid AS orderUUID,
             o.status AS status,
@@ -40,7 +40,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         JOIN books b ON ob.book_id = b.id
         WHERE o.user_id = :userId
         ORDER BY o.ordered_at DESC
-        """,
+       \s""",
             countQuery = "SELECT COUNT(*) FROM orders o WHERE o.user_id = :userId",
             nativeQuery = true
     )

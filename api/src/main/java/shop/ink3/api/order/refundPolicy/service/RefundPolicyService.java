@@ -30,6 +30,7 @@ public class RefundPolicyService {
                 .defectReturnDeadLine(request.getDefectReturnDeadLine())
                 .isAvailable(false)
                 .createdAt(LocalDateTime.now())
+                .refundShippingFee(request.getRefundShippingFee())
                 .build();
 
         return RefundPolicyResponse.from(refundPolicyRepository.save(refundPolicy));
