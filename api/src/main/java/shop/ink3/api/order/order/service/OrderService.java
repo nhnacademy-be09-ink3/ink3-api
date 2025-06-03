@@ -41,7 +41,7 @@ public class OrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .status(OrderStatus.CONFIRMED)
+                .status(OrderStatus.CREATED)
                 .orderedAt(LocalDateTime.now())
                 .ordererName(request.getOrdererName())
                 .ordererPhone(request.getOrdererPhone())

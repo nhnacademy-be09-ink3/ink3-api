@@ -34,6 +34,15 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderMainService orderMainService;
 
+    // 주문 생성
+    @PostMapping
+    public ResponseEntity<CommonResponse<OrderResponse>> createOrder(
+            @RequestBody OrderFormCreateRequest orderFormCreateRequest) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(CommonResponse.create(orderMainService.createOrderForm(orderFormCreateRequest)));
+    }
+
     // 특정 주문 조회
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<OrderResponse>> getOrder(
@@ -92,15 +101,6 @@ public class OrderController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         orderService.getOrderListByStatus(statusRequest, pageable)));
-    }
-
-    // 주문 생성
-    @PostMapping
-    public ResponseEntity<CommonResponse<OrderResponse>> createOrder(
-            @RequestBody OrderFormCreateRequest orderFormCreateRequest) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(CommonResponse.create(orderMainService.createOrderForm(orderFormCreateRequest)));
     }
 
     // 주문 수정
