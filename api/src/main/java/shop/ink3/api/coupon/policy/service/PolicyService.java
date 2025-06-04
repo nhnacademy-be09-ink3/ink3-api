@@ -2,11 +2,12 @@ package shop.ink3.api.coupon.policy.service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
@@ -20,11 +21,9 @@ import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 public class PolicyService {
     private final PolicyRepository policyRepository;
 
-    public List<PolicyResponse> getPolicy() {
-        List<CouponPolicy> policies = policyRepository.findAll();
-        return policies.stream()
-                .map(policy -> PolicyResponse.from(policy))
-                .collect(Collectors.toList());
+    public PageResponse<PolicyResponse> getPolicy(Pageable pageable) {
+        Page<CouponPolicy> policies = policyRepository.findAll(pageable);
+        return PageResponse.from(policies.map(PolicyResponse::from));
     }
 
     public PolicyResponse getPolicyById(long policyId) {
