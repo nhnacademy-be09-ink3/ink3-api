@@ -29,10 +29,6 @@ management:
 logging:
   level:
     org.hibernate.SQL: debug
-
-aladin:
-  ttb-key: ${TTB_KEY}
-
 minio:
   review-bucket: ink3-dev-reviews-images
   book-bucket: ink3-dev-books-images
