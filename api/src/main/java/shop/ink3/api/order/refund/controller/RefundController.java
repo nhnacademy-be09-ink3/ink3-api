@@ -59,10 +59,10 @@ public class RefundController {
                 .body(CommonResponse.create(orderMainService.createRefund(request)));
     }
 
-    @PostMapping("/{orderId}")
+    @PostMapping("/{orderId}/users/{userId}")
     public ResponseEntity<Void> approveRefund(
             @PathVariable long orderId,
-            @RequestHeader("X-User-Id") long userId) {
+            @PathVariable long userId) {
         orderMainService.approveRefund(userId, orderId);
         return ResponseEntity.ok().build();
     }

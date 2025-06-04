@@ -30,6 +30,7 @@ import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
 import shop.ink3.api.order.refund.entity.Refund;
 import shop.ink3.api.order.refund.exception.RefundNotFoundException;
 import shop.ink3.api.order.refund.repository.RefundRepository;
+import shop.ink3.api.user.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 class RefundServiceTest {
@@ -47,7 +48,8 @@ class RefundServiceTest {
     @DisplayName("반품 조회 - 성공")
     void getRefund_성공() {
         // given
-        Order order = Order.builder().id(1L).build();
+        User user = User.builder().id(1L).build();
+        Order order = Order.builder().id(1L).user(user).build();
         RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세",3000, LocalDateTime.now(), true);
         Refund refund = Refund.builder()
                 .id(1L)
@@ -80,8 +82,10 @@ class RefundServiceTest {
     @DisplayName("사용자의 반품 리스트 조회 - 성공")
     void getUserRefundList_성공() {
         // given
-        Order order1 = Order.builder().id(1L).build();
-        Order order2 = Order.builder().id(2L).build();
+        User user1 = User.builder().id(1L).build();
+        Order order1 = Order.builder().id(1L).user(user1).build();
+        User user2 = User.builder().id(1L).build();
+        Order order2 = Order.builder().id(1L).user(user2).build();
         List<Refund> policies = List.of(
                 Refund.builder().id(1L).order(order1).build(),
                 Refund.builder().id(2L).order(order2).build()
@@ -105,7 +109,8 @@ class RefundServiceTest {
     void createRefund_성공() {
         // given
         RefundCreateRequest request = new RefundCreateRequest(1L, "테스트 사유", "테스트 상세",3000, LocalDateTime.now(), true);
-        Order order = Order.builder().id(1L).build();
+        User user = User.builder().id(1L).build();
+        Order order = Order.builder().id(1L).user(user).build();
         Refund refund = Refund.builder()
                 .id(1L)
                 .order(order)
@@ -127,7 +132,8 @@ class RefundServiceTest {
     @DisplayName("사용자의 반품 리스트 조회 - 성공")
     void updateRefund_성공() {
         // given
-        Order order = Order.builder().id(1L).build();
+        User user = User.builder().id(1L).build();
+        Order order = Order.builder().id(1L).user(user).build();
         RefundUpdateRequest request = new RefundUpdateRequest("변경후 사유", "변경후 상세");
         Refund refund = Refund.builder()
                 .id(1L)
