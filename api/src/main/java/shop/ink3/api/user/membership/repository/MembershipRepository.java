@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import shop.ink3.api.user.membership.entity.Membership;
 
-public interface MembershipRepository extends JpaRepository<Membership, Long> {
+public interface MembershipRepository extends JpaRepository<Membership, Long>, MembershipQuerydslRepository {
     Optional<Membership> findByIsDefault(boolean isDefault);
 
     boolean existsByIsDefault(boolean isDefault);
