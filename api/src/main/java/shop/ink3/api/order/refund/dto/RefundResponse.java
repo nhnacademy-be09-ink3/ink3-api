@@ -20,6 +20,7 @@ public class RefundResponse {
     private Integer refundShippingFee;
     private LocalDateTime createdAt;
     private Boolean approved;
+    private Long userId;
 
 
     public static RefundResponse from(Refund refund) {
@@ -30,7 +31,8 @@ public class RefundResponse {
                 refund.getDetails(),
                 refund.getRefundShippingFee(),
                 refund.getCreatedAt(),
-                refund.getApproved()
+                refund.getApproved(),
+                refund.getOrder().getUser().getId()
         );
     }
 }
