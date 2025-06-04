@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,15 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.social.dto.SocialUserResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
+import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
@@ -63,11 +63,19 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getSocialUser(provider, providerUserId)));
     }
 
-    @GetMapping
+    @GetMapping(params = {"birthday", "!keyword"})
     public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
-            @RequestParam LocalDate birthday
+            @RequestParam(required = false) LocalDate birthday
     ) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUsersByBirthday(birthday)));
+    }
+
+    @GetMapping(params = {"!birthday"})
+    public ResponseEntity<CommonResponse<PageResponse<UserListItemDto>>> getUsers(
+            @RequestParam(required = false) String keyword,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUsersForManagement(keyword, pageable)));
     }
 
     @GetMapping("/check")

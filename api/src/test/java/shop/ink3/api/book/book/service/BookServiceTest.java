@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,7 +62,7 @@ class BookServiceTest {
     @DisplayName("도서 단건 조회 성공")
     void getBookSuccess() {
         when(bookRepository.findById(1L)).thenReturn(java.util.Optional.of(book));
-        when(reviewRepository.findAverageRatingByBookId(1L)).thenReturn(4.5);
+        when(reviewRepository.findAverageRatingByBookId(1L)).thenReturn(Optional.of(4.5));
 
         BookResponse result = bookService.getBook(1L);
         assertThat(result.id()).isEqualTo(1L);

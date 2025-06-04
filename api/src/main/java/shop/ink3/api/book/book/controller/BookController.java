@@ -34,7 +34,14 @@ public class BookController {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBook(bookId)));
     }
 
-     // 전체 도서 목록 조회
+
+    @GetMapping("/{bookId}/parent-categories")
+    public ResponseEntity<CommonResponse<BookResponse>> getBookByIdWithParentCategory(@PathVariable Long bookId) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.getBookWithCategory(bookId)));
+    }
+
+
+    // 전체 도서 목록 조회
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<BookResponse>>> getBooks(Pageable pageable) {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBooks(pageable)));
