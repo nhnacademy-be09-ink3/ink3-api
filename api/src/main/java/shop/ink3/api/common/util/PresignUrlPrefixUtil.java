@@ -10,7 +10,7 @@ public class PresignUrlPrefixUtil {
     private static final String PREFIX = "http://storage.java21.net:8000/";
     private static final String PROXY_PREFIX = "/image-proxy/";
 
-    public static String wrapWithProxy(String presignedUrl) {
+    public static String addPrefixUrl(String presignedUrl) {
         if (presignedUrl == null || presignedUrl.isBlank()) {
             return presignedUrl;
         }
