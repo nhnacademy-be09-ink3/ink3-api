@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
@@ -93,6 +95,11 @@ public class CouponStoreService {
         return userCouponRepository.findByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
+    public Page<CouponStore> getStoresPagingByUserId(Long userId, Pageable pageable) {
+        return couponStoreRepository.findByUserId(userId, pageable);
+    }
+
     /**
      * 3) 특정 쿠폰을 가진 유저들 조회
      */
@@ -109,6 +116,19 @@ public class CouponStoreService {
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
 
         return userCouponRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
+    }
+
+    // 미사용 쿠폰 페이징 조회
+    @Transactional(readOnly = true)
+    public Page<CouponStore> getUnusedStoresPagingByUserId(Long userId, Pageable pageable) {
+        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY, pageable);
+    }
+
+    // 사용 및 만료 쿠폰 페이징 조회
+    @Transactional(readOnly = true)
+    public Page<CouponStore> getUsedOrExpiredStoresPagingByUserId(Long userId, Pageable pageable) {
+        return couponStoreRepository.findByUserIdAndStatusIn(userId,
+            List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 
     /**
