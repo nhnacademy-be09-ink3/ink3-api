@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.entity.OriginType;
+import shop.ink3.api.user.user.entity.User;
 
 public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> {
 
