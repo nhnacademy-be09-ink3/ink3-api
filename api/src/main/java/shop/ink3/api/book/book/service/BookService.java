@@ -328,12 +328,11 @@ public class BookService {
         }
         return result;
     }
-    // 알라딘 api에서 가져온 카테고리 이름 분리 > 계층 구조 생성 (국내도서>소설/시/희곡/한국소설)
 
+    // 알라딘 api에서 가져온 카테고리 이름 분리 > 계층 구조 생성  (국내도서>소설/시/희곡/한국소설)
     public Category createCategoryHierarchy(String categoryPath) {
         String[] categoryNames = categoryPath.split(">");
         Category parent = null;
-
         for (String name : categoryNames) {
             name = name.trim();
 
