@@ -3,14 +3,18 @@ package shop.ink3.api.coupon.store.service;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
 import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.category.service.CategoryService;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
@@ -31,6 +35,7 @@ import shop.ink3.api.user.user.repository.UserRepository;
 @Transactional
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CouponStoreService {
 
     private final CouponRepository couponRepository;
@@ -40,6 +45,7 @@ public class CouponStoreService {
     private final CategoryCouponRepository categoryCouponRepository;
     private final CouponStoreRepository couponStoreRepository;
     private final BookRepository bookRepository;
+    private final CategoryService categoryService;
 
     /** 1) 쿠폰 발급 */
     @Transactional // write 트랜잭션
@@ -115,45 +121,5 @@ public class CouponStoreService {
                     String.format("CouponStore not found: %d", id));
         }
     }
-
-    /** 7) 상품에 적용가능한 쿠폰 조회 */
-    @Transactional(readOnly = true)
-    public List<CouponStore> getApplicableCouponStores(Long userId, Long bookId) {
-        // 1) book origin
-        List<Long> bookCouponIds = bookCouponRepository.findIdsByBookId(bookId);
-        List<CouponStore> bookStores = couponStoreRepository
-                .findByUserIdAndOriginTypeAndOriginIdInAndStatus(
-                        userId, OriginType.BOOK, bookCouponIds, CouponStatus.READY);
-
-        // 2) category origin — book 에서 카테고리 ID 리스트 가져오기
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
-        List<Long> categoryIds = book.getBookCategories().stream()
-                .map(bookCategory -> bookCategory.getCategory().getId())
-                .toList();
-
-        List<Long> categoryCouponIds = categoryIds.stream()
-                .flatMap(catId -> categoryCouponRepository.findIdsByCategoryId(catId).stream())
-                .toList();
-
-        List<CouponStore> categoryStores = couponStoreRepository
-                .findByUserIdAndOriginTypeAndOriginIdInAndStatus(
-                        userId, OriginType.CATEGORY, categoryCouponIds, CouponStatus.READY);
-
-        // 3) welcome
-        List<CouponStore> welcomeStores = couponStoreRepository
-                .findByUserIdAndOriginTypeAndStatus(userId, OriginType.WELCOME, CouponStatus.READY);
-
-        // 4) birthday
-        List<CouponStore> birthdayStores = couponStoreRepository
-                .findByUserIdAndOriginTypeAndStatus(userId, OriginType.BIRTHDAY, CouponStatus.READY);
-
-        // 결합 후 쿠폰 유효성 필터링
-        return Stream.of(bookStores, categoryStores, welcomeStores, birthdayStores)
-                .flatMap(List::stream)
-                .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
-                .toList();
-    }
-
 
 }

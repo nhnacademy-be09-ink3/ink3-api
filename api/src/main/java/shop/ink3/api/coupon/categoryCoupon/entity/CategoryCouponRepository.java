@@ -1,6 +1,8 @@
 package shop.ink3.api.coupon.categoryCoupon.entity;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,5 +13,6 @@ public interface CategoryCouponRepository extends JpaRepository<CategoryCoupon, 
     List<Long> findIdsByCategoryId(@Param("categoryId") Long categoryId);
 
     List<CategoryCoupon> findAllByCategoryId(Long categoryId);
+
 }
 
