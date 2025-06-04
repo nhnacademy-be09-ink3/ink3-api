@@ -1,4 +1,4 @@
-package shop.ink3.api.coupon.couponPolicy.service;
+package shop.ink3.api.coupon.policy.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -22,10 +22,9 @@ import shop.ink3.api.coupon.policy.entity.DiscountType;
 import shop.ink3.api.coupon.policy.exception.PolicyAlreadyExistException;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
-import shop.ink3.api.coupon.policy.service.PolicyService;
 
 @ExtendWith(MockitoExtension.class)
-class PolicyServiceTest {
+class CouponPolicyServiceTest {
 
     @Mock
     private PolicyRepository policyRepository;
@@ -155,7 +154,7 @@ class PolicyServiceTest {
                 .discountValue(0)
                 .discountPercentage(5)
                 .minimumOrderAmount(1000)
-                .maximumDiscountAmount(2000)
+                .maximumDiscountAmount(3000)
                 .createdAt(LocalDateTime.now())
                 .build();
 

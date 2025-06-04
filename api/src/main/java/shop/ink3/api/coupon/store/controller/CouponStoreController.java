@@ -5,18 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.ink3.api.common.dto.CommonResponse;
-import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
-import shop.ink3.api.coupon.coupon.dto.CouponResponse;
-import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateResponse;
 import shop.ink3.api.coupon.store.entity.CouponStore;
-import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
 
 import java.util.List;
@@ -30,7 +26,7 @@ public class CouponStoreController {
     private final CategoryCouponRepository categoryCouponRepository;
 
     // 쿠폰 발급 (store 생성)
-    @PostMapping("/users/{userId}/coupon-stores")
+    @PostMapping("/users/coupon-stores")
     public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(@RequestBody CouponIssueRequest request) {
         CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
@@ -84,47 +80,13 @@ public class CouponStoreController {
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
-    // 상품에 적용가능한 쿠폰 조회
-    @GetMapping("/users/{userId}/applicable-coupons")
-    public ResponseEntity<List<CouponResponse>> getApplicableCoupons(
+    @GetMapping("/applicable-coupons")
+    public ResponseEntity<List<CouponStoreDto>> getApplicableCoupons(
             @RequestParam Long userId,
-            @RequestParam Long bookId,
-            @RequestParam Long categoryId
+            @RequestParam Long bookId
     ) {
-        List<CouponStore> stores = couponStoreService.getApplicableCouponStores(userId, bookId, categoryId);
-
-        List<CouponResponse> responses = stores.stream()
-                .map(store -> {
-                    Coupon coupon = store.getCoupon();
-                    OriginType originType = store.getOriginType();
-                    Long originId = store.getOriginId();
-
-                    List<CouponResponse.BookInfo> books = List.of();
-                    List<CouponResponse.CategoryInfo> categories = List.of();
-
-                    if (originType == OriginType.BOOK && originId != null) {
-                        BookCoupon bc = bookCouponRepository.getReferenceById(originId);
-                        books = List.of(new CouponResponse.BookInfo(
-                                originId,
-                                bc.getBook().getId(),
-                                bc.getBook().getTitle()
-                        ));
-                    }
-
-                    if (originType == OriginType.CATEGORY && originId != null) {
-                        CategoryCoupon cc = categoryCouponRepository.getReferenceById(originId);
-                        categories = List.of(new CouponResponse.CategoryInfo(
-                                originId,
-                                cc.getCategory().getId(),
-                                cc.getCategory().getName()
-                        ));
-                    }
-
-                    return CouponResponse.from(coupon, books, categories);
-                })
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        List<CouponStoreDto> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
+        return ResponseEntity.ok(stores);
     }
 
 

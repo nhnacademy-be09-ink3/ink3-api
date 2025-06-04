@@ -5,8 +5,11 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Configuration;
 
 /*
@@ -33,14 +36,22 @@ public class RabbitConfig {
     */
     @Bean
     public Queue welcomeQueue() {
-        return new Queue("coupon.welcome", true);
+        return QueueBuilder.durable("coupon.welcome")
+                .withArgument("x-dead-letter-exchange", "dlx.exchange")
+                .withArgument("x-dead-letter-routing-key", "dlx.coupon.welcome")
+                .build();
+    }
+
+    @Bean
+    public Queue welcomeQueueDead() {
+        return new Queue("coupon.welcome.dead", true);
     }
 
     @Bean
     public Queue birthdayQueue() {
         return QueueBuilder.durable("coupon.birthday")
                 .withArgument("x-dead-letter-exchange", "dlx.exchange")
-                .withArgument("x-dead-letter-routing-key","dlx.coupon")
+                .withArgument("x-dead-letter-routing-key","dlx.coupon.birthday")
                 .build();
     }
 
@@ -70,7 +81,12 @@ public class RabbitConfig {
 
     @Bean
     public Binding bindWelcomeQueue() {
-        return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.issue.welcome");
+        return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.welcome");
+    }
+
+    @Bean
+    public Binding bindWelcomeDLQ() {
+        return BindingBuilder.bind(welcomeQueueDead()).to(dlxExchange()).with("dlx.coupon.welcome");
     }
 
     @Bean
@@ -80,14 +96,36 @@ public class RabbitConfig {
 
     @Bean
     public Binding bindBirthdayDLQ() {
-        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon");
+        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon.birthday");
     }
     /*
      message를 자동으로 Json <-> java객체로 직렬화/역직렬화 해주는 변환기
      RebbitTemplate 및 @RabbitListener에서 DTO객체를 바로 주고받을 수 있게 해줌
     */
+
+    // 1) POJO용 Jackson 컨버터
     @Bean
-    public Jackson2JsonMessageConverter jsonMessageConverter() {
+    public SimpleRabbitListenerContainerFactory pojoListenerContainerFactory(
+            ConnectionFactory cf,
+            Jackson2JsonMessageConverter jacksonConverter
+    ) {
+        SimpleRabbitListenerContainerFactory f = new SimpleRabbitListenerContainerFactory();
+        f.setConnectionFactory(cf);
+        f.setMessageConverter(jacksonConverter);
+        return f;
+    }
+    // 2) String(raw)용 컨테이너 팩토리
+    @Bean
+    public SimpleRabbitListenerContainerFactory stringListenerContainerFactory(
+            ConnectionFactory cf
+    ) {
+        SimpleRabbitListenerContainerFactory f = new SimpleRabbitListenerContainerFactory();
+        f.setConnectionFactory(cf);
+        return f;
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jacksonConverter() {
         return new Jackson2JsonMessageConverter();
     }
 }

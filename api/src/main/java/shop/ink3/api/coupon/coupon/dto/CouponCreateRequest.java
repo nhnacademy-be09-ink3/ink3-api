@@ -10,7 +10,7 @@ public record CouponCreateRequest(
         @NotBlank String name,
         @NotNull LocalDateTime issuableFrom,
         @NotNull LocalDateTime expiresAt,
-
+        @NotNull LocalDateTime createdAt,
         List<Long> bookIdList,
         List<Long> categoryIdList
 ) { }
