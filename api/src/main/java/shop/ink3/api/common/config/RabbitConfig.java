@@ -27,77 +27,77 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-    public static final String EXCHANGE_NAME = "coupon.exchange";
-
-    /*
-     coupon을 담을 queue 생성
-     durable = true : 서버를 재시작해도 큐가 (영구적으로) 지속됨
-     message는 이 큐에 쌓이고, 이후 @RabbitListener에서 소비됨.
-    */
-    @Bean
-    public Queue welcomeQueue() {
-        return QueueBuilder.durable("coupon.welcome")
-                .withArgument("x-dead-letter-exchange", "dlx.exchange")
-                .withArgument("x-dead-letter-routing-key", "dlx.coupon.welcome")
-                .build();
-    }
-
-    @Bean
-    public Queue welcomeQueueDead() {
-        return new Queue("coupon.welcome.dead", true);
-    }
-
-    @Bean
-    public Queue birthdayQueue() {
-        return QueueBuilder.durable("coupon.birthday")
-                .withArgument("x-dead-letter-exchange", "dlx.exchange")
-                .withArgument("x-dead-letter-routing-key","dlx.coupon.birthday")
-                .build();
-    }
-
-    @Bean
-    public Queue birthdayQueueDead(){ return new Queue("coupon.birthday.dead", true); }
-
-    /*
-     message를 어디로 보낼지 라우팅해주는 교환기 생성
-     Topic 타입은 "coupon.* -> coupon.routing, coupon.created : 모두 수신 가능
-                 "coupon.welcome : 특정 type에서 수신
-    */
-    @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE_NAME);
-    }
-
-    @Bean
-    public TopicExchange dlxExchange() {
-        return new TopicExchange("dlx.exchange");
-    }
-
-    /*
-     특정 Routing key를 통해 message를 Exchange -> Queue로 연결
-     즉, "coupon.routing" 키를 가진 message가 오면 coupon.queue로 전달
-     이걸 해줘야 message가 queue로 들어가게 됨
-    */
-
-    @Bean
-    public Binding bindWelcomeQueue() {
-        return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.welcome");
-    }
-
-    @Bean
-    public Binding bindWelcomeDLQ() {
-        return BindingBuilder.bind(welcomeQueueDead()).to(dlxExchange()).with("dlx.coupon.welcome");
-    }
-
-    @Bean
-    public Binding bindBirthdayQueue() {
-        return BindingBuilder.bind(birthdayQueue()).to(exchange()).with("coupon.birthday");
-    }
-
-    @Bean
-    public Binding bindBirthdayDLQ() {
-        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon.birthday");
-    }
+//    public static final String EXCHANGE_NAME = "coupon.exchange";
+//
+//    /*
+//     coupon을 담을 queue 생성
+//     durable = true : 서버를 재시작해도 큐가 (영구적으로) 지속됨
+//     message는 이 큐에 쌓이고, 이후 @RabbitListener에서 소비됨.
+//    */
+//    @Bean
+//    public Queue welcomeQueue() {
+//        return QueueBuilder.durable("coupon.welcome")
+//                .withArgument("x-dead-letter-exchange", "dlx.exchange")
+//                .withArgument("x-dead-letter-routing-key", "dlx.coupon.welcome")
+//                .build();
+//    }
+//
+//    @Bean
+//    public Queue welcomeQueueDead() {
+//        return new Queue("coupon.welcome.dead", true);
+//    }
+//
+//    @Bean
+//    public Queue birthdayQueue() {
+//        return QueueBuilder.durable("coupon.birthday")
+//                .withArgument("x-dead-letter-exchange", "dlx.exchange")
+//                .withArgument("x-dead-letter-routing-key","dlx.coupon.birthday")
+//                .build();
+//    }
+//
+//    @Bean
+//    public Queue birthdayQueueDead(){ return new Queue("coupon.birthday.dead", true); }
+//
+//    /*
+//     message를 어디로 보낼지 라우팅해주는 교환기 생성
+//     Topic 타입은 "coupon.* -> coupon.routing, coupon.created : 모두 수신 가능
+//                 "coupon.welcome : 특정 type에서 수신
+//    */
+//    @Bean
+//    public TopicExchange exchange() {
+//        return new TopicExchange(EXCHANGE_NAME);
+//    }
+//
+//    @Bean
+//    public TopicExchange dlxExchange() {
+//        return new TopicExchange("dlx.exchange");
+//    }
+//
+//    /*
+//     특정 Routing key를 통해 message를 Exchange -> Queue로 연결
+//     즉, "coupon.routing" 키를 가진 message가 오면 coupon.queue로 전달
+//     이걸 해줘야 message가 queue로 들어가게 됨
+//    */
+//
+//    @Bean
+//    public Binding bindWelcomeQueue() {
+//        return BindingBuilder.bind(welcomeQueue()).to(exchange()).with("coupon.welcome");
+//    }
+//
+//    @Bean
+//    public Binding bindWelcomeDLQ() {
+//        return BindingBuilder.bind(welcomeQueueDead()).to(dlxExchange()).with("dlx.coupon.welcome");
+//    }
+//
+//    @Bean
+//    public Binding bindBirthdayQueue() {
+//        return BindingBuilder.bind(birthdayQueue()).to(exchange()).with("coupon.birthday");
+//    }
+//
+//    @Bean
+//    public Binding bindBirthdayDLQ() {
+//        return BindingBuilder.bind(birthdayQueueDead()).to(dlxExchange()).with("dlx.coupon.birthday");
+//    }
     /*
      message를 자동으로 Json <-> java객체로 직렬화/역직렬화 해주는 변환기
      RebbitTemplate 및 @RabbitListener에서 DTO객체를 바로 주고받을 수 있게 해줌
