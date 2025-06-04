@@ -2,6 +2,7 @@ package shop.ink3.api.coupon.store.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -12,15 +13,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
-import shop.ink3.api.book.bookCategory.entity.BookCategory;
 import shop.ink3.api.book.category.entity.Category;
-import shop.ink3.api.book.category.service.CategoryService;
+import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
+import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
+import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponService;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
@@ -42,12 +44,14 @@ public class CouponStoreService {
     private final UserRepository userRepository;
     private final CouponStoreRepository userCouponRepository;
     private final BookCouponRepository bookCouponRepository;
-    private final CategoryCouponRepository categoryCouponRepository;
+    private final CategoryCouponService categoryCouponService;
     private final CouponStoreRepository couponStoreRepository;
     private final BookRepository bookRepository;
-    private final CategoryService categoryService;
+    private final CategoryRepository categoryRepository;
 
-    /** 1) 쿠폰 발급 */
+    /**
+     * 1) 쿠폰 발급
+     */
     @Transactional // write 트랜잭션
     public CouponStore issueCoupon(CouponIssueRequest req) {
         // 1) 회원/쿠폰 존재 검증
@@ -81,27 +85,35 @@ public class CouponStoreService {
         return couponStore;
     }
 
-    /** 2) 유저의 모든 쿠폰 조회 */
+    /**
+     * 2) 유저의 모든 쿠폰 조회
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByUserId(Long userId) {
         return userCouponRepository.findByUserId(userId);
     }
 
-    /** 3) 특정 쿠폰을 가진 유저들 조회 */
+    /**
+     * 3) 특정 쿠폰을 가진 유저들 조회
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByCouponId(Long couponId) {
         // 이 메서드가 없다면 UserCouponRepository에 추가해야 함
         return userCouponRepository.findByCouponId(couponId);
     }
 
-    /** 4) 미사용 쿠폰만 조회 */
+    /**
+     * 4) 미사용 쿠폰만 조회
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
 
         return userCouponRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
     }
 
-    /** 5) 사용 여부 업데이트 */
+    /**
+     * 5) 사용 여부 업데이트
+     */
     @Transactional
     public CouponStore updateStore(Long storeId, CouponStoreUpdateRequest req) {
         CouponStore store = couponStoreRepository.findById(storeId)
@@ -111,7 +123,9 @@ public class CouponStoreService {
         return store; // 트랜잭션 커밋 시점에 자동으로 반영
     }
 
-    /** 6) 삭제 */
+    /**
+     * 6) 삭제
+     */
     @Transactional
     public void deleteStore(Long id) {
         try {
@@ -122,4 +136,70 @@ public class CouponStoreService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<CouponStoreDto> getApplicableCouponStores(Long userId, Long bookId) {
+        // 1) BOOK 기반 쿠폰
+        List<Long> bookCouponIds = bookCouponRepository.findIdsByBookId(bookId);
+        List<CouponStore> bookStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.BOOK, bookCouponIds, CouponStatus.READY);
+
+        // 2) CATEGORY 기반 쿠폰
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
+
+        // 직접 매핑된 카테고리 ID들
+        List<Long> directCategoryIds = book.getBookCategories().stream()
+                .map(bc -> bc.getCategory().getId())
+                .toList();
+
+        // 조상 카테고리 포함해서 ID 수집
+        Set<Long> allCategoryIds = new HashSet<>(directCategoryIds);
+        for (Long catId : directCategoryIds) {
+            List<Category> ancestors = categoryRepository.findAllAncestors(catId);
+            for (Category parent : ancestors) {
+                allCategoryIds.add(parent.getId());
+            }
+        }
+
+        // CategoryCoupon 엔티티를 fetch join 으로 가져오고 → ID만 뽑아 내기
+        List<Long> categoryCouponIds = categoryCouponService
+                .getCategoryCouponsWithFetch(allCategoryIds)
+                .stream()
+                .map(cc -> cc.getId())
+                .toList();
+
+        List<CouponStore> categoryStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.CATEGORY, categoryCouponIds, CouponStatus.READY);
+
+        // 3) WELCOME 쿠폰 (coupon만 미리 fetch해서 가져옴)
+        List<CouponStore> welcomeStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.WELCOME, CouponStatus.READY);
+
+        // 4) BIRTHDAY 쿠폰
+        List<CouponStore> birthdayStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.BIRTHDAY, CouponStatus.READY);
+
+        // 5) 결합 후 기한 필터링, → 엔티티를 DTO로 매핑
+        return Stream.of(bookStores, categoryStores, welcomeStores, birthdayStores)
+                .flatMap(List::stream)
+                .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
+                .map(this::toDto)
+                .toList();
+    }
+
+    private CouponStoreDto toDto(CouponStore cs) {
+        return new CouponStoreDto(
+                cs.getId(),
+                cs.getCoupon().getId(),
+                cs.getCoupon().getName(),
+                cs.getCoupon().getExpiresAt(),
+                cs.getOriginType(),
+                cs.getOriginId(),
+                cs.getStatus()
+        );
+    }
 }

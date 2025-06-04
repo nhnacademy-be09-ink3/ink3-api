@@ -31,4 +31,33 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
 
     List<CouponStore> findByUserIdAndOriginTypeAndStatus(Long userId, OriginType originType, CouponStatus status);
 
+    @Query("""
+        SELECT cs
+        FROM CouponStore cs
+        JOIN FETCH cs.coupon c
+        WHERE cs.user.id = :userId
+          AND cs.originType = :originType
+          AND cs.originId IN :originIds
+          AND cs.status = :status
+    """)
+    List<CouponStore> findWithCouponByUserAndOriginAndStatus(
+            @Param("userId") Long userId,
+            @Param("originType") OriginType originType,
+            @Param("originIds") Collection<Long> originIds,
+            @Param("status") CouponStatus status
+    );
+
+    @Query("""
+        SELECT cs
+        FROM CouponStore cs
+        JOIN FETCH cs.coupon c
+        WHERE cs.user.id = :userId
+          AND cs.originType = :originType
+          AND cs.status = :status
+    """)
+    List<CouponStore> findWithCouponByUserAndOriginAndStatus(
+            @Param("userId") Long userId,
+            @Param("originType") OriginType originType,
+            @Param("status") CouponStatus status
+    );
 }

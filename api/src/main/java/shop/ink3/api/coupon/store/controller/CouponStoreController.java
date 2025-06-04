@@ -1,5 +1,7 @@
 package shop.ink3.api.coupon.store.controller;
 
+import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateResponse;
@@ -84,46 +87,13 @@ public class CouponStoreController {
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
-    // 상품에 적용가능한 쿠폰 조회
     @GetMapping("/applicable-coupons")
-    public ResponseEntity<List<CouponResponse>> getApplicableCoupons(
+    public ResponseEntity<List<CouponStoreDto>> getApplicableCoupons(
             @RequestParam Long userId,
             @RequestParam Long bookId
     ) {
-        List<CouponStore> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
-
-        List<CouponResponse> responses = stores.stream()
-                .map(store -> {
-                    Coupon coupon = store.getCoupon();
-                    OriginType originType = store.getOriginType();
-                    Long originId = store.getOriginId();
-
-                    List<CouponResponse.BookInfo> books = List.of();
-                    List<CouponResponse.CategoryInfo> categories = List.of();
-
-                    if (originType == OriginType.BOOK && originId != null) {
-                        BookCoupon bc = bookCouponRepository.getReferenceById(originId);
-                        books = List.of(new CouponResponse.BookInfo(
-                                originId,
-                                bc.getBook().getId(),
-                                bc.getBook().getTitle()
-                        ));
-                    }
-
-                    if (originType == OriginType.CATEGORY && originId != null) {
-                        CategoryCoupon cc = categoryCouponRepository.getReferenceById(originId);
-                        categories = List.of(new CouponResponse.CategoryInfo(
-                                originId,
-                                cc.getCategory().getId(),
-                                cc.getCategory().getName()
-                        ));
-                    }
-
-                    return CouponResponse.from(coupon, books, categories);
-                })
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        List<CouponStoreDto> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
+        return ResponseEntity.ok(stores);
     }
 
 
