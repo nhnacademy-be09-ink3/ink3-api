@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.coupon.rabbitMq.message.WelcomeCouponMessage;
+import shop.ink3.api.coupon.rabbitMq.produce.WelcomeCouponProducer;
 import shop.ink3.api.user.social.dto.SocialUserResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
@@ -39,6 +41,7 @@ import shop.ink3.api.user.user.service.UserService;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final WelcomeCouponProducer welcomeCouponProducer;
 
     @GetMapping("/{userId}")
     public ResponseEntity<CommonResponse<UserResponse>> getUser(@PathVariable long userId) {
@@ -106,9 +109,12 @@ public class UserController {
     public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(
             @RequestBody @Valid SocialUserCreateRequest request
     ) {
-        
+        UserResponse user = userService.createSocialUser(request);
+        long userId = user.id();
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userId);
+        welcomeCouponProducer.send(message);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CommonResponse.create(userService.createSocialUser(request)));
+                .body(CommonResponse.create(user));
     }
 
     @PutMapping("/{userId}")
