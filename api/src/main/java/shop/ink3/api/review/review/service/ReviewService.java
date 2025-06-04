@@ -169,7 +169,7 @@ public class ReviewService {
             List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
                 .map(url -> {
                     String presignedUrl = minioUploader.getPresignedUrl(url, bucket);
-                    return new ReviewImageResponse(PresignUrlPrefixUtil.wrapWithProxy(presignedUrl));
+                    return new ReviewImageResponse(PresignUrlPrefixUtil.addPrefixUrl(presignedUrl));
                 })
                 .toList();
 
