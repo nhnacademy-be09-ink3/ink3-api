@@ -30,18 +30,22 @@ public class PaymentController {
 
     // 결제 승인 API 호출 및 결과 저장
     @PostMapping("/confirm")
-    public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(@RequestBody PaymentConfirmRequest confirmRequest){
-        log.info("payType={}",confirmRequest.paymentType());
-        Payment payment = paymentService.callPaymentAPI(confirmRequest);
-        PaymentResponse paymentResponse = paymentService.createPayment(payment);
+    public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(
+            @RequestBody PaymentConfirmRequest confirmRequest
+    ) {
+        log.info("payType={}", confirmRequest.paymentType());
+        String paymentApproveResponse = paymentService.callPaymentAPI(confirmRequest);
+        PaymentResponse paymentResponse = paymentService.createPayment(confirmRequest.userId(), confirmRequest, paymentApproveResponse);
         return ResponseEntity.ok(CommonResponse.success(paymentResponse));
     }
 
-    // 결제 결과 조회
-    @GetMapping("/{orderId}")
-    public ResponseEntity<CommonResponse<PaymentResponse>> getPayment(@PathVariable long orderId){
-        return ResponseEntity
-                .ok(CommonResponse.success(paymentService.getPayment(orderId)));
+    // 결제 실패 처리
+    @PostMapping("/{orderId}/fail")
+    public ResponseEntity<CommonResponse<Void>> failPayment(
+            @PathVariable long orderId,
+            @RequestHeader("X-User-Id") long userId) {
+        paymentService.failPayment(orderId, userId);
+        return ResponseEntity.noContent().build();
     }
 
     // 결제 취소
@@ -49,8 +53,15 @@ public class PaymentController {
     public ResponseEntity<CommonResponse<Void>> cancelPayment(
             @PathVariable long orderId,
             @RequestHeader("X-User-Id") long userId){
-        paymentService.cancelPayment(orderId, userId);
+        paymentService.cancelPayment(orderId, userId);  
         return ResponseEntity.noContent().build();
+    }
+
+    // 결제 결과 조회
+    @GetMapping("/{orderId}")
+    public ResponseEntity<CommonResponse<PaymentResponse>> getPayment(@PathVariable long orderId){
+        return ResponseEntity
+                .ok(CommonResponse.success(paymentService.getPayment(orderId)));
     }
 
     // 결제 내역 삭제

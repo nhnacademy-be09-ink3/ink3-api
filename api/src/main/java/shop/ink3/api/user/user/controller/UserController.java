@@ -1,5 +1,6 @@
 package shop.ink3.api.user.user.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
-import shop.ink3.api.coupon.rabbitMq.message.WelcomeCouponMessage;
-import shop.ink3.api.coupon.rabbitMq.produce.WelcomeCouponProducer;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
@@ -39,7 +38,6 @@ import shop.ink3.api.user.user.service.UserService;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private final WelcomeCouponProducer welcomeCouponProducer;
 
     @GetMapping("/{userId}")
     public ResponseEntity<CommonResponse<UserResponse>> getUser(@PathVariable long userId) {
@@ -51,17 +49,17 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserDetail(userId)));
     }
 
-    @GetMapping("/auth/{loginId}")
+    @GetMapping("/{loginId}/auth")
     public ResponseEntity<CommonResponse<UserAuthResponse>> getUserAuth(@PathVariable String loginId) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserAuth(loginId)));
     }
 
-    @GetMapping("/auth/social/{provider}/{providerUserId}")
-    public ResponseEntity<CommonResponse<UserAuthResponse>> getSocialUserAuth(
+    @GetMapping("/social/{provider}/{providerUserId}")
+    public ResponseEntity<CommonResponse<SocialUserResponse>> getSocialUser(
             @PathVariable String provider,
             @PathVariable String providerUserId
     ) {
-        return ResponseEntity.ok(CommonResponse.success(userService.getSocialUserAuth(provider, providerUserId)));
+        return ResponseEntity.ok(CommonResponse.success(userService.getSocialUser(provider, providerUserId)));
     }
 
     @GetMapping
@@ -78,7 +76,6 @@ public class UserController {
     ) {
         Map<String, Boolean> result = new HashMap<>();
         if (Objects.nonNull(loginId)) {
-
             result.put("loginIdAvailable", userService.isLoginIdAvailable(loginId));
         }
         if (Objects.nonNull(email)) {
@@ -89,20 +86,15 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody @Valid UserCreateRequest request) {
-        UserResponse userResponse = userService.createUser(request);
-        WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
-        welcomeCouponProducer.send(message);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userResponse));
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
     }
 
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(
             @RequestBody @Valid SocialUserCreateRequest request
     ) {
-        UserResponse userResponse = userService.createSocialUser(request);
-        WelcomeCouponMessage message = new WelcomeCouponMessage(userResponse.id());
-        welcomeCouponProducer.send(message);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userResponse));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CommonResponse.create(userService.createSocialUser(request)));
     }
 
     @PutMapping("/{userId}")

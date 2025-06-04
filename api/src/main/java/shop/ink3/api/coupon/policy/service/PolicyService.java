@@ -2,12 +2,12 @@ package shop.ink3.api.coupon.policy.service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
@@ -21,16 +21,24 @@ import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 public class PolicyService {
     private final PolicyRepository policyRepository;
 
-    public PageResponse<PolicyResponse> getPolicy(Pageable pageable) {
-        Page<CouponPolicy> policies = policyRepository.findAll(pageable);
-        return PageResponse.from(policies.map(PolicyResponse::from));
+    public List<PolicyResponse> getPolicy() {
+        List<CouponPolicy> policies = policyRepository.findAll();
+        return policies.stream()
+                .map(policy -> PolicyResponse.from(policy, "정책 조회 성공"))
+                .collect(Collectors.toList());
     }
 
     public PolicyResponse getPolicyById(long policyId) {
         CouponPolicy policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
 
-        return PolicyResponse.from(Objects.requireNonNull(policy));
+        return PolicyResponse.from(Objects.requireNonNull(policy),"쿠폰 정책 조회 완료");
+    }
+
+    public PolicyResponse getPolicyByName(String policyName) {
+        CouponPolicy policy = policyRepository.findByName(policyName)
+                .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
+        return PolicyResponse.from(Objects.requireNonNull(policy),"쿠폰 정책 조회 완료");
     }
 
     @Transactional
@@ -48,12 +56,12 @@ public class PolicyService {
                 .discountValue(req.discountValue())
                 .discountPercentage(req.discountPercentage()) // ← 빠졌던 부분
                 .maximumDiscountAmount(req.maximumDiscountAmount())
-                .createdAt(LocalDateTime.now())
+                .createdAt(req.createdAt())
                 .build();
 
 
         CouponPolicy saved = policyRepository.save(policy);
-        return PolicyResponse.from(saved);
+        return PolicyResponse.from(saved, "쿠폰 정책 생성 완료");
     }
 
 
@@ -72,12 +80,20 @@ public class PolicyService {
                 request.maximumDiscountAmount()
         );
         CouponPolicy saved = policyRepository.save(policy);
-        return PolicyResponse.from(policy);
+        return PolicyResponse.from(policy, "쿠폰 정책이 수정되었습니다.");
     }
 
     @Transactional
     public PolicyResponse deletePolicyById(long policyId) {
         CouponPolicy policy = policyRepository.findById(policyId)
+                .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
+        policyRepository.delete(Objects.requireNonNull(policy));
+        return PolicyResponse.from(policy);
+    }
+
+    @Transactional
+    public PolicyResponse deletePolicyByName(String policyName) {
+        CouponPolicy policy = policyRepository.findByName(policyName)
                 .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
         policyRepository.delete(Objects.requireNonNull(policy));
         return PolicyResponse.from(policy);

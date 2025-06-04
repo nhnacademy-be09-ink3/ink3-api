@@ -15,23 +15,29 @@ public record PolicyResponse(
         @NotBlank
         String policyName,
 
+        @NotBlank
+        int minimumOrderAmount,
+
         @NotNull
         DiscountType discountType,
 
-        int discountValue,
+        Integer discountValue,
 
-        int discountPercentage,
+        Integer discountPercentage,
+
+        Integer maximumDiscountAmount,
 
         LocalDateTime createdAt
-
 ) {
     public static PolicyResponse from (CouponPolicy policy) {
         return new PolicyResponse(
                 policy.getId(),
                 policy.getName(),
+                policy.getMinimumOrderAmount(),
                 policy.getDiscountType(),
                 policy.getDiscountValue(),
                 policy.getDiscountPercentage(),
+                policy.getMaximumDiscountAmount(),
                 policy.getCreatedAt()
         );
     }

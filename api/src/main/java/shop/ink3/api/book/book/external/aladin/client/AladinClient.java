@@ -1,4 +1,4 @@
-package shop.ink3.api.book.book.external.aladin;
+package shop.ink3.api.book.book.external.aladin.client;
 
 import org.springframework.data.domain.Pageable;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;

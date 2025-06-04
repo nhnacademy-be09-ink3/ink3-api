@@ -136,7 +136,7 @@ class UserControllerTest {
         User user = User.builder().id(1L).loginId("test").password("test").status(UserStatus.ACTIVE).build();
         UserAuthResponse response = UserAuthResponse.from(user);
         when(userService.getUserAuth("test")).thenReturn(response);
-        mockMvc.perform(get("/users/auth/test"))
+        mockMvc.perform(get("/users/test/auth"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -149,7 +149,7 @@ class UserControllerTest {
     @Test
     void getUserAuthWithNotFound() throws Exception {
         when(userService.getUserAuth("test")).thenThrow(new UserAuthNotFoundException("test"));
-        mockMvc.perform(get("/users/auth/test"))
+        mockMvc.perform(get("/users/test/auth"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
