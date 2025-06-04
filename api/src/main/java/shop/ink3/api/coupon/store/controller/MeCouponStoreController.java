@@ -2,6 +2,10 @@ package shop.ink3.api.coupon.store.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,21 +47,33 @@ public class MeCouponStoreController {
 
     // ✅ 유저의 전체 쿠폰 조회 → /users/{userId}/stores
     @GetMapping("/users/coupon-stores")
-    public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByUserId(@RequestHeader(name = "X-User-Id") Long userId) {
-        List<CouponStore> stores = couponStoreService.getStoresByUserId(userId);
-        List<CouponStoreResponse> responses = stores.stream()
-                .map(CouponStoreResponse::fromEntity)
-                .toList();
+    public ResponseEntity<CommonResponse<Page<CouponStoreResponse>>> getStoresByUserId(
+        @RequestHeader(name = "X-User-Id") Long userId,
+        @PageableDefault(sort = "issuedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<CouponStore> stores = couponStoreService.getStoresPagingByUserId(userId, pageable);
+        Page<CouponStoreResponse> responses = stores.map(CouponStoreResponse::fromEntity);
+
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
     // ✅ 유저의 미사용 쿠폰만 조회 → /users/{userId}/stores/unused
-    @GetMapping("/users/{userId}/coupon-stores/status-unused")
-    public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getUnusedStores(@PathVariable Long userId) {
-        List<CouponStore> stores = couponStoreService.getUnusedStoresByUserId(userId);
-        List<CouponStoreResponse> responses = stores.stream()
-                .map(CouponStoreResponse::fromEntity)
-                .toList();
+    @GetMapping("/users/coupon-stores/status-unused")
+    public ResponseEntity<CommonResponse<Page<CouponStoreResponse>>> getUnusedStores(
+        @RequestHeader(name = "X-User-Id") Long userId,
+        @PageableDefault(sort = "usedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<CouponStore> stores = couponStoreService.getUnusedStoresPagingByUserId(userId, pageable);
+        Page<CouponStoreResponse> responses = stores.map(CouponStoreResponse::fromEntity);
+
+        return ResponseEntity.ok(CommonResponse.success(responses));
+    }
+
+    @GetMapping("/users/coupon-stores/status-used")
+    public ResponseEntity<CommonResponse<Page<CouponStoreResponse>>> getUsedExpiredStores(
+        @RequestHeader(name = "X-User-Id") Long userId,
+        @PageableDefault(sort = "usedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<CouponStore> stores = couponStoreService.getUsedOrExpiredStoresPagingByUserId(userId, pageable);
+        Page<CouponStoreResponse> responses = stores.map(CouponStoreResponse::fromEntity);
+
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
@@ -66,18 +82,18 @@ public class MeCouponStoreController {
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByCouponId(@PathVariable Long couponId) {
         List<CouponStore> stores = couponStoreService.getStoresByCouponId(couponId);
         List<CouponStoreResponse> responses = stores.stream()
-                .map(CouponStoreResponse::fromEntity)
-                .toList();
+            .map(CouponStoreResponse::fromEntity)
+            .toList();
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
     // ✅ 쿠폰 사용 여부 업데이트
     @PutMapping("/coupon-stores/{storeId}")
     public ResponseEntity<CommonResponse<CouponStoreUpdateResponse>> updateStore(
-            @PathVariable Long storeId,
-            @RequestBody CouponStoreUpdateRequest request) {
+        @PathVariable Long storeId,
+        @RequestBody CouponStoreUpdateRequest request) {
         CouponStoreUpdateResponse response = CouponStoreUpdateResponse.of(
-                couponStoreService.updateStore(storeId, request)
+            couponStoreService.updateStore(storeId, request)
         );
         return ResponseEntity.ok(CommonResponse.update(response));
     }
@@ -91,13 +107,12 @@ public class MeCouponStoreController {
 
     @GetMapping("/applicable-coupons")
     public ResponseEntity<List<CouponStoreDto>> getApplicableCoupons(
-            @RequestParam Long userId,
-            @RequestParam Long bookId
+        @RequestParam Long userId,
+        @RequestParam Long bookId
     ) {
         List<CouponStoreDto> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
         return ResponseEntity.ok(stores);
     }
-
 
 }
 
