@@ -18,6 +18,7 @@ import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.membership.dto.MembershipCreateRequest;
 import shop.ink3.api.user.membership.dto.MembershipResponse;
+import shop.ink3.api.user.membership.dto.MembershipStatisticsResponse;
 import shop.ink3.api.user.membership.dto.MembershipUpdateRequest;
 import shop.ink3.api.user.membership.service.MembershipService;
 
@@ -35,6 +36,11 @@ public class MembershipController {
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<MembershipResponse>>> getMemberships(Pageable pageable) {
         return ResponseEntity.ok(CommonResponse.success(membershipService.getMemberships(pageable)));
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<CommonResponse<MembershipStatisticsResponse>> getMembershipStatistics() {
+        return ResponseEntity.ok(CommonResponse.success(membershipService.getMembershipStatistics()));
     }
 
     @GetMapping("/default")
