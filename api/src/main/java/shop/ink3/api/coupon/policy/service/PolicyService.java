@@ -83,11 +83,4 @@ public class PolicyService {
         return PolicyResponse.from(policy);
     }
 
-    @Transactional
-    public PolicyResponse deletePolicyByName(String policyName) {
-        CouponPolicy policy = policyRepository.findByName(policyName)
-                .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
-        policyRepository.delete(Objects.requireNonNull(policy));
-        return PolicyResponse.from(policy);
-    }
 }
