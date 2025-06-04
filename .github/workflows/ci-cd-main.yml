@@ -169,6 +169,9 @@ jobs:
           -DTTB_KEY=$TTB_KEY \
           -DTOSS_PAYMENT_CLIENT_KEY=$TOSS_PAYMENT_CLIENT_KEY \
           -DTOSS_PAYMENT_SECRET_KEY=$TOSS_PAYMENT_SECRET_KEY \
+          -DMINIO_HOST=$MINIO_HOST \
+          -DMINIO_ACCESS_KEY=$MINIO_ACCESS_KEY \
+          -DMINIO_SECRET_KEY=$MINIO_SECRET_KEY \
           -B
 
       - name: Print app log if health check fails
