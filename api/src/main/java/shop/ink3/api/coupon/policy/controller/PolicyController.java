@@ -1,16 +1,17 @@
 package shop.ink3.api.coupon.policy.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyUpdateRequest;
 import shop.ink3.api.coupon.policy.service.PolicyService;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/policies")
@@ -21,8 +22,8 @@ public class PolicyController {
 
     // 정책 전체 조회
     @GetMapping
-    public ResponseEntity<CommonResponse<List<PolicyResponse>>> getAll() {
-        return ResponseEntity.ok(CommonResponse.success(policyService.getPolicy()));
+    public ResponseEntity<CommonResponse<PageResponse<PolicyResponse>>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(policyService.getPolicy(pageable)));
     }
 
     // 정책 ID로 조회

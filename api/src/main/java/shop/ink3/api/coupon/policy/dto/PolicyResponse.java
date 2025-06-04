@@ -22,20 +22,17 @@ public record PolicyResponse(
 
         int discountPercentage,
 
-        LocalDateTime createdAt,
+        LocalDateTime createdAt
 
-        @NotBlank
-        String message
 ) {
-    public static PolicyResponse from (CouponPolicy policy, String message) {
+    public static PolicyResponse from (CouponPolicy policy) {
         return new PolicyResponse(
                 policy.getId(),
                 policy.getName(),
                 policy.getDiscountType(),
                 policy.getDiscountValue(),
                 policy.getDiscountPercentage(),
-                policy.getCreatedAt(),
-                message
+                policy.getCreatedAt()
         );
     }
 }
