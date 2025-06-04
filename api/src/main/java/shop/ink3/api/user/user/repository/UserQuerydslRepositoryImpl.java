@@ -6,6 +6,7 @@ import static shop.ink3.api.user.user.entity.QUser.user;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.util.StringUtils;
 import shop.ink3.api.user.user.dto.UserListItemDto;
+import shop.ink3.api.user.user.dto.UserStatisticsResponse;
 import shop.ink3.api.user.user.entity.User;
+import shop.ink3.api.user.user.entity.UserStatus;
 
 public class UserQuerydslRepositoryImpl extends QuerydslRepositorySupport implements UserQuerydslRepository {
     public UserQuerydslRepositoryImpl() {
@@ -60,5 +63,17 @@ public class UserQuerydslRepositoryImpl extends QuerydslRepositorySupport implem
         total = total == null ? 0L : total;
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public UserStatisticsResponse getUserStatistics() {
+        return from(user)
+                .select(Projections.constructor(
+                        UserStatisticsResponse.class,
+                        user.count(),
+                        new CaseBuilder().when(user.status.eq(UserStatus.ACTIVE)).then(1L).otherwise(0L).sumLong(),
+                        new CaseBuilder().when(user.status.eq(UserStatus.DORMANT)).then(1L).otherwise(0L).sumLong(),
+                        new CaseBuilder().when(user.status.eq(UserStatus.WITHDRAWN)).then(1L).otherwise(0L).sumLong()
+                )).fetchOne();
     }
 }
