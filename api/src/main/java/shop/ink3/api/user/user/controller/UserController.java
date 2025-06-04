@@ -95,13 +95,18 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody @Valid UserCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
+        UserResponse user = userService.createUser(request);
+        long userId = user.id();
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userId);
+        welcomeCouponProducer.send(message);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(user));
     }
 
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(
             @RequestBody @Valid SocialUserCreateRequest request
     ) {
+        
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CommonResponse.create(userService.createSocialUser(request)));
     }
