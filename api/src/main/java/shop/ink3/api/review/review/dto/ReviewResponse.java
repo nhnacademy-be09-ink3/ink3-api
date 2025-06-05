@@ -8,6 +8,7 @@ import shop.ink3.api.review.review.entity.Review;
 public record ReviewResponse(
     Long id,
     Long userId,
+    Long bookId,
     Long orderBookId,
     String title,
     String content,
@@ -20,6 +21,7 @@ public record ReviewResponse(
         return new ReviewResponse(
             review.getId(),
             review.getUser().getId(),
+            review.getOrderBook().getBook().getId(),
             review.getOrderBook().getId(),
             review.getTitle(),
             review.getContent(),
