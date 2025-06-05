@@ -13,7 +13,6 @@ import org.springframework.data.repository.query.Param;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.entity.OriginType;
-import shop.ink3.api.user.user.entity.User;
 
 public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> {
 
@@ -24,7 +23,7 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
     @EntityGraph(attributePaths = {"user", "coupon"})
     Page<CouponStore> findByUserId(Long userId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"coupon", "user"})
+    @EntityGraph(attributePaths = {"coupon"})
     List<CouponStore> findByCouponId(Long couponId);
 
     @EntityGraph(attributePaths = {"coupon", "user"})
