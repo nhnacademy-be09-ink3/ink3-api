@@ -13,23 +13,19 @@ import shop.ink3.api.user.user.entity.User;
 
 public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> {
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByUserId(Long userId);
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByCouponId(Long couponId);
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByUserIdAndStatus(Long userId, CouponStatus status);
 
 
     boolean existsByUserIdAndOriginType(Long userId, OriginType originType);
 
     boolean existsByUserIdAndCouponIdAndOriginTypeAndOriginId(Long userId, Long couponId, OriginType originType, Long originId);
-
-    List<CouponStore> findByUserIdAndOriginTypeAndOriginIdInAndStatus(Long user_id, OriginType originType, List<Long> originIds, CouponStatus status);
-
-    List<CouponStore> findByUserIdAndOriginTypeAndStatus(Long userId, OriginType originType, CouponStatus status);
 
     @Query("""
         SELECT cs

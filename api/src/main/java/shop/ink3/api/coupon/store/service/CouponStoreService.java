@@ -34,7 +34,6 @@ import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
-@Transactional
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -42,7 +41,6 @@ public class CouponStoreService {
 
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
-    private final CouponStoreRepository userCouponRepository;
     private final BookCouponRepository bookCouponRepository;
     private final CategoryCouponService categoryCouponService;
     private final CouponStoreRepository couponStoreRepository;
@@ -90,7 +88,7 @@ public class CouponStoreService {
      */
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByUserId(Long userId) {
-        return userCouponRepository.findByUserId(userId);
+        return couponStoreRepository.findByUserId(userId);
     }
 
     /**
@@ -99,7 +97,7 @@ public class CouponStoreService {
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByCouponId(Long couponId) {
         // 이 메서드가 없다면 UserCouponRepository에 추가해야 함
-        return userCouponRepository.findByCouponId(couponId);
+        return couponStoreRepository.findByCouponId(couponId);
     }
 
     /**
@@ -108,7 +106,7 @@ public class CouponStoreService {
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
 
-        return userCouponRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
+        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
     }
 
     /**

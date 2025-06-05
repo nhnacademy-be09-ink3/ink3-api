@@ -7,9 +7,9 @@ import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.context.annotation.Bean;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Configuration;
 
 /*
@@ -39,6 +39,7 @@ public class RabbitConfig {
         return QueueBuilder.durable("coupon.welcome")
                 .withArgument("x-dead-letter-exchange", "dlx.exchange")
                 .withArgument("x-dead-letter-routing-key", "dlx.coupon.welcome")
+                .withArgument("x-queue-type", "classic")
                 .build();
     }
 
@@ -51,12 +52,15 @@ public class RabbitConfig {
     public Queue birthdayQueue() {
         return QueueBuilder.durable("coupon.birthday")
                 .withArgument("x-dead-letter-exchange", "dlx.exchange")
-                .withArgument("x-dead-letter-routing-key","dlx.coupon.birthday")
+                .withArgument("x-dead-letter-routing-key", "dlx.coupon.birthday")
+                .withArgument("x-queue-type", "classic")
                 .build();
     }
 
     @Bean
-    public Queue birthdayQueueDead(){ return new Queue("coupon.birthday.dead", true); }
+    public Queue birthdayQueueDead() {
+        return new Queue("coupon.birthday.dead", true);
+    }
 
     /*
      message를 어디로 보낼지 라우팅해주는 교환기 생성
@@ -114,6 +118,7 @@ public class RabbitConfig {
         f.setMessageConverter(jacksonConverter);
         return f;
     }
+
     // 2) String(raw)용 컨테이너 팩토리
     @Bean
     public SimpleRabbitListenerContainerFactory stringListenerContainerFactory(
@@ -128,5 +133,11 @@ public class RabbitConfig {
     public Jackson2JsonMessageConverter jacksonConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
+    }
+
 }
 
