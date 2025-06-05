@@ -9,6 +9,7 @@ import shop.ink3.api.review.reviewImage.dto.ReviewImageResponse;
 public record ReviewListResponse(
     Long id,
     Long userId,
+    Long bookId,
     Long orderBookId,
     String userName,
     String title,
@@ -26,6 +27,7 @@ public record ReviewListResponse(
         return new ReviewListResponse(
             review.getId(),
             review.getUser().getId(),
+            review.getOrderBook().getBook().getId(),
             review.getOrderBook().getId(),
             review.getUser().getName(),
             review.getTitle(),
