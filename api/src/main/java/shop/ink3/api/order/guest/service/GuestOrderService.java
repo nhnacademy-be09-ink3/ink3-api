@@ -11,8 +11,11 @@ import shop.ink3.api.order.guest.dto.GuestOrderDetailsResponse;
 import shop.ink3.api.order.guest.dto.GuestOrderResponse;
 import shop.ink3.api.order.guest.exception.GuestOrderNotFoundException;
 import shop.ink3.api.order.guest.repository.GuestOrderRepository;
+import shop.ink3.api.order.order.dto.OrderResponse;
+import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
+import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 
 @Transactional
@@ -43,5 +46,12 @@ public class GuestOrderService {
         saveOrder.assignOrderUUID(generateOrderUUID(saveOrder.getId()));
         orderRepository.save(saveOrder);
         return GuestOrderResponse.from(saveOrder);
+    }
+
+    // 주문 상태 변경
+    public GuestOrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        order.updateStatus(request.getOrderStatus());
+        return GuestOrderResponse.from(orderRepository.save(order));
     }
 }

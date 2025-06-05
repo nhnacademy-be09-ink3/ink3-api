@@ -16,6 +16,7 @@ import shop.ink3.api.payment.paymentUtil.processor.PaymentProcessor;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentProcessorResolver;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentResponseParserResolver;
 import shop.ink3.api.payment.repository.PaymentRepository;
+import shop.ink3.api.payment.service.PaymentService;
 
 @Transactional
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ import shop.ink3.api.payment.repository.PaymentRepository;
 public class GuestPaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderService orderService;
+    private final GuestOrderService guestOrderService;
     private final OrderBookService orderBookService;
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
@@ -48,8 +50,8 @@ public class GuestPaymentService {
                 String.format("%s-%s", String.valueOf(confirmRequest.paymentType()).toUpperCase(), "PARSER"));
         Payment payment = paymentParser.paymentResponseParser(confirmRequest, paymentApproveResponse);
 
-        orderService.updateOrderStatus(confirmRequest.orderId(), new OrderStatusUpdateRequest(OrderStatus.CONFIRMED));
-        return PaymentResponse.from(payment);
+        guestOrderService.updateOrderStatus(confirmRequest.orderId(), new OrderStatusUpdateRequest(OrderStatus.CONFIRMED));
+        return PaymentResponse.from(paymentRepository.save(payment));
     }
 
     // 결제 실패 (비회원)
