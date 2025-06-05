@@ -179,6 +179,7 @@ public class ReviewService {
             return new ReviewListResponse(
                 dto.id(),
                 dto.userId(),
+                dto.bookId(),
                 dto.orderBookId(),
                 dto.userName(),
                 dto.title(),

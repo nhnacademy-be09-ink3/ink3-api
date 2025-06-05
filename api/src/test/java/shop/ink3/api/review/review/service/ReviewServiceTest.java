@@ -121,7 +121,7 @@ class ReviewServiceTest {
     @Test
     @DisplayName("도서 ID로 리뷰 목록 조회")
     void getReviewsByBookId() {
-        ReviewDefaultListResponse dto = new ReviewDefaultListResponse(1L, 1L, 1L, "user1", "제목", "내용", 5, null, null);
+        ReviewDefaultListResponse dto = new ReviewDefaultListResponse(1L, 1L, 1L, 1L, "user1", "제목", "내용", 5, null, null);
         Page<ReviewDefaultListResponse> page = new PageImpl<>(List.of(dto));
 
         Review review = new Review(user, orderBook, "제목", "내용", 5);
@@ -149,7 +149,7 @@ class ReviewServiceTest {
     @DisplayName("유저의 리뷰 목록 조회")
     void getReviewsByUserId() {
         ReviewDefaultListResponse dto = new ReviewDefaultListResponse(
-            1L, 1L, 1L, "user1", "제목", "내용", 5, null, null
+            1L, 1L, 1L, 1L, "user1", "제목", "내용", 5, null, null
         );
         Page<ReviewDefaultListResponse> page = new PageImpl<>(List.of(dto));
 
