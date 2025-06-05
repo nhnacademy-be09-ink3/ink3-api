@@ -14,7 +14,7 @@ public interface GuestOrderRepository extends JpaRepository<Guest, Long> {
     Optional<Guest> findByOrderId(long orderId);
 
     @Query(value = """
-    SELECT\s
+    SELECT
         o.id AS orderId,
         o.order_uuid AS orderUUId,
         o.status AS status,
@@ -29,11 +29,16 @@ public interface GuestOrderRepository extends JpaRepository<Guest, Long> {
         s.default_address AS defaultAddress,
         s.extra_address AS extraAddress,
         s.shipping_fee AS shippingFee,
-        s.shipping_code AS shippingCode
+        s.shipping_code AS shippingCode,
+        p.payment_amount AS paymentAmount,
+        p.payment_type AS paymentType,
+        p.request_at AS requestedAt,
+        p.approved_at AS approvedAt
     FROM orders o
     JOIN shipments s ON s.order_id = o.id
+    JOIN payments p ON p.order_id = o.id
     WHERE o.id = :orderId
-   \s""",
-            nativeQuery = true)
+    """, nativeQuery = true)
     Optional<GuestOrderDetailsResponse> findByGuestOrderDetails(long orderId);
+
 }

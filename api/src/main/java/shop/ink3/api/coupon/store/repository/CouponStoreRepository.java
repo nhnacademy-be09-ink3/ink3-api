@@ -23,7 +23,7 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
     @EntityGraph(attributePaths = {"user", "coupon"})
     Page<CouponStore> findByUserId(Long userId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByCouponId(Long couponId);
 
     @EntityGraph(attributePaths = {"coupon", "user"})
@@ -31,9 +31,9 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
 
     @EntityGraph(attributePaths = {"user", "coupon"})
     Page<CouponStore> findByUserIdAndStatusIn(
-        @Param("userId") Long userId,
-        @Param("statuses") List<CouponStatus> status,
-        Pageable pageable
+            @Param("userId") Long userId,
+            @Param("statuses") List<CouponStatus> status,
+            Pageable pageable
     );
 
 
@@ -44,10 +44,10 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
     boolean existsByUserIdAndOriginType(Long userId, OriginType originType);
 
     boolean existsByUserIdAndCouponIdAndOriginTypeAndOriginId(Long userId, Long couponId, OriginType originType,
-        Long originId);
+                                                              Long originId);
 
     List<CouponStore> findByUserIdAndOriginTypeAndOriginIdInAndStatus(Long user_id, OriginType originType,
-        List<Long> originIds, CouponStatus status);
+                                                                      List<Long> originIds, CouponStatus status);
 
     List<CouponStore> findByUserIdAndOriginTypeAndStatus(Long userId, OriginType originType, CouponStatus status);
 
@@ -61,10 +61,10 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
               AND cs.status = :status
         """)
     List<CouponStore> findWithCouponByUserAndOriginAndStatus(
-        @Param("userId") Long userId,
-        @Param("originType") OriginType originType,
-        @Param("originIds") Collection<Long> originIds,
-        @Param("status") CouponStatus status
+            @Param("userId") Long userId,
+            @Param("originType") OriginType originType,
+            @Param("originIds") Collection<Long> originIds,
+            @Param("status") CouponStatus status
     );
 
     @Query("""
@@ -76,8 +76,8 @@ public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> 
               AND cs.status = :status
         """)
     List<CouponStore> findWithCouponByUserAndOriginAndStatus(
-        @Param("userId") Long userId,
-        @Param("originType") OriginType originType,
-        @Param("status") CouponStatus status
+            @Param("userId") Long userId,
+            @Param("originType") OriginType originType,
+            @Param("status") CouponStatus status
     );
 }

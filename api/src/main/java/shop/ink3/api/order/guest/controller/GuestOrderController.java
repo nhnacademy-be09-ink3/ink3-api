@@ -34,7 +34,7 @@ public class GuestOrderController {
     }
 
     // 비회원의 주문 상세 조회
-    @GetMapping("/orders/{orderId}")
+    @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<GuestOrderDetailsResponse>> getGuestDetails(
             @PathVariable long orderId) {
         GuestOrderDetailsResponse guestOrderDetails = guestOrderService.getGuestOrderDetails(orderId);
