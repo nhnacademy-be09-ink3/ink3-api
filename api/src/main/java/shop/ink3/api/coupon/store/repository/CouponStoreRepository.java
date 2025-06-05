@@ -16,17 +16,17 @@ import shop.ink3.api.coupon.store.entity.OriginType;
 
 public interface CouponStoreRepository extends JpaRepository<CouponStore, Long> {
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByUserId(Long userId);
 
     // 유저 쿠폰함 조회를 위한 메서드
     @EntityGraph(attributePaths = {"user", "coupon"})
     Page<CouponStore> findByUserId(Long userId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByCouponId(Long couponId);
 
-    @EntityGraph(attributePaths = {"coupon"})
+    @EntityGraph(attributePaths = {"coupon", "user"})
     List<CouponStore> findByUserIdAndStatus(Long userId, CouponStatus status);
 
     @EntityGraph(attributePaths = {"user", "coupon"})

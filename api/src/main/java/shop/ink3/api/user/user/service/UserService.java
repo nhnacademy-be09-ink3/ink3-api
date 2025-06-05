@@ -26,6 +26,7 @@ import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
+import shop.ink3.api.user.user.dto.UserStatisticsResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -98,6 +99,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public PageResponse<UserListItemDto> getUsersForManagement(String keyword, Pageable pageable) {
         return PageResponse.from(userRepository.getUsersForManagement(keyword, pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public UserStatisticsResponse getUserStatistics() {
+        return userRepository.getUserStatistics();
     }
 
     public UserResponse createUser(UserCreateRequest request) {

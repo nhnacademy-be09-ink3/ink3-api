@@ -48,6 +48,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
     private final MinioUploader minioUploader;
+    private final PresignUrlPrefixUtil presignUrlPrefixUtil;
 
     @Value("${minio.review-bucket}")
     private String bucket;
@@ -169,9 +170,11 @@ public class ReviewService {
             List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
                 .map(url -> {
                     String presignedUrl = minioUploader.getPresignedUrl(url, bucket);
-                    return new ReviewImageResponse(PresignUrlPrefixUtil.addPrefixUrl(presignedUrl));
+                    return new ReviewImageResponse(presignUrlPrefixUtil.addPrefixUrl(presignedUrl));
                 })
                 .toList();
+
+            log.warn("PrefixUrl============{}", Arrays.toString(images.toArray()));
 
             return new ReviewListResponse(
                 dto.id(),

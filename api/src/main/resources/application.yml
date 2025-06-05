@@ -3,3 +3,5 @@ spring:
     name: shop-service
   config:
     import: optional:configserver:https://ink3.shop/config/
+
+

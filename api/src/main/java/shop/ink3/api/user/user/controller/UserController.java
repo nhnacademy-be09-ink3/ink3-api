@@ -33,6 +33,7 @@ import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
+import shop.ink3.api.user.user.dto.UserStatisticsResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.service.UserService;
 
@@ -79,6 +80,11 @@ public class UserController {
             Pageable pageable
     ) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUsersForManagement(keyword, pageable)));
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<CommonResponse<UserStatisticsResponse>> getUserStatistics() {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUserStatistics()));
     }
 
     @GetMapping("/check")
