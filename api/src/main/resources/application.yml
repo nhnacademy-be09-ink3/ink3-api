@@ -6,3 +6,5 @@ spring:
 server:
   port: 10260
   address: 127.0.0.1
+
+
