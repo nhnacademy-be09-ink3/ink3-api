@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.exception.AlreadyExistsException;
+import shop.ink3.api.common.exception.BadRequestException;
 import shop.ink3.api.common.exception.NotFoundException;
 import shop.ink3.api.order.order.exception.InsufficientBookStockException;
 import shop.ink3.api.payment.exception.PaymentParserFailException;
@@ -41,7 +42,8 @@ public class GlobalExceptionHandler {
             IllegalStateException.class,
             InsufficientPointException.class,
             InvalidPasswordException.class,
-            PointHistoryAlreadyCanceledException.class
+            PointHistoryAlreadyCanceledException.class,
+            BadRequestException.class,
     })
     public ResponseEntity<CommonResponse<Void>> handleBadRequestException(Exception e) {
         return ResponseEntity
