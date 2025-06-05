@@ -36,13 +36,13 @@ public class PointPolicyService {
     public PointPolicyStatisticsResponse getPointPolicyStatistics() {
         return pointPolicyRepository.getPointPolicyStatistics();
     }
-    
+
     public PointPolicyResponse createPointPolicy(PointPolicyCreateRequest request) {
         PointPolicy pointPolicy = pointPolicyRepository.save(new PointPolicy(
                 request.name(),
-                request.join_point(),
-                request.review_point(),
-                request.default_rate()
+                request.joinPoint(),
+                request.reviewPoint(),
+                request.defaultRate()
         ));
         return PointPolicyResponse.from(pointPolicy);
     }
@@ -50,7 +50,7 @@ public class PointPolicyService {
     public PointPolicyResponse updatePointPolicy(long pointPolicyId, PointPolicyUpdateRequest request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(pointPolicyId)
                 .orElseThrow(() -> new PointPolicyNotFoundException(pointPolicyId));
-        pointPolicy.update(request.name(), request.join_point(), request.review_point(), request.default_rate());
+        pointPolicy.update(request.name(), request.joinPoint(), request.reviewPoint(), request.defaultRate());
         pointPolicyRepository.save(pointPolicy);
         return PointPolicyResponse.from(pointPolicy);
     }
