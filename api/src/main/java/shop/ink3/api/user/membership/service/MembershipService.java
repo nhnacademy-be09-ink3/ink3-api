@@ -12,6 +12,8 @@ import shop.ink3.api.user.membership.dto.MembershipResponse;
 import shop.ink3.api.user.membership.dto.MembershipStatisticsResponse;
 import shop.ink3.api.user.membership.dto.MembershipUpdateRequest;
 import shop.ink3.api.user.membership.entity.Membership;
+import shop.ink3.api.user.membership.exception.CannotDeactivateDefaultMembershipException;
+import shop.ink3.api.user.membership.exception.CannotDeleteDefaultMembershipException;
 import shop.ink3.api.user.membership.exception.DefaultMembershipNotFoundException;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
@@ -71,17 +73,15 @@ public class MembershipService {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
         membership.activate();
-        membershipRepository.save(membership);
     }
 
     public void deactivateMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
         if (membership.getIsDefault()) {
-            throw new IllegalStateException("Default membership cannot be deactivated.");
+            throw new CannotDeactivateDefaultMembershipException();
         }
         membership.deactivate();
-        membershipRepository.save(membership);
     }
 
     public void setDefaultMembership(long membershipId) {
@@ -90,18 +90,21 @@ public class MembershipService {
         membershipRepository.findByIsDefault(true).ifPresent(currentDefaultMembership -> {
             if (!currentDefaultMembership.getId().equals(membership.getId())) {
                 currentDefaultMembership.unmarkAsDefault();
-                membershipRepository.save(currentDefaultMembership);
             }
         });
+
+        if (!membership.getIsActive()) {
+            membership.activate();
+        }
+
         membership.markAsDefault();
-        membershipRepository.save(membership);
     }
 
     public void deleteMembership(long membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(membershipId));
         if (membership.getIsDefault()) {
-            throw new IllegalStateException("Default membership cannot be deleted.");
+            throw new CannotDeleteDefaultMembershipException();
         }
         membershipRepository.delete(membership);
     }
