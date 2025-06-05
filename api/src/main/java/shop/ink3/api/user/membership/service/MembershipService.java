@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.membership.dto.MembershipCreateRequest;
 import shop.ink3.api.user.membership.dto.MembershipResponse;
+import shop.ink3.api.user.membership.dto.MembershipStatisticsResponse;
 import shop.ink3.api.user.membership.dto.MembershipUpdateRequest;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.DefaultMembershipNotFoundException;
@@ -39,6 +40,11 @@ public class MembershipService {
         Membership membership = membershipRepository.findByIsDefault(true)
                 .orElseThrow(DefaultMembershipNotFoundException::new);
         return MembershipResponse.from(membership);
+    }
+
+    @Transactional(readOnly = true)
+    public MembershipStatisticsResponse getMembershipStatistics() {
+        return membershipRepository.getMembershipStatistics();
     }
 
     public MembershipResponse createMembership(MembershipCreateRequest request) {
