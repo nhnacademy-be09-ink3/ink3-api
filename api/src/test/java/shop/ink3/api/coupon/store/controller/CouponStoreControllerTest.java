@@ -1,6 +1,8 @@
 package shop.ink3.api.coupon.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
+import shop.ink3.api.coupon.store.dto.CouponStoreUpdateResponse;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.entity.OriginType;
@@ -49,15 +52,18 @@ class CouponStoreControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // 컨트롤러에 Mock 주입
+        // Controller에 mock 주입
         controller = new CouponStoreController(
                 couponStoreService,
                 bookCouponRepository,
                 categoryCouponRepository
         );
-
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+        // Jackson ObjectMapper에 JavaTimeModule 등록
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Test
@@ -254,48 +260,48 @@ class CouponStoreControllerTest {
                 LocalDateTime.of(2025, 6, 4, 13, 0)
         );
 
-        User mockUser = mock(User.class);
-        when(mockUser.getId()).thenReturn(5L);
-        when(mockUser.getName()).thenReturn("최수진");
-
-        Coupon mockCoupon = mock(Coupon.class);
-        when(mockCoupon.getId()).thenReturn(500L);
-        when(mockCoupon.getName()).thenReturn("SUMMER50");
-        when(mockCoupon.getExpiresAt()).thenReturn(LocalDateTime.of(2025, 12, 31, 0, 0));
-
-        CouponStore dummyStore = CouponStore.builder()
-                .id(storeId)
-                .user(mockUser)       // null이 아니어야 함
-                .coupon(mockCoupon)   // null이 아니어야 함
-                .originType(OriginType.WELCOME)
-                .originId(null)
-                .status(CouponStatus.USED)
-                .usedAt(LocalDateTime.of(2025, 6, 4, 13, 0))
-                .issuedAt(LocalDateTime.of(2025, 6, 4, 12, 0))
-                .build();
+        // CouponStoreUpdateResponse에 맞춰 필요한 필드만 포함하는 더미 응답 생성
+        // 실제 Controller 코드: CouponStoreUpdateResponse.of(updatedStore) 형태로 생성됨
+        CouponStoreUpdateResponse dummyResponse = new CouponStoreUpdateResponse(
+                storeId,
+                CouponStatus.USED,
+                LocalDateTime.of(2025, 6, 4, 13, 0),
+                String.format("CouponStore 엔트리 %d 업데이트 완료", storeId)
+        );
 
         when(couponStoreService.updateStore(
                 eq(storeId),
                 ArgumentMatchers.<CouponStoreUpdateRequest>any()))
-                .thenReturn(dummyStore);
+                .thenReturn(
+
+                        CouponStore.builder()
+                                .id(storeId)
+                                .user(mock(User.class))
+                                .coupon(mock(Coupon.class))
+                                .originType(OriginType.WELCOME)
+                                .originId(null)
+                                .status(CouponStatus.USED)
+                                .usedAt(LocalDateTime.of(2025, 6, 4, 13, 0))
+                                .issuedAt(LocalDateTime.of(2025, 6, 4, 12, 0))
+                                .build()
+                );
 
         // Act & Assert
         mockMvc.perform(put("/coupon-stores/{storeId}", storeId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
+                // JSON 구조: { "success": true, "data": { storeId, status, usedAt, message } }
                 .andExpect(jsonPath("$.data.storeId", is(5)))
-                .andExpect(jsonPath("$.data.userId", is(5)))
-                .andExpect(jsonPath("$.data.userName", is("최수진")))
-                .andExpect(jsonPath("$.data.couponId", is(500)))
-                .andExpect(jsonPath("$.data.couponName", is("SUMMER50")))
                 .andExpect(jsonPath("$.data.status", is("USED")))
-                // issuedAt 대신 usedAt 배열 형태를 확인:
-                .andExpect(jsonPath("$.data.usedAt", contains(2025, 6, 4, 13, 0)));
+                // usedAt은 [2025,6,4,13,0] 배열로 나옴
+                .andExpect(jsonPath("$.data.usedAt", contains(2025, 6, 4, 13, 0)))
+                .andExpect(jsonPath("$.data.message", is("CouponStore 엔트리 5 업데이트 완료")));
 
         verify(couponStoreService, times(1))
                 .updateStore(eq(storeId), ArgumentMatchers.<CouponStoreUpdateRequest>any());
     }
+
 
 
     @Test
