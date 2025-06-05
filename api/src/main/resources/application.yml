@@ -3,8 +3,5 @@ spring:
     name: shop-service
   config:
     import: optional:configserver:https://ink3.shop/config/
-server:
-  port: 10260
-  address: 127.0.0.1
 
 
