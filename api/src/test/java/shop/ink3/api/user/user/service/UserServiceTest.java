@@ -22,7 +22,7 @@ import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
-import shop.ink3.api.user.point.repository.PointHistoryRepository;
+import shop.ink3.api.user.point.history.repository.PointHistoryRepository;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;

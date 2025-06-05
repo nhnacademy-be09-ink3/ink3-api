@@ -4,20 +4,20 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.orderBook.service.OrderBookService;
-import shop.ink3.api.order.orderPoint.service.OrderPointService;
 import shop.ink3.api.order.orderPoint.entity.OrderPoint;
+import shop.ink3.api.order.orderPoint.service.OrderPointService;
 import shop.ink3.api.order.refund.dto.RefundCreateRequest;
 import shop.ink3.api.order.refund.dto.RefundResponse;
 import shop.ink3.api.order.refund.service.RefundService;
 import shop.ink3.api.order.shipment.service.ShipmentService;
-import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
 import shop.ink3.api.payment.service.PaymentService;
-import shop.ink3.api.user.point.service.PointService;
+import shop.ink3.api.user.point.history.service.PointService;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 
 @Transactional
@@ -53,20 +53,21 @@ public class OrderMainService {
 
     //TODO : 사용된 쿠폰 재발급
     // 반품 승인
-    public void approveRefund(long userId, long orderId){
+    public void approveRefund(long userId, long orderId) {
         RefundResponse refund = refundService.updateApproved(orderId);
         PaymentResponse payment = paymentService.getPayment(refund.getId());
 
         // 결제 금액 환불
         String description = String.format(REFUND_DESCRIPTION, refund.getRefundShippingFee());
-        pointService.earnPoint(userId, new UserPointRequest(payment.paymentAmount() - refund.getRefundShippingFee(), description));
+        pointService.earnPoint(userId,
+                new UserPointRequest(payment.paymentAmount() - refund.getRefundShippingFee(), description));
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
 
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(refund.getId());
-        for(OrderPoint orderPoint : orderPoints) {
+        for (OrderPoint orderPoint : orderPoints) {
             pointService.cancelPoint(userId, orderPoint.getPointHistory().getId());
         }
     }

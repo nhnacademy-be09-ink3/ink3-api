@@ -47,21 +47,21 @@ public class PaymentController {
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<CommonResponse<Void>> cancelPayment(
             @PathVariable long orderId,
-            @RequestHeader("X-User-Id") long userId){
-        paymentService.cancelPayment(orderId, userId);  
+            @RequestHeader("X-User-Id") long userId) {
+        paymentService.cancelPayment(orderId, userId);
         return ResponseEntity.noContent().build();
     }
 
     // 결제 결과 조회
     @GetMapping("/{orderId}")
-    public ResponseEntity<CommonResponse<PaymentResponse>> getPayment(@PathVariable long orderId){
+    public ResponseEntity<CommonResponse<PaymentResponse>> getPayment(@PathVariable long orderId) {
         return ResponseEntity
                 .ok(CommonResponse.success(paymentService.getPayment(orderId)));
     }
 
     // 결제 내역 삭제
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<CommonResponse<Void>> deletePayment(@PathVariable long orderId){
+    public ResponseEntity<CommonResponse<Void>> deletePayment(@PathVariable long orderId) {
         paymentService.deletePayment(orderId);
         return ResponseEntity.noContent().build();
     }

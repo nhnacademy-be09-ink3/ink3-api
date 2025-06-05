@@ -8,8 +8,9 @@ import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 import shop.ink3.api.order.orderPoint.entity.OrderPoint;
 import shop.ink3.api.order.orderPoint.repository.OrderPointRepository;
-import shop.ink3.api.user.point.entity.PointHistory;
-import shop.ink3.api.user.point.repository.PointHistoryRepository;
+import shop.ink3.api.user.point.history.entity.PointHistory;
+import shop.ink3.api.user.point.history.repository.PointHistoryRepository;
+
 
 @RequiredArgsConstructor
 @Service
