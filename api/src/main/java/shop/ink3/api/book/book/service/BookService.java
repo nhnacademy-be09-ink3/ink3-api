@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,7 @@ import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.exception.TagNotFoundException;
 import shop.ink3.api.book.tag.repository.TagRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.common.uploader.MinioUploader;
 import shop.ink3.api.review.review.repository.ReviewRepository;
 
 @Transactional
@@ -56,6 +58,10 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
+    private final MinioUploader minioUploader;
+
+    @Value("${minio.book-bucket}")
+    private String bucket;
 
     // 단건 조회
     @Transactional(readOnly = true)
@@ -125,6 +131,10 @@ public class BookService {
 
     public BookResponse createBook(BookCreateRequest request) {
 
+        if (bookRepository.existsByIsbn(request.isbn())) {
+            throw new DuplicateIsbnException(request.isbn());
+        }
+
         if (request.categoryIds() == null || request.categoryIds().isEmpty()) {
             throw new InvalidCategorySelectionException("최소 한 개 이상의 카테고리를 선택해야 합니다.");
         }
@@ -134,6 +144,7 @@ public class BookService {
         }
 
         Publisher publisher = publisherRepository.findById(request.publisherId()).orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
+        String imageUrl = minioUploader.upload(request.coverImage(), bucket);
         Book book = Book.builder()
                 .isbn(request.isbn())
                 .title(request.title())
@@ -145,7 +156,7 @@ public class BookService {
                 .quantity(request.quantity())
                 .status(request.status())
                 .isPackable(request.isPackable())
-                .thumbnailUrl(request.thumbnailUrl())
+                .thumbnailUrl(imageUrl)
                 .publisher(publisher)
                 .build();
 
@@ -171,6 +182,10 @@ public class BookService {
     }
 
     public BookResponse updateBook(Long bookId, BookUpdateRequest request) {
+
+        if (bookRepository.existsByIsbn(request.isbn())) {
+            throw new DuplicateIsbnException(request.isbn());
+        }
 
         if (request.categoryIds() == null || request.categoryIds().isEmpty()) {
             throw new InvalidCategorySelectionException("최소 한 개 이상의 카테고리를 선택해야 합니다.");
@@ -238,6 +253,10 @@ public class BookService {
     public void deleteBook(@PathVariable Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new BookNotFoundException(bookId));
+
+        book.getBookCategories().clear();
+        book.getBookAuthors().clear();
+        book.getBookTags().clear();
 
         bookRepository.delete(book);
     }

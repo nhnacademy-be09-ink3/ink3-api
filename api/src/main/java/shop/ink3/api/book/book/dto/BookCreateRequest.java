@@ -8,6 +8,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 import shop.ink3.api.book.book.entity.BookStatus;
 
 public record BookCreateRequest(
@@ -21,7 +22,7 @@ public record BookCreateRequest(
         @NotNull @PositiveOrZero Integer quantity,
         @NotNull BookStatus status,
         boolean isPackable,
-        @NotBlank String thumbnailUrl,
+        @NotNull MultipartFile coverImage,
         @NotNull Long publisherId,
 
         @NotEmpty(message = "카테고리는 최소 1개 이상이어야 합니다.")
