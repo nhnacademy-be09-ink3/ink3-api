@@ -22,7 +22,7 @@ import shop.ink3.api.order.order.entity.Order;
 @Builder
 @Entity
 @Table(name = "guest")
-public class GuestOrder {
+public class Guest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +34,4 @@ public class GuestOrder {
 
     @Column(nullable = false, length = 50)
     private String email;
-
-    @Column(nullable = false, length = 50)
-    private String password;
 }

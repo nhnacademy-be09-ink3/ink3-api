@@ -34,11 +34,11 @@ public class PaymentController {
         return ResponseEntity.ok(CommonResponse.success(paymentResponse));
     }
 
-    // 결제 실패 처리
+    // 결제 실패 처리 (회원)
     @PostMapping("/{orderId}/fail")
     public ResponseEntity<CommonResponse<Void>> failPayment(
             @PathVariable long orderId,
-            @RequestHeader("X-User-Id") long userId) {
+            @RequestHeader(value = "X-User-Id") long userId){
         paymentService.failPayment(orderId, userId);
         return ResponseEntity.noContent().build();
     }

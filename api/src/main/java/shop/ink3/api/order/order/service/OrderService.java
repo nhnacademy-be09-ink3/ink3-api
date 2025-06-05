@@ -31,7 +31,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
-    // 생성
+    // 생성 (회원)
     public OrderResponse createOrder(OrderCreateRequest request) {
         User user = null;
         if (Objects.nonNull(request.getUserId())) {
@@ -129,7 +129,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.updateStatus(request.getOrderStatus());
-        return OrderResponse.from(order);
+        return OrderResponse.from(orderRepository.save(order));
     }
 
 
