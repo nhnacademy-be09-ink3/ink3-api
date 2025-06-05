@@ -31,7 +31,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
-    // 생성
+    // 생성 (회원)
     public OrderResponse createOrder(OrderCreateRequest request) {
         User user = null;
         if (Objects.nonNull(request.getUserId())) {

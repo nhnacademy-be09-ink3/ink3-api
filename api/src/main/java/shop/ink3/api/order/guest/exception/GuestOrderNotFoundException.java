@@ -7,8 +7,8 @@ public class GuestOrderNotFoundException extends NotFoundException {
         super("Available GuestOrder not found.");
     }
 
-    public GuestOrderNotFoundException(long guestOrderId) {
-        super("GuestOrder not found. ID: %d".formatted(guestOrderId));
+    public GuestOrderNotFoundException(long orderId) {
+        super("GuestOrder not found. ORDER_ID: %d".formatted(orderId));
     }
 
 }
