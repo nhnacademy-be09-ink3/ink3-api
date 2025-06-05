@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.order.cart.dto.CartCouponResponse;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
@@ -55,8 +56,10 @@ public class MeCartController {
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<CartResponse>>> getCarts(@RequestHeader(name = "X-User-Id") Long userId) {
-        return ResponseEntity.ok(CommonResponse.success(cartService.getCartItemsByUserId(userId)));
+    public ResponseEntity<CommonResponse<List<CartCouponResponse>>> getCarts(@RequestHeader(name = "X-User-Id") Long userId) {
+        List<CartCouponResponse> carts = cartService.getCartItemsWithCoupons(userId);
+        log.warn(carts.toString());
+        return ResponseEntity.ok(CommonResponse.success(carts));
     }
 
     @DeleteMapping
