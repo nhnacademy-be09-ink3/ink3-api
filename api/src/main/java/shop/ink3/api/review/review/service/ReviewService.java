@@ -174,6 +174,8 @@ public class ReviewService {
                 })
                 .toList();
 
+            log.warn("PrefixUrl============{}", Arrays.toString(images.toArray()));
+
             return new ReviewListResponse(
                 dto.id(),
                 dto.userId(),
