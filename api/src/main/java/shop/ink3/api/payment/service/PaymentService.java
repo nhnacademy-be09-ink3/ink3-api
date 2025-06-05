@@ -13,8 +13,8 @@ import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
 import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.orderBook.service.OrderBookService;
-import shop.ink3.api.order.orderPoint.service.OrderPointService;
 import shop.ink3.api.order.orderPoint.entity.OrderPoint;
+import shop.ink3.api.order.orderPoint.service.OrderPointService;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
 import shop.ink3.api.payment.entity.Payment;
@@ -26,8 +26,8 @@ import shop.ink3.api.payment.paymentUtil.processor.PaymentProcessor;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentProcessorResolver;
 import shop.ink3.api.payment.paymentUtil.resolver.PaymentResponseParserResolver;
 import shop.ink3.api.payment.repository.PaymentRepository;
-import shop.ink3.api.user.point.eventListener.PointHistoryAfterPaymentEven;
-import shop.ink3.api.user.point.service.PointService;
+import shop.ink3.api.user.point.history.eventListener.PointHistoryAfterPaymentEven;
+import shop.ink3.api.user.point.history.service.PointService;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 
 @Slf4j
@@ -99,7 +99,7 @@ public class PaymentService {
 
         // 금액 환불
         Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(()-> new PaymentNotFoundException(orderId));
+                .orElseThrow(() -> new PaymentNotFoundException(orderId));
         pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), "결제 취소로 인한 환불금액"));
 
         // 주문된 도서들의 재고를 원상복구
@@ -109,7 +109,7 @@ public class PaymentService {
 
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(orderId);
-        for(OrderPoint orderPoint : orderPoints) {
+        for (OrderPoint orderPoint : orderPoints) {
             pointService.cancelPoint(userId, orderPoint.getPointHistory().getId());
         }
     }
