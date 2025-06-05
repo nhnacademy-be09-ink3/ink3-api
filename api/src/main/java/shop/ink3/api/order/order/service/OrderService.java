@@ -129,7 +129,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.updateStatus(request.getOrderStatus());
-        return OrderResponse.from(order);
+        return OrderResponse.from(orderRepository.save(order));
     }
 
 
