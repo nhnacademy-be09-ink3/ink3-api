@@ -61,6 +61,9 @@ public class OrderMainService {
         String description = String.format(REFUND_DESCRIPTION, refund.getRefundShippingFee());
         pointService.earnPoint(userId, new UserPointRequest(payment.paymentAmount() - refund.getRefundShippingFee(), description));
 
+        // 주문된 도서들의 재고를 원상복구
+        orderBookService.resetBookQuantity(orderId);
+
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(refund.getId());
         for(OrderPoint orderPoint : orderPoints) {
