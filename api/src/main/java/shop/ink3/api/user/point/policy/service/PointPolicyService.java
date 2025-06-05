@@ -11,6 +11,7 @@ import shop.ink3.api.user.point.policy.dto.PointPolicyResponse;
 import shop.ink3.api.user.point.policy.dto.PointPolicyStatisticsResponse;
 import shop.ink3.api.user.point.policy.dto.PointPolicyUpdateRequest;
 import shop.ink3.api.user.point.policy.entity.PointPolicy;
+import shop.ink3.api.user.point.policy.exception.CannotDeleteActivePointPolicyException;
 import shop.ink3.api.user.point.policy.exception.PointPolicyNotFoundException;
 import shop.ink3.api.user.point.policy.repository.PointPolicyRepository;
 
@@ -74,8 +75,10 @@ public class PointPolicyService {
     }
 
     public void deletePointPolicy(long pointPolicyId) {
-        if (!pointPolicyRepository.existsById(pointPolicyId)) {
-            throw new PointPolicyNotFoundException(pointPolicyId);
+        PointPolicy pointPolicy = pointPolicyRepository.findById(pointPolicyId)
+                .orElseThrow(() -> new PointPolicyNotFoundException(pointPolicyId));
+        if (pointPolicy.getIsActive()) {
+            throw new CannotDeleteActivePointPolicyException();
         }
         pointPolicyRepository.deleteById(pointPolicyId);
     }
