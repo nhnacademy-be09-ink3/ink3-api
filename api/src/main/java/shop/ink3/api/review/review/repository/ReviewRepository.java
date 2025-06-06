@@ -16,6 +16,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             SELECT new shop.ink3.api.review.review.dto.ReviewDefaultListResponse(
                 r.id,
                 u.id,
+                ob.book.id,
                 ob.id,
                 u.name,
                 r.title,
@@ -36,6 +37,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             SELECT new shop.ink3.api.review.review.dto.ReviewDefaultListResponse(
                 r.id,
                 u.id,
+                ob.book.id,
                 ob.id,
                 u.name,
                 r.title,

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.exception.AlreadyExistsException;
+import shop.ink3.api.common.exception.BadRequestException;
 import shop.ink3.api.common.exception.NotFoundException;
 import shop.ink3.api.order.order.exception.InsufficientBookStockException;
 import shop.ink3.api.payment.exception.PaymentParserFailException;
@@ -18,7 +19,7 @@ import shop.ink3.api.payment.exception.PaymentProcessorFailException;
 import shop.ink3.api.user.common.exception.DormantException;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.common.exception.WithdrawnException;
-import shop.ink3.api.user.point.exception.PointHistoryAlreadyCanceledException;
+import shop.ink3.api.user.point.history.exception.PointHistoryAlreadyCanceledException;
 import shop.ink3.api.user.user.exception.InsufficientPointException;
 
 @RestControllerAdvice
@@ -41,7 +42,8 @@ public class GlobalExceptionHandler {
             IllegalStateException.class,
             InsufficientPointException.class,
             InvalidPasswordException.class,
-            PointHistoryAlreadyCanceledException.class
+            PointHistoryAlreadyCanceledException.class,
+            BadRequestException.class,
     })
     public ResponseEntity<CommonResponse<Void>> handleBadRequestException(Exception e) {
         return ResponseEntity
@@ -85,24 +87,26 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientBookStockException.class)
-    public ResponseEntity<CommonResponse<String>> handleInsufficientBookStockException(InsufficientBookStockException e) {
+    public ResponseEntity<CommonResponse<String>> handleInsufficientBookStockException(
+            InsufficientBookStockException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(CommonResponse.error(HttpStatus.CONFLICT, "Book stock insufficient.",e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.CONFLICT, "Book stock insufficient.", e.getMessage()));
     }
 
     @ExceptionHandler(PaymentParserFailException.class)
     public ResponseEntity<CommonResponse<String>> handlePaymentParserFailException(PaymentParserFailException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, "Payment parsing error.",e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, "Payment parsing error.", e.getMessage()));
     }
 
     @ExceptionHandler(PaymentProcessorFailException.class)
     public ResponseEntity<CommonResponse<String>> handlePaymentProcessorFailException(PaymentProcessorFailException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, "Payment processor Approve fail error.",e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.BAD_REQUEST, "Payment processor Approve fail error.",
+                        e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

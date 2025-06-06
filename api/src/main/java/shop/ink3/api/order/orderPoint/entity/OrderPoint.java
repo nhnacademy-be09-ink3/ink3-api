@@ -14,7 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.ink3.api.order.order.entity.Order;
-import shop.ink3.api.user.point.entity.PointHistory;
+import shop.ink3.api.user.point.history.entity.PointHistory;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
