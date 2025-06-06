@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.author.exception.AuthorNotFoundException;
 import shop.ink3.api.book.author.repository.AuthorRepository;
@@ -129,7 +130,7 @@ public class BookService {
         return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
-    public BookResponse createBook(BookCreateRequest request) {
+    public BookResponse createBook(BookCreateRequest request, MultipartFile coverImage) {
 
         if (bookRepository.existsByIsbn(request.isbn())) {
             throw new DuplicateIsbnException(request.isbn());
@@ -144,7 +145,7 @@ public class BookService {
         }
 
         Publisher publisher = publisherRepository.findById(request.publisherId()).orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
-        String imageUrl = minioUploader.upload(request.coverImage(), bucket);
+        String imageUrl = minioUploader.upload(coverImage, bucket);
         Book book = Book.builder()
                 .isbn(request.isbn())
                 .title(request.title())

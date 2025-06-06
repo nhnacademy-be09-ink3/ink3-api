@@ -1,5 +1,6 @@
 package shop.ink3.api.book.book.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +31,8 @@ import shop.ink3.api.common.dto.PageResponse;
 @RestController
 public class BookController {
     private final BookService bookService;
+    private final ObjectMapper objectMapper;
+
 
     // 도서 상세 조회 (ID 기반 단건 조회)
     @GetMapping("/{bookId}")
@@ -82,10 +85,16 @@ public class BookController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<BookResponse>> createBook(
-            @RequestPart("request") @Valid BookCreateRequest request,
+            @RequestPart("book") String bookCreateRequestJson,
             @RequestPart("coverImage") MultipartFile coverImage
-            ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(bookService.createBook(request)));
+    ) {
+        try {
+            BookCreateRequest bookCreateRequest = objectMapper.readValue(bookCreateRequestJson, BookCreateRequest.class);
+            BookResponse response = bookService.createBook(bookCreateRequest, coverImage);
+            return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage(), null));
+        }
     }
 
     @PutMapping("/{bookId}")
