@@ -132,13 +132,13 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping(value = "/{userId}/activate", params = "userId")
+    @PatchMapping(value = "/{userId}/activate")
     public ResponseEntity<Void> activateUser(@PathVariable long userId) {
         userService.activateUser(userId);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping(value = "/{loginId}/activate", params = "loginId")
+    @PatchMapping(value = "/login-id/{loginId}/activate")
     public ResponseEntity<Void> activateUser(@PathVariable String loginId) {
         userService.activateUser(loginId);
         return ResponseEntity.noContent().build();
