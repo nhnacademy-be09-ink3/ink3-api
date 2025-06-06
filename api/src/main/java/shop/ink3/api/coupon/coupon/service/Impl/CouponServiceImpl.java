@@ -5,12 +5,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.repository.CategoryRepository;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
@@ -99,66 +102,69 @@ public class CouponServiceImpl implements CouponService {
         Set<BookCoupon> bookCoupons = coupon.getBookCoupons();
         Set<CategoryCoupon> categoryCoupons = coupon.getCategoryCoupons();
 
-        List<BookInfo> bookIds = bookCoupons.stream()
+        List<BookInfo> bookInfos = bookCoupons.stream()
                 .map(bc -> new CouponResponse.BookInfo(
                         bc.getId(),
                         bc.getBook().getId(),
                         bc.getBook().getTitle()))
                 .collect(Collectors.toList());
 
-        List<CategoryInfo> categoryIds = categoryCoupons.stream()
+        List<CategoryInfo> categoryInfos = categoryCoupons.stream()
                 .map(cc -> new CouponResponse.CategoryInfo(
                         cc.getId(),
                         cc.getCategory().getId(),
                         cc.getCategory().getName()))
                 .collect(Collectors.toList());
-        return CouponResponse.from(coupon, bookIds, categoryIds);
+
+        return CouponResponse.from(coupon, bookInfos, categoryInfos);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CouponResponse> getAllCoupons() {
-        List<Coupon> coupons = couponRepository.findAllWithAssociations();
-        return getCouponResponses(coupons);
+    public PageResponse<CouponResponse> getAllCoupons(Pageable pageable) {
+        Page<Coupon> coupons = couponRepository.findAllWithAssociations(pageable);
+
+        // Page<Coupon> → Page<CouponResponse>
+        Page<CouponResponse> dtoPage = coupons.map(this::getCouponResponse);
+
+        // PageResponse.from(Page<CouponResponse>) 사용
+        return PageResponse.from(dtoPage);
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public List<CouponResponse> getCouponsByBookId(long bookId) {
-        List<BookCoupon> bookCoupons = bookCouponRepository.findAllByBookId(bookId);
-        if(bookCoupons.isEmpty()) {
+    public PageResponse<CouponResponse> getCouponsByBookId(long bookId, Pageable pageable) {
+        Page<BookCoupon> bookCoupons = bookCouponRepository.findAllByBookId(bookId, pageable);
+        if (bookCoupons.isEmpty()) {
             throw new CouponNotFoundException(bookId + " 북 쿠폰이 존재하지 않습니다.");
         }
-        return bookCoupons.stream()
-                .map(bc -> {
-                    // BookInfo(originId = id of BookCoupon record, id/book.id, title)
-                    CouponResponse.BookInfo info = new CouponResponse.BookInfo(
-                            bc.getId(),
-                            bc.getBook().getId(),
-                            bc.getBook().getTitle()
-                    );
-                    // categories는 비어 있는 리스트로
-                    return CouponResponse.from(bc.getCoupon(), List.of(info), List.of());
-                })
-                .toList();
+        Page<CouponResponse> dtoPage = bookCoupons.map(bc -> {
+            BookInfo info = new BookInfo(
+                    bc.getId(),
+                    bc.getBook().getId(),
+                    bc.getBook().getTitle()
+            );
+            return CouponResponse.from(bc.getCoupon(), List.of(info), List.of());
+        });
+        return PageResponse.from(dtoPage);
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public List<CouponResponse> getCouponsByCategoryId(long categoryId) {
-        List<CategoryCoupon> categoryCoupons =
-                categoryCouponRepository.findAllByCategoryId(categoryId);
-        if(categoryCoupons.isEmpty()) {
+    public PageResponse<CouponResponse> getCouponsByCategoryId(long categoryId, Pageable pageable) {
+        Page<CategoryCoupon> categoryCoupons = categoryCouponRepository.findAllByCategoryId(categoryId, pageable);
+        if (categoryCoupons.isEmpty()) {
             throw new CouponNotFoundException(categoryId + " 카테고리 쿠폰이 존재하지 않습니다.");
         }
-        return categoryCoupons.stream()
-                .map(cc -> {
-                    CouponResponse.CategoryInfo info = new CouponResponse.CategoryInfo(
-                            cc.getId(),
-                            cc.getCategory().getId(),
-                            cc.getCategory().getName()
-                    );
-                    return CouponResponse.from(cc.getCoupon(), List.of(), List.of(info));
-                })
-                .toList();
+        Page<CouponResponse> dtoPage = categoryCoupons.map(cc -> {
+            CategoryInfo info = new CategoryInfo(
+                    cc.getId(),
+                    cc.getCategory().getId(),
+                    cc.getCategory().getName()
+            );
+            return CouponResponse.from(cc.getCoupon(), List.of(), List.of(info));
+        });
+        return PageResponse.from(dtoPage);
     }
 
     @Override

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +15,7 @@ public interface CategoryCouponRepository extends JpaRepository<CategoryCoupon, 
     @Query("select cc.id from CategoryCoupon cc where cc.category.id = :categoryId")
     List<Long> findIdsByCategoryId(@Param("categoryId") Long categoryId);
 
-    List<CategoryCoupon> findAllByCategoryId(Long categoryId);
+    Page<CategoryCoupon> findAllByCategoryId(Long categoryId, Pageable pageable);
 
     /**
      * 단일 CategoryCoupon을 조회할 때, 연관된 category와 coupon을

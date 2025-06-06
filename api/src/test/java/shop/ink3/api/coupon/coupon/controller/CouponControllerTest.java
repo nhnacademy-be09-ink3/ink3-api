@@ -17,10 +17,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
@@ -28,16 +32,17 @@ import shop.ink3.api.coupon.coupon.dto.CouponResponse.CategoryInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 
-@WebMvcTest(CouponController.class)
+@WebMvcTest()
+@ContextConfiguration(classes = CouponController.class)
 public class CouponControllerTest {
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @MockitoBean
-    CouponServiceImpl couponService;
+    private CouponServiceImpl couponService;
 
     private static final LocalDateTime now = LocalDateTime.of(2025, 5, 31, 0, 0);
     private static final LocalDateTime expires = now.plusDays(5);
@@ -182,8 +187,9 @@ public class CouponControllerTest {
     }
 
     @Test
-    @DisplayName("GET /coupons - 전체 조회 성공")
-    void getAll_success() throws Exception {
+    @DisplayName("GET /coupons - 전체 조회 성공 (Pageable 고려, content 필드 확인)")
+    void getAll_success_withPageable() throws Exception {
+        // given
         CouponResponse c1 = new CouponResponse(
                 1L, 10L, "coup1", now, expires, now,
                 Collections.emptyList(), Collections.emptyList()
@@ -192,19 +198,31 @@ public class CouponControllerTest {
                 2L, 20L, "coup2", now, expires, now,
                 Collections.emptyList(), Collections.emptyList()
         );
-        when(couponService.getAllCoupons()).thenReturn(List.of(c1, c2));
 
-        mockMvc.perform(get("/coupons"))
+        PageRequest pageable = PageRequest.of(0, 2);
+        PageResponse<CouponResponse> pageResponse = PageResponse.from(
+                new PageImpl<>(List.of(c1, c2), pageable, 2)
+        );
+
+        when(couponService.getAllCoupons(eq(pageable)))
+                .thenReturn(pageResponse);
+
+        // when / then
+        mockMvc.perform(get("/coupons")
+                        .param("page", "0")
+                        .param("size", "2"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].couponId").value(1))
-                .andExpect(jsonPath("$.data[1].couponId").value(2));
+                // $.data.content 배열 검증
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content[0].couponId").value(1))
+                .andExpect(jsonPath("$.data.content[1].couponId").value(2));
 
-        verify(couponService).getAllCoupons();
+        verify(couponService).getAllCoupons(eq(pageable));
     }
+
 
     @Test
     @DisplayName("PUT /coupons/{id} - 수정 성공")
@@ -269,46 +287,80 @@ public class CouponControllerTest {
     }
 
     @Test
-    @DisplayName("GET /coupons/by-book/{bookId} - 도서별 조회 성공")
-    void getByBookId_success() throws Exception {
+    @DisplayName("GET /coupons/by-book/{bookId} - 도서별 조회 성공 (Pageable 고려, content 필드 확인)")
+    void getByBookId_success_withPageable() throws Exception {
         Long bookId = 100L;
         BookInfo bookInfo = new BookInfo(11L, 100L, "BookTitle");
         CouponResponse resp = new CouponResponse(
                 9L, 40L, "from-book", now, expires, now,
                 List.of(bookInfo), Collections.emptyList()
         );
-        when(couponService.getCouponsByBookId(bookId)).thenReturn(List.of(resp));
 
-        mockMvc.perform(get("/coupons/by-book/{bookId}", bookId))
+        // Pageable 파라미터 (예: page=0, size=2)
+        PageRequest pageable = PageRequest.of(0, 2);
+        PageResponse<CouponResponse> pageResponse = PageResponse.from(
+                new PageImpl<>(List.of(resp), pageable, 1)
+        );
+
+        // 서비스가 getCouponsByBookId(bookId, pageable)를 호출하면 pageResponse를 반환하도록 모킹
+        when(couponService.getCouponsByBookId(eq(bookId), eq(pageable)))
+                .thenReturn(pageResponse);
+
+        // MockMvc로 GET 요청 시 page, size 파라미터를 함께 보냄
+        mockMvc.perform(get("/coupons/by-book/{bookId}", bookId)
+                        .param("page", "0")
+                        .param("size", "2"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                // CommonResponse.status가 200인지 확인
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].couponId").value(9))
-                .andExpect(jsonPath("$.data[0].books[0].id").value(100));
+                // 실제 데이터 리스트는 $.data.content 배열 안에 들어있음
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(1))
+                .andExpect(jsonPath("$.data.content[0].couponId").value(9))
+                .andExpect(jsonPath("$.data.content[0].books[0].id").value(100));
 
-        verify(couponService).getCouponsByBookId(bookId);
+        // 서비스 메서드가 정확히 (bookId, pageable) 인자로 호출되었는지 검증
+        verify(couponService).getCouponsByBookId(eq(bookId), eq(pageable));
     }
 
+
     @Test
-    @DisplayName("GET /coupons/by-category/{categoryId} - 카테고리별 조회 성공")
-    void getByCategoryId_success() throws Exception {
+    @DisplayName("GET /coupons/by-category/{categoryId} - 카테고리별 조회 성공 (Pageable 고려, content 필드 확인)")
+    void getByCategoryId_success_withPageable() throws Exception {
         Long categoryId = 200L;
         CategoryInfo catInfo = new CategoryInfo(22L, 200L, "CatName");
         CouponResponse resp = new CouponResponse(
                 15L, 50L, "from-cat", now, expires, now,
                 Collections.emptyList(), List.of(catInfo)
         );
-        when(couponService.getCouponsByCategoryId(categoryId)).thenReturn(List.of(resp));
 
-        mockMvc.perform(get("/coupons/by-category/{categoryId}", categoryId))
+        // Pageable 파라미터 (예: page=0, size=2)
+        PageRequest pageable = PageRequest.of(0, 2);
+        PageResponse<CouponResponse> pageResponse = PageResponse.from(
+                new PageImpl<>(List.of(resp), pageable, 1)
+        );
+
+        // 서비스가 getCouponsByCategoryId(categoryId, pageable)를 호출하면 pageResponse를 반환하도록 모킹
+        when(couponService.getCouponsByCategoryId(eq(categoryId), eq(pageable)))
+                .thenReturn(pageResponse);
+
+        // MockMvc로 GET 요청 시 page, size 파라미터를 함께 보냄
+        mockMvc.perform(get("/coupons/by-category/{categoryId}", categoryId)
+                        .param("page", "0")
+                        .param("size", "2"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                // CommonResponse.status가 200인지 확인
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[0].couponId").value(15))
-                .andExpect(jsonPath("$.data[0].categories[0].id").value(200));
+                // 실제 데이터 리스트는 $.data.content 배열 안에 들어있음
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(1))
+                .andExpect(jsonPath("$.data.content[0].couponId").value(15))
+                .andExpect(jsonPath("$.data.content[0].categories[0].id").value(200));
 
-        verify(couponService).getCouponsByCategoryId(categoryId);
+        // 서비스 메서드가 정확히 (categoryId, pageable) 인자로 호출되었는지 검증
+        verify(couponService).getCouponsByCategoryId(eq(categoryId), eq(pageable));
     }
+
 }

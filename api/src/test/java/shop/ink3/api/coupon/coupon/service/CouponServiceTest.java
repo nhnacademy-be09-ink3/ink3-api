@@ -3,11 +3,13 @@ package shop.ink3.api.coupon.coupon.service;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,11 +18,15 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.repository.CategoryRepository;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
@@ -87,13 +93,15 @@ class CouponServiceTest {
             }
         });
 
+        // when
         CouponResponse resp = couponService.createCoupon(req);
 
+        // then
         assertNotNull(resp);
         assertEquals(100L, resp.couponId());
-        assertEquals(1L,   resp.policyId());
+        assertEquals(1L, resp.policyId());
         assertEquals("test", resp.name());
-        assertEquals(now,    resp.issuableFrom());
+        assertEquals(now, resp.issuableFrom());
         assertEquals(expires, resp.expiresAt());
         assertTrue(resp.books().isEmpty());
         assertTrue(resp.categories().isEmpty());
@@ -101,7 +109,6 @@ class CouponServiceTest {
         verify(policyRepository).findById(1L);
         verify(couponRepository).save(any(Coupon.class));
     }
-
 
     @Test
     void createCoupon_noPolicy_throws() {
@@ -154,6 +161,7 @@ class CouponServiceTest {
         assertThrows(CouponNotFoundException.class,
                 () -> couponService.getCouponById(5L));
     }
+
     // --- getAllCoupons ---
 
     @Test
@@ -161,19 +169,19 @@ class CouponServiceTest {
         CouponPolicy policy = CouponPolicy.builder().id(1L).build();
         var c1 = Coupon.builder().id(11L).couponPolicy(policy).build();
         var c2 = Coupon.builder().id(22L).couponPolicy(policy).build();
-        when(couponRepository.findAllWithAssociations())
-                .thenReturn(List.of(c1, c2));
+        when(couponRepository.findAllWithAssociations(Pageable.unpaged()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(c1, c2)));
 
-        var list = couponService.getAllCoupons();
+        PageResponse<CouponResponse> page = couponService.getAllCoupons(Pageable.unpaged());
+        List<CouponResponse> list = page.content();  // assumes PageResponse has getData()
+
         assertEquals(2, list.size());
         assertEquals(11L, list.get(0).couponId());
         assertEquals(22L, list.get(1).couponId());
     }
 
-
     @Test
     void getCouponsByBookId_success() {
-
         BookCoupon bc = mock(BookCoupon.class);
         Book book = mock(Book.class);
         CouponPolicy policy = CouponPolicy.builder().id(1L).build();
@@ -184,12 +192,14 @@ class CouponServiceTest {
         when(bc.getBook()).thenReturn(book);
         when(bc.getCoupon()).thenReturn(coupon);
 
-        when(bookCouponRepository.findAllByBookId(10L))
-                .thenReturn(List.of(bc));
+        when(bookCouponRepository.findAllByBookId(10L, Pageable.unpaged()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(bc)));
 
-        var list = couponService.getCouponsByBookId(10L);
+        PageResponse<CouponResponse> page = couponService.getCouponsByBookId(10L, Pageable.unpaged());
+        List<CouponResponse> list = page.content();
+
         assertEquals(1, list.size());
-        var info = list.getFirst().books().getFirst();
+        var info = list.get(0).books().get(0);
         assertEquals(5L, info.originId());
         assertEquals(10L, info.id());
         assertEquals("Java", info.title());
@@ -197,10 +207,10 @@ class CouponServiceTest {
 
     @Test
     void getCouponsByBookId_empty_throws() {
-        when(bookCouponRepository.findAllByBookId(123L))
-                .thenReturn(List.of());
+        when(bookCouponRepository.findAllByBookId(123L, Pageable.unpaged()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
         assertThrows(CouponNotFoundException.class,
-                () -> couponService.getCouponsByBookId(123L));
+                () -> couponService.getCouponsByBookId(123L, Pageable.unpaged()));
     }
 
     // --- getCouponsByCategoryId ---
@@ -217,10 +227,12 @@ class CouponServiceTest {
         when(cc.getCategory()).thenReturn(cat);
         when(cc.getCoupon()).thenReturn(coupon);
 
-        when(categoryCouponRepository.findAllByCategoryId(8L))
-                .thenReturn(List.of(cc));
+        when(categoryCouponRepository.findAllByCategoryId(8L, Pageable.unpaged()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(cc)));
 
-        var list = couponService.getCouponsByCategoryId(8L);
+        PageResponse<CouponResponse> page = couponService.getCouponsByCategoryId(8L, Pageable.unpaged());
+        List<CouponResponse> list = page.content();
+
         assertEquals(1, list.size());
         var info = list.get(0).categories().get(0);
         assertEquals(6L, info.originId());
@@ -230,10 +242,10 @@ class CouponServiceTest {
 
     @Test
     void getCouponsByCategoryId_empty_throws() {
-        when(categoryCouponRepository.findAllByCategoryId(7L))
-                .thenReturn(List.of());
+        when(categoryCouponRepository.findAllByCategoryId(7L, Pageable.unpaged()))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
         assertThrows(CouponNotFoundException.class,
-                () -> couponService.getCouponsByCategoryId(7L));
+                () -> couponService.getCouponsByCategoryId(7L, Pageable.unpaged()));
     }
 
     @Test
@@ -277,7 +289,6 @@ class CouponServiceTest {
         when(policyRepository.findById(2L)).thenReturn(Optional.of(newPolicy));
 
         // 4) Book 리스트 조회 모킹
-        //    Book 엔티티를 mock 으로 생성하여 getId/getTitle 반환값 설정
         Book book1 = mock(Book.class);
         when(book1.getId()).thenReturn(101L);
         when(book1.getTitle()).thenReturn("Java Programming");
@@ -484,12 +495,8 @@ class CouponServiceTest {
         verify(couponRepository).findByIdWithFetch(couponId);
         verify(policyRepository).findById(1L);
         verify(categoryRepository).findAllById(categoryIds);
-
         verifyNoMoreInteractions(couponRepository);
     }
-
-
-
 
     @Test
     void deleteCouponById_delegatesToRepository() {
@@ -497,4 +504,3 @@ class CouponServiceTest {
         verify(couponRepository).deleteById(100L);
     }
 }
-
