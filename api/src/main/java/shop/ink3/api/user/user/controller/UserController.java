@@ -63,19 +63,19 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getSocialUser(provider, providerUserId)));
     }
 
-    @GetMapping(params = {"birthday", "!keyword"})
-    public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
-            @RequestParam(required = false) LocalDate birthday
-    ) {
-        return ResponseEntity.ok(CommonResponse.success(userService.getUsersByBirthday(birthday)));
-    }
-
-    @GetMapping(params = {"!birthday"})
+    @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<UserListItemDto>>> getUsers(
             @RequestParam(required = false) String keyword,
             Pageable pageable
     ) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUsersForManagement(keyword, pageable)));
+    }
+
+    @GetMapping(params = "birthday")
+    public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
+            @RequestParam LocalDate birthday
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUsersByBirthday(birthday)));
     }
 
     @GetMapping("/statistics")
@@ -132,9 +132,15 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{userId}/activate")
+    @PatchMapping(value = "/{userId}/activate", params = "userId")
     public ResponseEntity<Void> activateUser(@PathVariable long userId) {
         userService.activateUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping(value = "/{loginId}/activate", params = "loginId")
+    public ResponseEntity<Void> activateUser(@PathVariable String loginId) {
+        userService.activateUser(loginId);
         return ResponseEntity.noContent().build();
     }
 

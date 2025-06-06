@@ -181,6 +181,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void activateUser(String loginId) {
+        User user = userRepository.findByLoginId(loginId).orElseThrow(() -> new UserNotFoundException(loginId));
+        user.activate();
+        userRepository.save(user);
+    }
+
     public void markAsDormantUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.markAsDormant();
