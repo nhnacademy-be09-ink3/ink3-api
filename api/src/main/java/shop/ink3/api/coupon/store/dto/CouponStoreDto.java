@@ -1,7 +1,7 @@
 package shop.ink3.api.coupon.store.dto;
 
 import java.time.LocalDateTime;
-import lombok.Getter;
+import shop.ink3.api.coupon.policy.entity.DiscountType;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.OriginType;
 
@@ -12,5 +12,9 @@ public record CouponStoreDto(
         LocalDateTime expiresAt,
         OriginType originType,
         Long originId,
-        CouponStatus status
+        CouponStatus status,
+        DiscountType discountType,
+        Integer discountValue,
+        Integer discountPercentage,
+        Integer maximumDiscountAmount
 ) {}

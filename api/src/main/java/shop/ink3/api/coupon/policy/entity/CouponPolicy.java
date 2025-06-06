@@ -36,9 +36,9 @@ public class CouponPolicy {
     @Column(name = "discount_type", nullable = false, length = 20)
     private DiscountType discountType;
 
-    private int discountValue;
-    private int discountPercentage;
-    private int maximumDiscountAmount;
+    private Integer discountValue;
+    private Integer discountPercentage;
+    private Integer maximumDiscountAmount;
     private LocalDateTime createdAt;
 
     public void update(String name, DiscountType discountType, Integer minimumOrderAmount, Integer discountValue, Integer discountPercentage,Integer maximumDiscountAmount) {

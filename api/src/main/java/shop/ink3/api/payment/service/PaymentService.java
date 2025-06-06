@@ -1,5 +1,6 @@
 package shop.ink3.api.payment.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
+import shop.ink3.api.coupon.store.service.CouponStoreService;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.entity.OrderStatus;
@@ -36,12 +40,14 @@ import shop.ink3.api.user.user.dto.UserPointRequest;
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
+    private static final String PAYMENT_CANCEL_MESSAGE ="결제 취소로 인한 환불금액";
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private final OrderBookService orderBookService;
     private final OrderPointService orderPointService;
     private final PointService pointService;
+    private final CouponStoreService couponStoreService;
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
     private final ApplicationEventPublisher eventPublisher;
@@ -69,7 +75,7 @@ public class PaymentService {
         orderService.updateOrderStatus(confirmRequest.orderId(), new OrderStatusUpdateRequest(OrderStatus.CONFIRMED));
         Payment savePayment = paymentRepository.save(payment);
 
-        if(!Objects.isNull(confirmRequest.userId())){
+        if (!Objects.isNull(confirmRequest.userId())) {
             // 비동기 이벤트 핸들러 ( 포인트 사용 내역 및 적립 내역 추가 )
             eventPublisher.publishEvent(new PointHistoryAfterPaymentEven(
                     confirmRequest.userId(),
@@ -81,16 +87,20 @@ public class PaymentService {
         return PaymentResponse.from(savePayment);
     }
 
-    //TODO : 사용된 쿠폰 재발급
-    // 결제 실패 (회원 + 비회원)
+    // 결제 실패
     public void failPayment(long orderId, long userId) {
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
         // 주문 상태 변경
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.FAILED));
+        // 사용된 쿠폰 되돌리기 (포인트는 결제 후 이기 때문에 처리 X)
+        orderBookService.getOrderCouponStoreId(orderId)
+                .ifPresent(couponStoreId -> {
+                    CouponStoreUpdateRequest request = new CouponStoreUpdateRequest(CouponStatus.READY, null);
+                    couponStoreService.updateStore(couponStoreId, request);
+                });
     }
 
-    //TODO : 사용된 쿠폰 재발급
     // 결제 취소
     public void cancelPayment(long orderId, long userId) {
         OrderResponse orderResponse = orderService.getOrder(orderId);
@@ -102,13 +112,18 @@ public class PaymentService {
         // 금액 환불
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException(orderId));
-        pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), "결제 취소로 인한 환불금액"));
+        pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), PAYMENT_CANCEL_MESSAGE));
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
         // 주문 상태 변경
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.CANCELLED));
-
+        // 사용된 쿠폰 되돌리기
+        orderBookService.getOrderCouponStoreId(orderId)
+                .ifPresent(couponStoreId -> {
+                    CouponStoreUpdateRequest request = new CouponStoreUpdateRequest(CouponStatus.READY, null);
+                    couponStoreService.updateStore(couponStoreId, request);
+                });
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(orderId);
         for (OrderPoint orderPoint : orderPoints) {
