@@ -1,7 +1,9 @@
 package shop.ink3.api.order.orderBook.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,7 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
@@ -59,6 +62,11 @@ public class OrderBookService {
             book.decreaseQuantity(request.getQuantity());
             bookRepository.save(book);
 
+            // 쿠폰 상태 변경
+            if(couponStore != null ){
+                couponStore.update(CouponStatus.USED, LocalDateTime.now());
+            }
+
             OrderBook orderBook = OrderBook.builder()
                     .order(order)
                     .book(book)
@@ -85,6 +93,15 @@ public class OrderBookService {
         Page<OrderBook> page = orderBookRepository.findAllByOrderId(orderId, pageable);
         Page<OrderBookResponse> pageResponse = page.map(OrderBookResponse::from);
         return PageResponse.from(pageResponse);
+    }
+
+    // 주문에 대한 쿠폰 사용 내역 조회 (없을 경우 null 반환)
+    @Transactional(readOnly = true)
+    public Optional<Long> getOrderCouponStoreId(long orderId) {
+        return orderBookRepository.findAllByOrderId(orderId).stream()
+                .filter(ob -> ob.getCouponStore() != null)
+                .map(ob -> ob.getCouponStore().getId())
+                .findFirst();
     }
 
     // 수정

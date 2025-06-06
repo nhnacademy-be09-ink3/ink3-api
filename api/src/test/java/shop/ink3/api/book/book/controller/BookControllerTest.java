@@ -76,6 +76,7 @@ class BookControllerTest {
         this.mainBookResponse = new MainBookResponse(
             1L, "책 제목", 20000, 18000, 10,
             "https://example.com/image.jpg",
+            true,
             List.of("홍길동 (저자)")
         );
     }
