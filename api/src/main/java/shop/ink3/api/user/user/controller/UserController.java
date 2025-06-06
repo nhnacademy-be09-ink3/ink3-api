@@ -2,10 +2,7 @@ package shop.ink3.api.user.user.controller;
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.social.dto.SocialUserResponse;
+import shop.ink3.api.user.user.dto.IdentifierAvailabilityResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
@@ -32,6 +30,7 @@ import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.dto.UserStatisticsResponse;
+import shop.ink3.api.user.user.dto.UserStatusResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.service.UserService;
 
@@ -84,19 +83,23 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.success(userService.getUserStatistics()));
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<CommonResponse<Map<String, Boolean>>> checkUserIdentifierAvailability(
-            @RequestParam(required = false) String loginId,
-            @RequestParam(required = false) String email
+    @GetMapping("/status")
+    public ResponseEntity<CommonResponse<UserStatusResponse>> getUserStatus(@RequestParam String loginId) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUserStatus(loginId)));
+    }
+
+    @GetMapping(value = "/available", params = "loginId")
+    public ResponseEntity<CommonResponse<IdentifierAvailabilityResponse>> checkLoginIdAvailable(
+            @RequestParam String loginId
     ) {
-        Map<String, Boolean> result = new HashMap<>();
-        if (Objects.nonNull(loginId)) {
-            result.put("loginIdAvailable", userService.isLoginIdAvailable(loginId));
-        }
-        if (Objects.nonNull(email)) {
-            result.put("emailAvailable", userService.isEmailAvailable(email));
-        }
-        return ResponseEntity.ok(CommonResponse.success(result));
+        return ResponseEntity.ok(CommonResponse.success(userService.isLoginIdAvailable(loginId)));
+    }
+
+    @GetMapping(value = "/available", params = "email")
+    public ResponseEntity<CommonResponse<IdentifierAvailabilityResponse>> checkEmailAvailable(
+            @RequestParam String email
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.isEmailAvailable(email)));
     }
 
     @PostMapping
