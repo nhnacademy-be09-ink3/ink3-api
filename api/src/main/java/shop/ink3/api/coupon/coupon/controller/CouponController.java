@@ -3,6 +3,8 @@ package shop.ink3.api.coupon.coupon.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
@@ -42,8 +45,8 @@ public class CouponController {
 
     /** 전체 쿠폰 조회 */
     @GetMapping
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getAll() {
-        List<CouponResponse> list = couponService.getAllCoupons();
+    public ResponseEntity<CommonResponse<PageResponse<CouponResponse>>> getAll(Pageable pageable) {
+        PageResponse<CouponResponse> list = couponService.getAllCoupons(pageable);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
@@ -65,19 +68,19 @@ public class CouponController {
 
     /** book ID로 쿠폰 조회 */
     @GetMapping("/by-book/{bookId}")
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getByBookId(
-            @PathVariable long bookId
-    ) {
-        List<CouponResponse> list = couponService.getCouponsByBookId(bookId);
+    public ResponseEntity<CommonResponse<PageResponse<CouponResponse>>> getByBookId(
+            @PathVariable long bookId,
+            Pageable pageable) {
+        PageResponse<CouponResponse> list = couponService.getCouponsByBookId(bookId, pageable);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
     /** category ID로 쿠폰 조회 */
     @GetMapping("/by-category/{categoryId}")
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getByCategoryId(
-            @PathVariable long categoryId
-    ) {
-        List<CouponResponse> list = couponService.getCouponsByCategoryId(categoryId);
+    public ResponseEntity<CommonResponse<PageResponse<CouponResponse>>> getByCategoryId(
+            @PathVariable long categoryId,
+            Pageable pageable) {
+        PageResponse<CouponResponse> list = couponService.getCouponsByCategoryId(categoryId, pageable);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 

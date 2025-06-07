@@ -1,12 +1,12 @@
 package shop.ink3.api.coupon.policy.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.policy.dto.PolicyCreateRequest;
 import shop.ink3.api.coupon.policy.dto.PolicyResponse;
@@ -20,12 +20,12 @@ import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 @Service
 public class PolicyService {
     private final PolicyRepository policyRepository;
-
+    @Transactional(readOnly = true)
     public PageResponse<PolicyResponse> getPolicy(Pageable pageable) {
         Page<CouponPolicy> policies = policyRepository.findAll(pageable);
         return PageResponse.from(policies.map(PolicyResponse::from));
     }
-
+    @Transactional(readOnly = true)
     public PolicyResponse getPolicyById(long policyId) {
         CouponPolicy policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new PolicyNotFoundException("없는 쿠폰 정책"));
