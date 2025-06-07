@@ -23,6 +23,8 @@ import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponService;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
+import shop.ink3.api.coupon.policy.entity.CouponPolicy;
+import shop.ink3.api.coupon.policy.entity.DiscountType;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
@@ -320,16 +322,21 @@ class CouponStoreServiceTest {
         // 조상 카테고리 없다고 가정
         when(categoryRepository.findAllAncestors(5L)).thenReturn(List.of());
 
-        // categoryCouponService -> no category-based coupon
-        when(categoryCouponService.getCategoryCouponsWithFetch(Set.of(5L))).thenReturn(List.of());
-
         // 3) WELCOME, 4) BIRTHDAY IDs: 각각 간단히 빈 리스트로
         // Stub findWithCouponByUserAndOriginAndStatus for each origin
         var now = LocalDateTime.now();
+        var policy = mock(CouponPolicy.class);
+        when(policy.getDiscountType()).thenReturn(DiscountType.RATE);
+        when(policy.getDiscountValue()).thenReturn(null);
+        when(policy.getDiscountPercentage()).thenReturn(10);
+        when(policy.getMaximumDiscountAmount()).thenReturn(1000);
+
+        var coupon = mock(Coupon.class);
+        when(coupon.getCouponPolicy()).thenReturn(policy);
         var validStore = CouponStore.builder()
                 .id(1L)
                 .user(user)
-                .coupon(mock(Coupon.class))
+                .coupon(coupon)
                 .originType(OriginType.BOOK)
                 .status(CouponStatus.READY)
                 .issuedAt(LocalDateTime.now())
@@ -337,10 +344,11 @@ class CouponStoreServiceTest {
         // 만료되지 않은 쿠폰(ExpiresAt이 미래)
         when(validStore.getCoupon().getExpiresAt()).thenReturn(now.plusDays(1));
 
+        var expiredCoupon = mock(Coupon.class);
         var expiredStore = CouponStore.builder()
                 .id(2L)
                 .user(user)
-                .coupon(mock(Coupon.class))
+                .coupon(expiredCoupon)
                 .originType(OriginType.BOOK)
                 .status(CouponStatus.READY)
                 .issuedAt(LocalDateTime.now())
