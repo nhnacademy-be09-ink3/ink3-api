@@ -20,7 +20,7 @@ public record BookCreateRequest(
         @NotNull @PositiveOrZero Integer salePrice,
         @NotNull @PositiveOrZero Integer quantity,
         @NotNull BookStatus status,
-        boolean isPackable,
+        Boolean isPackable,
         @NotNull Long publisherId,
 
         @NotEmpty(message = "카테고리는 최소 1개 이상이어야 합니다.")

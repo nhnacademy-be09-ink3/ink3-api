@@ -20,7 +20,7 @@ public record BookUpdateRequest(
         @NotNull @PositiveOrZero Integer salePrice,
         @NotNull @PositiveOrZero Integer quantity,
         @NotNull BookStatus status,
-        boolean isPackable,
+        Boolean isPackable,
         @NotBlank String thumbnailUrl,
         @NotNull Long publisherId,
 
