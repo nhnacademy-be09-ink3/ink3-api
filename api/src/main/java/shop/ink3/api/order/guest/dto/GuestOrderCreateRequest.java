@@ -1,17 +1,23 @@
 package shop.ink3.api.order.guest.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
+import shop.ink3.api.order.order.entity.OrderStatus;
 
-public record GuestOrderCreateRequest(
-        @NotNull
-        Long orderId,
-        @Email
-        @NotBlank
-        String email,
-        @NotBlank
-        String password
-) {
-
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+public class GuestOrderCreateRequest {
+    @NotBlank
+    @Length(max = 20)
+    private String ordererName;
+    @NotBlank
+    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$")
+    private String ordererPhone;
 }

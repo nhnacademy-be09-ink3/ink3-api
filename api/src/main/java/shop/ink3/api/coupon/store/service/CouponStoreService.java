@@ -1,110 +1,231 @@
 package shop.ink3.api.coupon.store.service;
 
-import java.time.LocalDate;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.time.Year;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.category.repository.CategoryRepository;
+import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
+import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
+import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponService;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
-import shop.ink3.api.coupon.store.dto.CouponStoreCreateRequest;
+import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
+import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
 import shop.ink3.api.coupon.store.exception.DuplicateCouponException;
-import shop.ink3.api.coupon.store.repository.UserCouponRepository;
+import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
 
-@Transactional
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CouponStoreService {
 
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
-    private final UserCouponRepository userCouponRepository;
+    private final BookCouponRepository bookCouponRepository;
+    private final CategoryCouponService categoryCouponService;
+    private final CouponStoreRepository couponStoreRepository;
+    private final BookRepository bookRepository;
+    private final CategoryRepository categoryRepository;
 
-    /** 1) 쿠폰 저장소 생성 */
-    public CouponStore createStore(CouponStoreCreateRequest req) {
+    /**
+     * 1) 쿠폰 발급
+     */
+    @Transactional // write 트랜잭션
+    public CouponStore issueCoupon(CouponIssueRequest req) {
+        // 1) 회원/쿠폰 존재 검증
         User user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
-        Coupon coupon = couponRepository.findById(req.couponId())
-                .orElseThrow(() -> new CouponNotFoundException("쿠폰이 없습니다. id=" + req.couponId()));
+        Coupon policy = couponRepository.findById(req.couponId())
+                .orElseThrow(() -> new CouponNotFoundException("Coupon not found"));
 
-        if (isAlreadyIssued(req.userId(), req.couponId())) {
-            throw new DuplicateCouponException(
-                    "이미 발급된 쿠폰입니다. user=" + req.userId() + ", coupon=" + req.couponId()
-            );
+        // 2) 중복 발급 검사 (originId 유·무 상관없이)
+        if (req.originId() == null) {
+            if (couponStoreRepository.existsByUserIdAndOriginType(user.getId(), req.originType())) {
+                throw new DuplicateCouponException("Duplicate coupon found");
+            }
+        } else {
+            if (couponStoreRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginId(
+                    user.getId(), policy.getId(), req.originType(), req.originId())) {
+                throw new DuplicateCouponException("Duplicate coupon found");
+            }
         }
 
-        CouponStore store = CouponStore.builder()
-                .user(user)
-                .coupon(coupon)
+        CouponStore couponStore = CouponStore.builder()
+                .user(userRepository.getReferenceById(req.userId()))
+                .coupon(couponRepository.getReferenceById(req.couponId()))
+                .originType(req.originType())
+                .originId(req.originId())
                 .status(CouponStatus.READY)
                 .usedAt(null)
                 .issuedAt(LocalDateTime.now())
                 .build();
-
-        userCouponRepository.save(store);
-        return store;
+        couponStoreRepository.save(couponStore);
+        return couponStore;
     }
 
-    /** 2) 유저의 모든 쿠폰 조회 */
+    /**
+     * 2) 유저의 모든 쿠폰 조회
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByUserId(Long userId) {
-        return userCouponRepository.findByUserId(userId);
+        return couponStoreRepository.findByUserId(userId);
     }
 
-    /** 3) 특정 쿠폰을 가진 유저들 조회 */
+    @Transactional(readOnly = true)
+    public Page<CouponStore> getStoresPagingByUserId(Long userId, Pageable pageable) {
+        return couponStoreRepository.findByUserId(userId, pageable);
+    }
+
+    /**
+     * 3) 특정 쿠폰을 가진 유저들 조회
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getStoresByCouponId(Long couponId) {
         // 이 메서드가 없다면 UserCouponRepository에 추가해야 함
-        return userCouponRepository.findByCouponId(couponId);
+        return couponStoreRepository.findByCouponId(couponId);
     }
 
-    /** fix 예정 */
-    /** 4) 미사용 쿠폰만 조회 */
+    /**
+     * 4) 미사용 쿠폰만 조회
+     */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
 
-        return userCouponRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
+        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
     }
 
-    /** 5) 사용 여부 업데이트 */
+    // 미사용 쿠폰 페이징 조회
+    @Transactional(readOnly = true)
+    public Page<CouponStore> getUnusedStoresPagingByUserId(Long userId, Pageable pageable) {
+        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY, pageable);
+    }
+
+    // 사용 및 만료 쿠폰 페이징 조회
+    @Transactional(readOnly = true)
+    public Page<CouponStore> getUsedOrExpiredStoresPagingByUserId(Long userId, Pageable pageable) {
+        return couponStoreRepository.findByUserIdAndStatusIn(userId,
+            List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
+    }
+
+    /**
+     * 5) 사용 여부 업데이트
+     */
+    @Transactional
     public CouponStore updateStore(Long storeId, CouponStoreUpdateRequest req) {
-        CouponStore store = userCouponRepository.findById(storeId)
-                .orElseThrow(() -> new CouponStoreNotFoundException(storeId + " coupon not found"));
-        store.setStatus(req.couponStatus());
-        store.setUsedAt(req.usedAt());
-
-        return store;
+        CouponStore store = couponStoreRepository.findById(storeId)
+                .orElseThrow(() -> new CouponStoreNotFoundException(
+                        String.format("CouponStore not found: %d", storeId)));
+        store.update(req.couponStatus(), req.usedAt());
+        return store; // 트랜잭션 커밋 시점에 자동으로 반영
     }
 
-    /** 6) 삭제 */
+    /**
+     * 6) 삭제
+     */
+    @Transactional
     public void deleteStore(Long id) {
-        if (!userCouponRepository.existsById(id)) {
-            throw new CouponStoreNotFoundException(id + " coupon not found");
+        try {
+            couponStoreRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new CouponStoreNotFoundException(
+                    String.format("CouponStore not found: %d", id));
         }
-        userCouponRepository.deleteById(id);
     }
 
-    /** 7) 중복 쿠폰 발급 여부 확인 */
     @Transactional(readOnly = true)
-    public boolean isAlreadyIssued(Long userId, Long couponId) {
-        return userCouponRepository.existsByUserIdAndCouponId(userId, couponId);
+    public List<CouponStoreDto> getApplicableCouponStores(Long userId, Long bookId) {
+        // 1) BOOK 기반 쿠폰
+        List<Long> bookCouponIds = bookCouponRepository.findIdsByBookId(bookId);
+        List<CouponStore> bookStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.BOOK, bookCouponIds, CouponStatus.READY);
+
+        // 2) CATEGORY 기반 쿠폰
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
+
+        // 직접 매핑된 카테고리 ID들
+        List<Long> directCategoryIds = book.getBookCategories().stream()
+                .map(bc -> bc.getCategory().getId())
+                .toList();
+
+        // 조상 카테고리 포함해서 ID 수집
+        Set<Long> allCategoryIds = new HashSet<>(directCategoryIds);
+        for (Long catId : directCategoryIds) {
+            List<Category> ancestors = categoryRepository.findAllAncestors(catId);
+            for (Category parent : ancestors) {
+                allCategoryIds.add(parent.getId());
+            }
+        }
+
+        // CategoryCoupon 엔티티를 fetch join 으로 가져오고 → ID만 뽑아 내기
+        List<Long> categoryCouponIds = categoryCouponService
+                .getCategoryCouponsWithFetch(allCategoryIds)
+                .stream()
+                .map(cc -> cc.getId())
+                .toList();
+
+        List<CouponStore> categoryStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.CATEGORY, categoryCouponIds, CouponStatus.READY);
+
+        // 3) WELCOME 쿠폰 (coupon만 미리 fetch해서 가져옴)
+        List<CouponStore> welcomeStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.WELCOME, CouponStatus.READY);
+
+        // 4) BIRTHDAY 쿠폰
+        List<CouponStore> birthdayStores = couponStoreRepository
+                .findWithCouponByUserAndOriginAndStatus(
+                        userId, OriginType.BIRTHDAY, CouponStatus.READY);
+
+        // 5) 결합 후 기한 필터링, → 엔티티를 DTO로 매핑
+        return Stream.of(bookStores, categoryStores, welcomeStores, birthdayStores)
+                .flatMap(List::stream)
+                .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
+                .map(this::toDto)
+                .toList();
     }
 
-    /** 8) 정기적으로 발급되는 쿠폰 처리 (생일쿠폰) */
-    @Transactional(readOnly = true)
-    public boolean isAlreadyIssuedBirthday(Long userId, Long couponId) {
-
-        return userCouponRepository.existsByUserIdAndCouponIdAndYear(
-                userId, couponId, Year.now().getValue());
+    private CouponStoreDto toDto(CouponStore cs) {
+        return new CouponStoreDto(
+                cs.getId(),
+                cs.getCoupon().getId(),
+                cs.getCoupon().getName(),
+                cs.getCoupon().getExpiresAt(),
+                cs.getOriginType(),
+                cs.getOriginId(),
+                cs.getStatus(),
+                cs.getCoupon().getCouponPolicy().getDiscountType(),
+                (cs.getCoupon().getCouponPolicy().getDiscountValue() != null)
+                        ? cs.getCoupon().getCouponPolicy().getDiscountValue()
+                        : null,
+                (cs.getCoupon().getCouponPolicy().getDiscountPercentage() != null)
+                        ? cs.getCoupon().getCouponPolicy().getDiscountPercentage()
+                        : null,
+                cs.getCoupon().getCouponPolicy().getMaximumDiscountAmount()
+        );
     }
 }

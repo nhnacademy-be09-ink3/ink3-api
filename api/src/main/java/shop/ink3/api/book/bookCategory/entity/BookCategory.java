@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.category.entity.Category;
 
@@ -37,4 +38,8 @@ public class BookCategory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    public BookCategory(Category bc1) {
+        this.category = bc1;
+    }
 }

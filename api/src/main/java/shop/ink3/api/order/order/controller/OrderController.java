@@ -21,6 +21,7 @@ import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusRequest;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
+import shop.ink3.api.order.order.dto.OrderWithDetailsResponse;
 import shop.ink3.api.order.order.service.OrderMainService;
 import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
@@ -33,6 +34,15 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderMainService orderMainService;
 
+    // 주문 생성
+    @PostMapping
+    public ResponseEntity<CommonResponse<OrderResponse>> createOrder(
+            @RequestBody OrderFormCreateRequest orderFormCreateRequest) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(CommonResponse.create(orderMainService.createOrderForm(orderFormCreateRequest)));
+    }
+
     // 특정 주문 조회
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<OrderResponse>> getOrder(
@@ -42,7 +52,7 @@ public class OrderController {
 
     // 사용자의 주문목록 조회
     @GetMapping("/me")
-    public ResponseEntity<CommonResponse<PageResponse<OrderResponse>>> getOrderListByUser(
+    public ResponseEntity<CommonResponse<PageResponse<OrderWithDetailsResponse>>> getOrderListByUser(
             HttpServletRequest request, Pageable pageable) {
         long userId = Long.parseLong(request.getHeader(HEADER_USER_ID));
         return ResponseEntity.ok(
@@ -91,15 +101,6 @@ public class OrderController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         orderService.getOrderListByStatus(statusRequest, pageable)));
-    }
-
-    // 주문 생성
-    @PostMapping
-    public ResponseEntity<CommonResponse<OrderResponse>> createOrder(
-            @RequestBody OrderFormCreateRequest orderFormCreateRequest) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(CommonResponse.create(orderMainService.createOrderForm(orderFormCreateRequest)));
     }
 
     // 주문 수정

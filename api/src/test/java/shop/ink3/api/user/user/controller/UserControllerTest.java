@@ -24,9 +24,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import shop.ink3.api.coupon.rabbitMq.produce.WelcomeCouponProducer;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
+import shop.ink3.api.user.user.dto.IdentifierAvailabilityResponse;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
@@ -47,6 +49,9 @@ class UserControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @MockitoBean
+    WelcomeCouponProducer welcomeCouponProducer;
 
     @MockitoBean
     UserService userService;
@@ -136,7 +141,7 @@ class UserControllerTest {
         User user = User.builder().id(1L).loginId("test").password("test").status(UserStatus.ACTIVE).build();
         UserAuthResponse response = UserAuthResponse.from(user);
         when(userService.getUserAuth("test")).thenReturn(response);
-        mockMvc.perform(get("/users/auth/test"))
+        mockMvc.perform(get("/users/test/auth"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
@@ -149,7 +154,7 @@ class UserControllerTest {
     @Test
     void getUserAuthWithNotFound() throws Exception {
         when(userService.getUserAuth("test")).thenThrow(new UserAuthNotFoundException("test"));
-        mockMvc.perform(get("/users/auth/test"))
+        mockMvc.perform(get("/users/test/auth"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -160,36 +165,58 @@ class UserControllerTest {
     }
 
     @Test
-    void checkUserIdentifierAvailability() throws Exception {
-        when(userService.isLoginIdAvailable("test")).thenReturn(true);
-        when(userService.isEmailAvailable("test@test.com")).thenReturn(true);
-        mockMvc.perform(get("/users/check")
-                        .queryParam("loginId", "test")
-                        .queryParam("email", "test@test.com"))
+    void checkLoginIdAvailable() throws Exception {
+        when(userService.isLoginIdAvailable("test")).thenReturn(new IdentifierAvailabilityResponse(true));
+        mockMvc.perform(get("/users/available")
+                        .queryParam("loginId", "test"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data.loginIdAvailable").value(true))
-                .andExpect(jsonPath("$.data.emailAvailable").value(true))
+                .andExpect(jsonPath("$.data.available").value(true))
                 .andDo(print());
     }
 
     @Test
-    void checkUserIdentifierAvailabilityWithInvalidInput() throws Exception {
-        when(userService.isLoginIdAvailable("test")).thenReturn(false);
-        when(userService.isEmailAvailable("test@test.com")).thenReturn(false);
-        mockMvc.perform(get("/users/check")
-                        .queryParam("loginId", "test")
+    void checkLoginIdAvailableWithInvalidInput() throws Exception {
+        when(userService.isLoginIdAvailable("test")).thenReturn(new IdentifierAvailabilityResponse(false));
+        mockMvc.perform(get("/users/available")
+                        .queryParam("loginId", "test"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data.available").value(false))
+                .andDo(print());
+    }
+
+    @Test
+    void checkEmailAvailable() throws Exception {
+        when(userService.isEmailAvailable("test@test.com")).thenReturn(new IdentifierAvailabilityResponse(true));
+        mockMvc.perform(get("/users/available")
                         .queryParam("email", "test@test.com"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.data.loginIdAvailable").value(false))
-                .andExpect(jsonPath("$.data.emailAvailable").value(false))
+                .andExpect(jsonPath("$.data.available").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    void checkEmailAvailableWithInvalidInput() throws Exception {
+        when(userService.isEmailAvailable("test@test.com")).thenReturn(new IdentifierAvailabilityResponse(false));
+        mockMvc.perform(get("/users/available")
+                        .queryParam("email", "test@test.com"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.data.available").value(false))
                 .andDo(print());
     }
 

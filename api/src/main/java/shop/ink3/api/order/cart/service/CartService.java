@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.common.exception.BookNotFoundException;
+import shop.ink3.api.coupon.store.dto.CouponStoreDto;
+import shop.ink3.api.coupon.store.service.CouponStoreService;
+import shop.ink3.api.order.cart.dto.CartCouponResponse;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
@@ -30,6 +33,7 @@ public class CartService {
     private static final String CART_KEY_PREFIX = "cart:user:";
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CouponStoreService couponStoreService;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final CartRepository cartRepository;
@@ -86,6 +90,24 @@ public class CartService {
         }
 
         return responses;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CartCouponResponse> getCartItemsWithCoupons(Long userId) {
+        List<Cart> carts = cartRepository.findByUserId(userId);
+
+        return carts.stream()
+            .map(cart -> {
+                List<CouponStoreDto> coupons = couponStoreService.getApplicableCouponStores(userId, cart.getBook().getId());
+                return CartCouponResponse.from(cart, coupons);
+            })
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CartResponse> getCartItems(Long userId) {
+        List<Cart> carts = cartRepository.findByUserId(userId);
+        return carts.stream().map(CartResponse::from).toList();
     }
 
     public void deleteCartItems(Long userId) {

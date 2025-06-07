@@ -17,6 +17,7 @@ public class OrderBookResponse {
     private Long couponId;
     private String bookName;
     private Integer bookSalePrice;
+    private String thumbnailUrl;
     private String packagingName;
     private Integer packagingPrice;
     private String couponName;
@@ -26,18 +27,19 @@ public class OrderBookResponse {
 
     public static OrderBookResponse from(OrderBook orderBook) {
         return new OrderBookResponse(
-                orderBook.getId(),
-                orderBook.getOrder().getId(),
-                orderBook.getBook().getId(),
-                orderBook.getPackaging() != null ? orderBook.getPackaging().getId() : null,
-                orderBook.getCouponStore() != null ? orderBook.getCouponStore().getId() : null,
-                orderBook.getBook().getTitle(),
-                orderBook.getBook().getSalePrice(),
-                orderBook.getPackaging() != null ? orderBook.getPackaging().getName() : null,
-                orderBook.getPackaging() != null ? orderBook.getPackaging().getPrice() : null,
-                orderBook.getCouponStore() != null ? orderBook.getCouponStore().getCoupon().getName() : null,
-                orderBook.getPrice(),
-                orderBook.getQuantity()
+            orderBook.getId(),
+            orderBook.getOrder().getId(),
+            orderBook.getBook().getId(),
+            orderBook.getPackaging() != null ? orderBook.getPackaging().getId() : null,
+            orderBook.getCouponStore() != null ? orderBook.getCouponStore().getId() : null,
+            orderBook.getBook().getTitle(),
+            orderBook.getBook().getSalePrice(),
+            orderBook.getBook().getThumbnailUrl(),
+            orderBook.getPackaging() != null ? orderBook.getPackaging().getName() : null,
+            orderBook.getPackaging() != null ? orderBook.getPackaging().getPrice() : null,
+            orderBook.getCouponStore() != null ? orderBook.getCouponStore().getCoupon().getName() : null,
+            orderBook.getPrice(),
+            orderBook.getQuantity()
         );
     }
 }

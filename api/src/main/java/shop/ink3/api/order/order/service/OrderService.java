@@ -9,24 +9,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.coupon.store.entity.CouponStore;
-import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
-import shop.ink3.api.coupon.store.repository.UserCouponRepository;
 import shop.ink3.api.order.order.dto.OrderCreateRequest;
 import shop.ink3.api.order.order.dto.OrderDateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusRequest;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
+import shop.ink3.api.order.order.dto.OrderWithDetailsResponse;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
-import shop.ink3.api.order.refundPolicy.service.RefundPolicyService;
-import shop.ink3.api.user.point.dto.PointHistoryResponse;
-import shop.ink3.api.user.point.entity.PointHistory;
-import shop.ink3.api.user.point.exception.PointHistoryNotFoundException;
-import shop.ink3.api.user.point.repository.PointHistoryRepository;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
@@ -38,7 +31,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
-    // 생성
+    // 생성 (회원)
     public OrderResponse createOrder(OrderCreateRequest request) {
         User user = null;
         if (Objects.nonNull(request.getUserId())) {
@@ -48,14 +41,14 @@ public class OrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .status(OrderStatus.CONFIRMED)
+                .status(OrderStatus.CREATED)
                 .orderedAt(LocalDateTime.now())
                 .ordererName(request.getOrdererName())
                 .ordererPhone(request.getOrdererPhone())
                 .build();
 
         Order saveOrder = orderRepository.save(order);
-        saveOrder.setOrderUUID(generateOrderUUID(saveOrder.getId()));
+        saveOrder.assignOrderUUID(generateOrderUUID(saveOrder.getId()));
         orderRepository.save(saveOrder);
         return OrderResponse.from(saveOrder);
     }
@@ -70,10 +63,9 @@ public class OrderService {
 
     // 사용자의 주문 리스트 조회 (사용자)
     @Transactional(readOnly = true)
-    public PageResponse<OrderResponse> getOrderListByUser(long userId, Pageable pageable) {
-        Page<Order> page = orderRepository.findAllByUserId(userId, pageable);
-        Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
-        return PageResponse.from(pageResponse);
+    public PageResponse<OrderWithDetailsResponse> getOrderListByUser(long userId, Pageable pageable) {
+        Page<OrderWithDetailsResponse> orderWithDetailsResponsePage = orderRepository.findAllByUserId(userId, pageable);
+        return PageResponse.from(orderWithDetailsResponsePage);
     }
 
     // 사용자 + 상태별 주문 조회 (사용자)
@@ -103,7 +95,6 @@ public class OrderService {
         Page<OrderResponse> pageResponse = page.map(OrderResponse::from);
         return PageResponse.from(pageResponse);
     }
-
 
     // 전체 주문 리스트 조회 (관리자)
     @Transactional(readOnly = true)
@@ -138,7 +129,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(long orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.updateStatus(request.getOrderStatus());
-        return OrderResponse.from(order);
+        return OrderResponse.from(orderRepository.save(order));
     }
 
 
@@ -152,7 +143,6 @@ public class OrderService {
         if (orderUUID.length() > 64) {
             orderUUID = orderUUID.substring(0, 64);
         }
-
         return orderUUID;
     }
 }

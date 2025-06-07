@@ -18,7 +18,7 @@ public class PaymentResponseParserResolver {
     public PaymentParser getPaymentParser(String paymentType){
         PaymentParser paymentParser = parserMap.get(paymentType.toUpperCase());
         if(Objects.isNull(paymentParser)){
-            // fix : 예외처리를 어떻게 할지.
+            //TODO 예외처리를 어떻게 할지.
             throw new IllegalArgumentException();
         }
         return paymentParser;

@@ -1,6 +1,9 @@
 package shop.ink3.api.book.book.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record AuthorDto(
-        String name,
-        String role
+        @NotBlank Long authorId,
+        @NotBlank String authorName,
+        @NotBlank String role
 ) {}

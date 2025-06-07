@@ -24,14 +24,16 @@ import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookRegisterRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
+import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
 import shop.ink3.api.book.book.exception.InvalidCategoryDepthException;
 import shop.ink3.api.book.book.exception.InvalidCategorySelectionException;
-import shop.ink3.api.book.book.external.aladin.AladinClient;
 import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
@@ -42,30 +44,83 @@ import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.exception.TagNotFoundException;
 import shop.ink3.api.book.tag.repository.TagRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.review.review.repository.ReviewRepository;
 
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class BookService {
     private final BookRepository bookRepository;
+    private final ReviewRepository reviewRepository;
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
-    private final AladinClient aladinClient;
 
     // 단건 조회
     @Transactional(readOnly = true)
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-        return BookResponse.from(book);
+        double averageRating = getAverageRating(bookId);
+
+        return BookResponse.from(book, averageRating);
+    }
+
+    @Transactional(readOnly = true)
+    public BookResponse getBookWithCategory(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        List<Category> categories = new ArrayList<>();
+        List<Category> list = book.getBookCategories()
+                .stream()
+                .map(BookCategory::getCategory)
+                .toList();
+        for(Category category:list) {
+            categories.addAll(categoryRepository.findAllAncestors(category.getId()));
+        }
+        return BookResponse.from(book, categories.stream().map(CategoryResponse::from).toList());
     }
 
     // 전체 조회
+
     @Transactional(readOnly = true)
     public PageResponse<BookResponse> getBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAll(pageable);
         return PageResponse.from(books.map(BookResponse::from));
+    }
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getTop5BestSellerBooks() {
+        Page<Book> top5BestSellerBooks = bookRepository.findBestSellerBooks(Pageable.ofSize(5));
+        return PageResponse.from(top5BestSellerBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getAllBestSellerBooks(Pageable pageable) {
+        Page<Book> bestSellerBooks = bookRepository.findBestSellerBooks(pageable);
+        return PageResponse.from(bestSellerBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getTop5NewBooks() {
+        Page<Book> top5RecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(Pageable.ofSize(5));
+        return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getAllNewBooks(Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(pageable);
+        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getTop5RecommendedBooks() {
+        Page<Book> top5RecommendedBooks = bookRepository.findRecommendedBooks(Pageable.ofSize(5));
+        return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MainBookResponse> getAllRecommendedBooks(Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findRecommendedBooks(pageable);
+        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
     public BookResponse createBook(BookCreateRequest request) {
@@ -215,8 +270,8 @@ public class BookService {
 
         List<AuthorDto> authorDtos = parseAuthors(dto.author());
         for (AuthorDto authorDto : authorDtos) {
-            Author author = authorRepository.findByName(authorDto.name())
-                    .orElseGet(() -> authorRepository.save(Author.builder().name(authorDto.name()).build()));
+            Author author = authorRepository.findByName(authorDto.authorName())
+                    .orElseGet(() -> authorRepository.save(Author.builder().name(authorDto.authorName()).build()));
             book.addBookAuthor(author, authorDto.role());
         }
 
@@ -234,7 +289,12 @@ public class BookService {
         return BookResponse.from(book);
     }
 
+    private double getAverageRating(Long bookId) {
+        return reviewRepository.findAverageRatingByBookId(bookId)
+                .orElse(0.0);
+    }
     // 카테고리는 최소 2단계
+
     private void validateCategoryDepth(List<Category> categories) {
         for (Category category : categories) {
             if (category.getParent() == null) {
@@ -242,9 +302,9 @@ public class BookService {
             }
         }
     }
-
     // 알라딘 API로 가져온 작가 이름 파싱
-    public static List<AuthorDto> parseAuthors(String authorString) {
+
+    public List<AuthorDto> parseAuthors(String authorString) {
         List<String> parts = Arrays.stream(authorString.split(","))
                 .map(String::trim)
                 .toList();
@@ -253,23 +313,23 @@ public class BookService {
 
         Pattern pattern = Pattern.compile("^(.*)\\(([^()]+)\\)$");
         String currentRole = null;
-
         for (int i = parts.size() - 1; i >= 0; i--) {
             String part = parts.get(i);
             Matcher matcher = pattern.matcher(part);
-
             if (matcher.matches()) {
                 String nameWithPossibleParens = matcher.group(1).trim();
                 currentRole = matcher.group(2).trim();
-                result.set(i, new AuthorDto(nameWithPossibleParens, currentRole));
+                Author author = authorRepository.findByName(nameWithPossibleParens).orElseThrow(() -> new AuthorNotFoundException(nameWithPossibleParens));
+                result.set(i, new AuthorDto(author.getId(),nameWithPossibleParens, currentRole));
             } else {
-                result.set(i, new AuthorDto(part, currentRole != null ? currentRole : "지은이"));
+                Author author = authorRepository.findByName(part).orElseThrow(() -> new AuthorNotFoundException(part));
+                result.set(i, new AuthorDto(author.getId(), part, currentRole != null ? currentRole : "지은이"));
             }
         }
         return result;
     }
-
     // 알라딘 api에서 가져온 카테고리 이름 분리 > 계층 구조 생성 (국내도서>소설/시/희곡/한국소설)
+
     public Category createCategoryHierarchy(String categoryPath) {
         String[] categoryNames = categoryPath.split(">");
         Category parent = null;

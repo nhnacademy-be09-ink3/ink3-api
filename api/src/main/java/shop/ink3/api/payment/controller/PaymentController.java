@@ -10,16 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
-import shop.ink3.api.payment.entity.Payment;
 import shop.ink3.api.payment.service.PaymentService;
-import shop.ink3.api.user.point.dto.PointHistoryCreateRequest;
-import shop.ink3.api.user.point.entity.PointHistory;
-import shop.ink3.api.user.point.eventListener.PointEventListener;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,32 +25,43 @@ public class PaymentController {
 
     // 결제 승인 API 호출 및 결과 저장
     @PostMapping("/confirm")
-    public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(@RequestBody PaymentConfirmRequest confirmRequest){
-        log.info("payType={}",confirmRequest.paymentType());
-        Payment payment = paymentService.callPaymentAPI(confirmRequest);
-        PaymentResponse paymentResponse = paymentService.createPayment(payment);
+    public ResponseEntity<CommonResponse<PaymentResponse>> confirmPayment(
+            @RequestBody PaymentConfirmRequest confirmRequest
+    ) {
+        log.info("payType={}", confirmRequest.paymentType());
+        String paymentApproveResponse = paymentService.callPaymentAPI(confirmRequest);
+        PaymentResponse paymentResponse = paymentService.createPayment(confirmRequest, paymentApproveResponse);
         return ResponseEntity.ok(CommonResponse.success(paymentResponse));
     }
 
-    // 결제 결과 조회
-    @GetMapping("/{orderId}")
-    public ResponseEntity<CommonResponse<PaymentResponse>> getPayment(@PathVariable long orderId){
-        return ResponseEntity
-                .ok(CommonResponse.success(paymentService.getPayment(orderId)));
+    // 결제 실패 처리 (회원)
+    @PostMapping("/{orderId}/fail")
+    public ResponseEntity<CommonResponse<Void>> failPayment(
+            @PathVariable long orderId,
+            @RequestHeader(value = "X-User-Id") long userId){
+        paymentService.failPayment(orderId, userId);
+        return ResponseEntity.noContent().build();
     }
 
     // 결제 취소
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<CommonResponse<Void>> cancelPayment(
             @PathVariable long orderId,
-            @RequestHeader("X-User-Id") long userId){
+            @RequestHeader("X-User-Id") long userId) {
         paymentService.cancelPayment(orderId, userId);
         return ResponseEntity.noContent().build();
     }
 
+    // 결제 결과 조회
+    @GetMapping("/{orderId}")
+    public ResponseEntity<CommonResponse<PaymentResponse>> getPayment(@PathVariable long orderId) {
+        return ResponseEntity
+                .ok(CommonResponse.success(paymentService.getPayment(orderId)));
+    }
+
     // 결제 내역 삭제
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<CommonResponse<Void>> deletePayment(@PathVariable long orderId){
+    public ResponseEntity<CommonResponse<Void>> deletePayment(@PathVariable long orderId) {
         paymentService.deletePayment(orderId);
         return ResponseEntity.noContent().build();
     }

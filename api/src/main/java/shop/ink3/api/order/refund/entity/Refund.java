@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,8 +41,21 @@ public class Refund {
     @Column(nullable = false, length = 255)
     private String details;
 
+    @Column(nullable = false)
+    private Integer RefundShippingFee;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private Boolean approved;
+
     public void update(RefundUpdateRequest request) {
         this.details = request.getDetails();
         this.reason = request.getReason();
+    }
+
+    public void approved(){
+        this.approved = true;
     }
 }

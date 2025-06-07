@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ import shop.ink3.api.order.refund.dto.RefundUpdateRequest;
 import shop.ink3.api.order.refund.entity.Refund;
 import shop.ink3.api.order.refund.exception.RefundNotFoundException;
 import shop.ink3.api.order.refund.service.RefundService;
+import shop.ink3.api.user.user.entity.User;
 
 @WebMvcTest(RefundController.class)
 class RefundControllerTest {
@@ -56,7 +58,8 @@ class RefundControllerTest {
     @DisplayName("반품 정보 조회 - 성공")
     void getRefund_성공() throws Exception {
         // given
-        Order order = Order.builder().id(1L).build();
+        User user = User.builder().id(1L).build();
+        Order order = Order.builder().id(1L).user(user).build();
         Refund refund = Refund.builder().id(1L).order(order).build();
         RefundResponse response = RefundResponse.from(refund);
         when(refundService.getOrderRefund(1L)).thenReturn(response);
@@ -95,8 +98,10 @@ class RefundControllerTest {
     @DisplayName("사용자의 반품 정보 리스트 조회 - 성공")
     void getUserRefundList_성공() throws Exception {
         // given
-        Order order1 = Order.builder().id(1L).build();
-        Order order2 = Order.builder().id(2L).build();
+        User user1 = User.builder().id(1L).build();
+        Order order1 = Order.builder().id(1L).user(user1).build();
+        User user2 = User.builder().id(1L).build();
+        Order order2 = Order.builder().id(1L).user(user2).build();
         PageResponse<RefundResponse> response = new PageResponse<>(
                 List.of(
                         RefundResponse.from(Refund.builder().id(1L).order(order1).reason("테스트 사유1").details("테스트 상세1").build()),
@@ -128,12 +133,16 @@ class RefundControllerTest {
     @DisplayName("반품 생성 - 성공")
     void createRefund_성공() throws Exception {
         // given
-        Order order = Order.builder().id(1L).build();
-        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
+        User user = User.builder().id(1L).build();
+        Order order = Order.builder().id(1L).user(user).build();
+        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세",3000, LocalDateTime.now(),true);
         Refund refund = Refund.builder()
                 .order(order)
                 .reason(request.getReason())
                 .details(request.getDetails())
+                .createdAt(request.getCreatedAt())
+                .RefundShippingFee(request.getRefundShippingFee())
+                .approved(request.getApproved())
                 .build();
         RefundResponse response = RefundResponse.from(refund);
         when(orderMainService.createRefund(any())).thenReturn(response);
@@ -155,7 +164,7 @@ class RefundControllerTest {
     @DisplayName("반품 생성 - 실패")
     void createRefund_실패() throws Exception {
         // given
-        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세");
+        RefundCreateRequest request = new RefundCreateRequest(1L,"테스트 사유", "테스트 상세", 3000, LocalDateTime.now(),true);
         doThrow(new RefundNotFoundException(1L)).when(orderMainService).createRefund(any());
 
         // when, then
@@ -177,7 +186,8 @@ class RefundControllerTest {
     void updateRefund_성공() throws Exception {
         // given
         RefundUpdateRequest request = new RefundUpdateRequest("변경 사유", "변경 상세");
-        Order order = Order.builder().id(1L).build();
+        User user = User.builder().id(1L).build();
+        Order order = Order.builder().id(1L).user(user).build();
         Refund refund = Refund.builder().id(1L).order(order).build();
         when(refundService.updateRefund(anyLong(),any())).thenReturn(RefundResponse.from(refund));
 

@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -17,9 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.order.order.dto.OrderUpdateRequest;
-import shop.ink3.api.user.point.entity.PointHistory;
 import shop.ink3.api.user.user.entity.User;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -58,7 +55,7 @@ public class Order {
         this.ordererPhone = request.getOrdererPhone();
     }
 
-    public void setOrderUUID(String orderUUID) {
+    public void assignOrderUUID(String orderUUID) {
         this.orderUUID = orderUUID;
     }
 

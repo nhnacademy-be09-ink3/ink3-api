@@ -14,14 +14,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.order.cart.dto.CartCouponResponse;
 import shop.ink3.api.order.cart.dto.CartRequest;
 import shop.ink3.api.order.cart.dto.CartResponse;
 import shop.ink3.api.order.cart.dto.CartUpdateRequest;
 import shop.ink3.api.order.cart.dto.MeCartRequest;
 import shop.ink3.api.order.cart.service.CartService;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/me/carts")
@@ -29,7 +33,7 @@ public class MeCartController {
     private final CartService cartService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestHeader(name = "X-User-Id") Long userId, @RequestBody MeCartRequest request) {
+    public ResponseEntity<CommonResponse<CartResponse>> addCart(@RequestHeader(name = "X-User-Id") Long userId, @RequestBody @Valid MeCartRequest request) {
         CartRequest cartRequest = new CartRequest(userId, request.bookId(), request.quantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(cartService.addCartItem(cartRequest)));
     }
@@ -39,19 +43,30 @@ public class MeCartController {
         @RequestHeader("X-User-Id") Long userId) {
         for (MeCartRequest item : guestItems) {
             CartRequest request = new CartRequest(userId, item.bookId(), item.quantity());
+            log.error("service 실행 전");
             cartService.addCartItem(request);
+            log.error("service 실행 후");
         }
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{cartId}")
-    public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable Long cartId, @RequestBody CartUpdateRequest request) {
+    public ResponseEntity<CommonResponse<CartResponse>> updateQuantity(@RequestHeader(name = "X-User-Id") Long userId, @PathVariable Long cartId, @RequestBody @Valid CartUpdateRequest request) {
         return ResponseEntity.ok(CommonResponse.update(cartService.updateCartQuantity(cartId, request)));
+    }
+
+    @GetMapping("/coupons")
+    public ResponseEntity<CommonResponse<List<CartCouponResponse>>> getCartsWithCoupon(@RequestHeader(name = "X-User-Id") Long userId) {
+        List<CartCouponResponse> carts = cartService.getCartItemsWithCoupons(userId);
+        log.warn(carts.toString());
+        return ResponseEntity.ok(CommonResponse.success(carts));
     }
 
     @GetMapping
     public ResponseEntity<CommonResponse<List<CartResponse>>> getCarts(@RequestHeader(name = "X-User-Id") Long userId) {
-        return ResponseEntity.ok(CommonResponse.success(cartService.getCartItemsByUserId(userId)));
+        List<CartResponse> carts = cartService.getCartItems(userId);
+        log.warn(carts.toString());
+        return ResponseEntity.ok(CommonResponse.success(carts));
     }
 
     @DeleteMapping
