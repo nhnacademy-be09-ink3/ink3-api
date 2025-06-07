@@ -68,7 +68,7 @@ class CouponServiceTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expires = now.plusDays(5);
         CouponCreateRequest req = new CouponCreateRequest(
-                1L, "test", now, expires, now,
+                1L, "test", now, expires,
                 List.of(), List.of()
         );
 
@@ -106,7 +106,6 @@ class CouponServiceTest {
                 99L, "no-policy",
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
-                LocalDateTime.now(),
                 List.of(), List.of()
         );
 
@@ -286,7 +285,7 @@ class CouponServiceTest {
         when(couponRepository.save(existing)).thenReturn(existing);
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                2L, "new-name", now, newExpires, now,
+                2L, "new-name", now, newExpires,
                 bookIds, catIds
         );
 
@@ -318,7 +317,7 @@ class CouponServiceTest {
 
         CouponUpdateRequest req = new CouponUpdateRequest(
                 1L, "irrelevant",
-                LocalDateTime.now(), LocalDateTime.now().plusDays(1), LocalDateTime.now(),
+                LocalDateTime.now(), LocalDateTime.now().plusDays(1),
                 Collections.emptyList(), Collections.emptyList()
         );
 
@@ -341,7 +340,7 @@ class CouponServiceTest {
         when(policyRepository.findById(2L)).thenReturn(Optional.empty());
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                2L, "name", now, now.plusDays(2), now,
+                2L, "name", now, now.plusDays(2),
                 Collections.emptyList(), Collections.emptyList()
         );
 
@@ -367,7 +366,7 @@ class CouponServiceTest {
         when(bookRepository.findAllById(badBooks)).thenReturn(Collections.emptyList());
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                1L, "name", now, now.plusDays(2), now,
+                1L, "name", now, now.plusDays(2),
                 badBooks, Collections.emptyList()
         );
 
@@ -394,7 +393,7 @@ class CouponServiceTest {
         when(categoryRepository.findAllById(badCats)).thenReturn(Collections.emptyList());
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                1L, "name", now, now.plusDays(2), now,
+                1L, "name", now, now.plusDays(2),
                 Collections.emptyList(), badCats
         );
 

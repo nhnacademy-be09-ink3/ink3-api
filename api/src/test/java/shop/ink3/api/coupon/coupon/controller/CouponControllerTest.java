@@ -54,7 +54,7 @@ public class CouponControllerTest {
     void create() throws Exception {
         // given
         CouponCreateRequest req = new CouponCreateRequest(
-                1L, "test", now, expires, now,
+                1L, "test", now, expires,
                 Collections.emptyList(),
                 Collections.emptyList()
         );
@@ -99,7 +99,7 @@ public class CouponControllerTest {
     void createBooksAndCategories() throws Exception {
         // given
         CouponCreateRequest req = new CouponCreateRequest(
-                1L, "test-coupon", now, expires, now,
+                1L, "test-coupon", now, expires,
                 List.of(100L),
                 List.of(200L)
         );
@@ -205,7 +205,7 @@ public class CouponControllerTest {
         // given
         Long couponId = 5L;
         CouponUpdateRequest req = new CouponUpdateRequest(
-                30L, "updated-name", now, expires.plusDays(2), now,
+                30L, "updated-name", now, expires.plusDays(2),
                 List.of(100L), List.of(200L)
         );
         BookInfo bi = new BookInfo(11L, 100L, "BookTitle");

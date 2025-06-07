@@ -1,5 +1,6 @@
 package shop.ink3.api.coupon.coupon.service.Impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class CouponServiceImpl implements CouponService {
                 .couponPolicy(policyRepository.findById(req.policyId()).orElseThrow(()->new PolicyNotFoundException("없는 정책입니다.")))
                 .issuableFrom(req.issuableFrom())
                 .expiresAt(req.expiresAt())
-                .createdAt(req.createdAt())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         if (!req.bookIdList().isEmpty()) {
@@ -199,7 +200,7 @@ public class CouponServiceImpl implements CouponService {
                 req.name(),
                 req.issuableFrom(),
                 req.expiresAt(),
-                req.createdAt(),
+                LocalDateTime.now(),
                 newBookList,
                 newCategoryList
         );
