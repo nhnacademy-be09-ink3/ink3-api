@@ -98,9 +98,18 @@ public class BookController {
     }
 
     @PutMapping("/{bookId}")
-    public ResponseEntity<CommonResponse<BookResponse>> updateBook(@PathVariable Long bookId,
-                                                                   @RequestBody @Valid BookUpdateRequest request) {
-        return ResponseEntity.ok(CommonResponse.update(bookService.updateBook(bookId, request)));
+    public ResponseEntity<CommonResponse<BookResponse>> updateBook(
+            @PathVariable Long bookId,
+            @RequestPart("book") String bookUpdateRequestJson,
+            @RequestPart("coverImage") MultipartFile coverImage
+    ) {
+        try {
+            BookUpdateRequest bookUpdateRequest = objectMapper.readValue(bookUpdateRequestJson, BookUpdateRequest.class);
+            BookResponse response = bookService.updateBook(bookId, bookUpdateRequest, coverImage);
+            return ResponseEntity.ok(CommonResponse.update(response));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage(), null));
+        }
     }
 
     @DeleteMapping("/{bookId}")

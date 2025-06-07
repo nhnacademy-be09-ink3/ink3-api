@@ -47,6 +47,7 @@ import shop.ink3.api.book.tag.exception.TagNotFoundException;
 import shop.ink3.api.book.tag.repository.TagRepository;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
+import shop.ink3.api.common.util.PresignUrlPrefixUtil;
 import shop.ink3.api.review.review.repository.ReviewRepository;
 
 @Transactional
@@ -60,6 +61,7 @@ public class BookService {
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
     private final MinioUploader minioUploader;
+    private final PresignUrlPrefixUtil presignUrlPrefixUtil;
 
     @Value("${minio.book-bucket}")
     private String bucket;
@@ -70,7 +72,11 @@ public class BookService {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         double averageRating = getAverageRating(bookId);
 
-        return BookResponse.from(book, averageRating);
+        String imageUrl = book.getThumbnailUrl();
+        if (imageUrl != null && !imageUrl.startsWith("https")) {
+            imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+        }
+        return BookResponse.from(book, imageUrl, averageRating);
     }
 
     @Transactional(readOnly = true)
@@ -84,7 +90,11 @@ public class BookService {
         for(Category category:list) {
             categories.addAll(categoryRepository.findAllAncestors(category.getId()));
         }
-        return BookResponse.from(book, categories.stream().map(CategoryResponse::from).toList());
+        String imageUrl = book.getThumbnailUrl();
+        if (imageUrl != null && !imageUrl.startsWith("https")) {
+            imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+        }
+        return BookResponse.from(book, imageUrl, categories.stream().map(CategoryResponse::from).toList());
     }
 
     // 전체 조회
@@ -92,8 +102,17 @@ public class BookService {
     @Transactional(readOnly = true)
     public PageResponse<BookResponse> getBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAll(pageable);
-        return PageResponse.from(books.map(BookResponse::from));
+        Page<BookResponse> bookResponses = books.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return BookResponse.from(book, imageUrl);
+        });
+        return PageResponse.from(bookResponses);
     }
+
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5BestSellerBooks() {
         Page<Book> top5BestSellerBooks = bookRepository.findBestSellerBooks(Pageable.ofSize(5));
@@ -179,14 +198,10 @@ public class BookService {
             book.addBookTag(tag);
         }
 
-        return BookResponse.from(bookRepository.save(book));
+        return BookResponse.from(bookRepository.save(book), imageUrl);
     }
 
-    public BookResponse updateBook(Long bookId, BookUpdateRequest request) {
-
-        if (bookRepository.existsByIsbn(request.isbn())) {
-            throw new DuplicateIsbnException(request.isbn());
-        }
+    public BookResponse updateBook(Long bookId, BookUpdateRequest request, MultipartFile coverImage) {
 
         if (request.categoryIds() == null || request.categoryIds().isEmpty()) {
             throw new InvalidCategorySelectionException("최소 한 개 이상의 카테고리를 선택해야 합니다.");
@@ -198,8 +213,21 @@ public class BookService {
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        // 수정 시 중복 ISBN 허용하지 않음, request로 동일한 ISBN이 입력되어도 같은 도서이므로 throw하지 않음
+        if (bookRepository.existsByIsbn(request.isbn()) && !book.getIsbn().equals(request.isbn())) {
+            throw new DuplicateIsbnException(request.isbn());
+        }
+
         Publisher publisher = publisherRepository.findById(request.publisherId())
                 .orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
+
+        // 입력받은 이미지 파일이 없으면 기존 imageUrl로 유지
+        String imageUrl = book.getThumbnailUrl();
+        if (coverImage != null && !coverImage.isEmpty()) {
+            minioUploader.delete(imageUrl, bucket);
+            imageUrl = minioUploader.upload(coverImage, bucket);
+        }
 
         book.updateBook(
                 request.isbn(),
@@ -212,7 +240,7 @@ public class BookService {
                 request.quantity(),
                 request.status(),
                 request.isPackable(),
-                request.thumbnailUrl(),
+                imageUrl,
                 publisher
         );
 
@@ -247,13 +275,16 @@ public class BookService {
                     .orElseThrow(() -> new TagNotFoundException(tagId));
             book.addBookTag(tag);
         }
+        double averageRating = getAverageRating(bookId);
 
-        return BookResponse.from(book);
+        return BookResponse.from(book, imageUrl, averageRating);
     }
 
     public void deleteBook(@PathVariable Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new BookNotFoundException(bookId));
+
+        // 도서 삭제 로직 수정 필요 -> 실제 삭제를 하는 것이 아닌 도서의 상태를 "삭제"로 변경
 
         book.getBookCategories().clear();
         book.getBookAuthors().clear();
@@ -263,7 +294,7 @@ public class BookService {
     }
 
     // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
-    public BookResponse registerBook(BookRegisterRequest request) {
+    public BookResponse registerBookByAladin(BookRegisterRequest request) {
         AladinBookResponse dto = request.aladinBookResponse();
         if (bookRepository.existsByIsbn(dto.isbn13())) {
             throw new DuplicateIsbnException(dto.isbn13());
@@ -306,7 +337,7 @@ public class BookService {
             }
         }
 
-        return BookResponse.from(book);
+        return BookResponse.from(book, book.getThumbnailUrl());
     }
 
     private double getAverageRating(Long bookId) {
