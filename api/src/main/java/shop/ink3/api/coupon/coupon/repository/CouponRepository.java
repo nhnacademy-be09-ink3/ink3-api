@@ -2,9 +2,9 @@ package shop.ink3.api.coupon.coupon.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
@@ -29,7 +29,7 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
             "LEFT JOIN FETCH c.categoryCoupons cc " +
             "LEFT JOIN FETCH cc.category " +
             "WHERE c.name = :name")
-    Optional<List<Coupon>> findAllByNameWithFetch(@Param("name") String name);
+    List<Coupon> findAllByNameWithFetch(@Param("name") String name);
 
 
     // 모든 쿠폰 조회
@@ -38,7 +38,7 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
             "LEFT JOIN FETCH bc.book " +
             "LEFT JOIN FETCH c.categoryCoupons cc " +
             "LEFT JOIN FETCH cc.category")
-    List<Coupon> findAllWithAssociations();
+    Page<Coupon> findAllWithAssociations(Pageable pageable);
 
     // 북 id로 쿠폰 조회
     List<Coupon> getCouponsByBookCoupons_BookId(Long id);
