@@ -6,8 +6,9 @@ import shop.ink3.api.coupon.coupon.entity.Coupon;
 
 public record CouponResponse(
         Long couponId,
-        Long policyId,
         String name,
+        Long policyId,
+        String policyName,
         LocalDateTime issuableFrom,
         LocalDateTime expiresAt,
         LocalDateTime createdAt,
@@ -19,8 +20,9 @@ public record CouponResponse(
                                       List<CategoryInfo> categories) {
         return new CouponResponse(
                 coupon.getId(),
-                coupon.getCouponPolicy().getId(),
                 coupon.getName(),
+                coupon.getCouponPolicy().getId(),
+                coupon.getCouponPolicy().getName(),
                 coupon.getIssuableFrom(),
                 coupon.getExpiresAt(),
                 coupon.getCreatedAt(),
