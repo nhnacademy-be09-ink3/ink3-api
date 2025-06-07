@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.policy.entity.DiscountType;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
@@ -334,7 +335,11 @@ class CouponStoreControllerTest {
                 LocalDateTime.of(2025, 12, 31, 0, 0),
                 OriginType.BOOK,
                 10L,
-                CouponStatus.READY
+                CouponStatus.READY,
+                DiscountType.FIXED,
+                3000,
+                null,
+                10000
         );
 
         when(couponStoreService.getApplicableCouponStores(userId, bookId))

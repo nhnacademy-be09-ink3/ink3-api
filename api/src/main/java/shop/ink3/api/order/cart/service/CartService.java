@@ -104,6 +104,12 @@ public class CartService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<CartResponse> getCartItems(Long userId) {
+        List<Cart> carts = cartRepository.findByUserId(userId);
+        return carts.stream().map(CartResponse::from).toList();
+    }
+
     public void deleteCartItems(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException(userId);

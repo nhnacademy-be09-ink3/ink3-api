@@ -217,7 +217,15 @@ public class CouponStoreService {
                 cs.getCoupon().getExpiresAt(),
                 cs.getOriginType(),
                 cs.getOriginId(),
-                cs.getStatus()
+                cs.getStatus(),
+                cs.getCoupon().getCouponPolicy().getDiscountType(),
+                (cs.getCoupon().getCouponPolicy().getDiscountValue() != null)
+                        ? cs.getCoupon().getCouponPolicy().getDiscountValue()
+                        : null,
+                (cs.getCoupon().getCouponPolicy().getDiscountPercentage() != null)
+                        ? cs.getCoupon().getCouponPolicy().getDiscountPercentage()
+                        : null,
+                cs.getCoupon().getCouponPolicy().getMaximumDiscountAmount()
         );
     }
 }
