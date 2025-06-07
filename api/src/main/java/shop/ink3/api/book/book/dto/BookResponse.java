@@ -28,7 +28,8 @@ public record BookResponse(
         List<TagResponse> tags,
         double averageRating
 ) {
-    public static BookResponse from(Book book) {
+
+    public static BookResponse from(Book book, String thumbnailUrl) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
 
@@ -46,7 +47,7 @@ public record BookResponse(
                 book.getQuantity() != null ? book.getQuantity() : 0,
                 book.getStatus(),
                 book.isPackable(),
-                book.getThumbnailUrl(),
+                thumbnailUrl,
                 book.getBookCategories()
                         .stream()
                         .map(bc -> CategoryResponse.from(bc.getCategory()))
@@ -67,7 +68,7 @@ public record BookResponse(
         );
     }
 
-    public static BookResponse from(Book book, List<CategoryResponse> categories) {
+    public static BookResponse from(Book book, String thumbnailUrl, List<CategoryResponse> categories) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
 
@@ -85,7 +86,7 @@ public record BookResponse(
                 book.getQuantity() != null ? book.getQuantity() : 0,
                 book.getStatus(),
                 book.isPackable(),
-                book.getThumbnailUrl(),
+                thumbnailUrl,
                 categories,
                 book.getBookAuthors()
                         .stream()
@@ -103,7 +104,7 @@ public record BookResponse(
         );
     }
 
-    public static BookResponse from(Book book, double averageRating) {
+    public static BookResponse from(Book book, String thumbnailUrl, double averageRating) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
 
@@ -121,7 +122,7 @@ public record BookResponse(
                 book.getQuantity() != null ? book.getQuantity() : 0,
                 book.getStatus(),
                 book.isPackable(),
-                book.getThumbnailUrl(),
+                thumbnailUrl,
                 book.getBookCategories()
                         .stream()
                         .map(bc -> CategoryResponse.from(bc.getCategory()))
