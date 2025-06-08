@@ -153,7 +153,7 @@ public class ReviewService {
             pointType = REVIEW;
         }
         return pointService.earnPoint(user.getId(),
-            new UserPointRequest(pointType.getAmount(), pointType.getAmount() + "포인트가 적립되었습니다."));
+            new UserPointRequest(pointType.getAmount(), "리뷰 작성에 따른 " + pointType.getAmount() + " 포인트 적립"));
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {
