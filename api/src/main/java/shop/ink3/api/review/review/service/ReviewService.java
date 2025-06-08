@@ -83,14 +83,7 @@ public class ReviewService {
             .build();
         Review savedReview = reviewRepository.save(review);
 
-        ReviewPointType pointType = null;
-        if (!images.isEmpty()) {
-            pointType = REVIEW_IMAGE;
-        } else {
-            pointType = REVIEW;
-        }
-        PointHistory pointHistory = pointService.earnPoint(user.getId(),
-            new UserPointRequest(pointType.getAmount(), pointType.getAmount() + "포인트가 적립되었습니다."));
+        PointHistory pointHistory = getPointHistory(images, user);
 
         List<String> imageUrls = saveImages(images, savedReview);
 
@@ -150,6 +143,17 @@ public class ReviewService {
         }
 
         reviewRepository.deleteById(reviewId);
+    }
+
+    private PointHistory getPointHistory(List<MultipartFile> images, User user) {
+        ReviewPointType pointType;
+        if (images != null && !images.isEmpty()) {
+            pointType = REVIEW_IMAGE;
+        } else {
+            pointType = REVIEW;
+        }
+        return pointService.earnPoint(user.getId(),
+            new UserPointRequest(pointType.getAmount(), pointType.getAmount() + "포인트가 적립되었습니다."));
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {
