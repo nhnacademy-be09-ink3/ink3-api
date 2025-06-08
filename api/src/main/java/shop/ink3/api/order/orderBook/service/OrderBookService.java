@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import shop.ink3.api.order.packaging.entity.Packaging;
 import shop.ink3.api.order.packaging.exception.PackagingNotFoundException;
 import shop.ink3.api.order.packaging.repository.PackagingRepository;
 
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -57,6 +59,7 @@ public class OrderBookService {
 
             // 재고 처리
             if (book.getQuantity() < request.getQuantity()) {
+                log.info("재고 부족 에러");
                 throw new InsufficientBookStockException(book.getTitle(), request.getQuantity(), book.getQuantity());
             }
             book.decreaseQuantity(request.getQuantity());

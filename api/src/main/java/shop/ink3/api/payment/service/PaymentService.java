@@ -13,6 +13,7 @@ import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
+import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
@@ -22,7 +23,9 @@ import shop.ink3.api.order.orderPoint.entity.OrderPoint;
 import shop.ink3.api.order.orderPoint.service.OrderPointService;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
+import shop.ink3.api.payment.dto.ZeroPaymentRequest;
 import shop.ink3.api.payment.entity.Payment;
+import shop.ink3.api.payment.entity.PaymentType;
 import shop.ink3.api.payment.exception.PaymentAlreadyExistsException;
 import shop.ink3.api.payment.exception.PaymentCancelNotAllowedException;
 import shop.ink3.api.payment.exception.PaymentNotFoundException;
@@ -41,16 +44,20 @@ import shop.ink3.api.user.user.dto.UserPointRequest;
 @Service
 public class PaymentService {
     private static final String PAYMENT_CANCEL_MESSAGE ="결제 취소로 인한 환불금액";
+
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+
     private final OrderService orderService;
     private final OrderBookService orderBookService;
     private final OrderPointService orderPointService;
     private final PointService pointService;
     private final CouponStoreService couponStoreService;
+
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
     private final ApplicationEventPublisher eventPublisher;
+
 
     // 결제 승인 API 호출 및 ApproveResponse 반환
     @Transactional(readOnly = true)
@@ -85,6 +92,23 @@ public class PaymentService {
             );
         }
         return PaymentResponse.from(savePayment);
+    }
+
+    // 생성 (0원 결제)
+    public PaymentResponse createZeroPayment(ZeroPaymentRequest request) {
+        Order order = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new OrderNotFoundException(request.orderId()));
+        Payment payment = Payment.builder()
+                .order(order)
+                .paymentKey(null)
+                .usedPoint(request.usedPointAmount())
+                .discountPrice(request.discountAmount())
+                .paymentAmount(request.amount())
+                .paymentType(PaymentType.POINT)
+                .requestAt(LocalDateTime.now())
+                .approvedAt(LocalDateTime.now())
+                .build();
+        return PaymentResponse.from(paymentRepository.save(payment));
     }
 
     // 결제 실패
