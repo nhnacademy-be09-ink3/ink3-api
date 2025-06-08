@@ -44,6 +44,7 @@ import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
+import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CouponServiceTest {
@@ -59,6 +60,8 @@ class CouponServiceTest {
     private BookRepository bookRepository;
     @Mock
     private CategoryRepository categoryRepository;
+    @Mock
+    private CouponStoreRepository couponStoreRepository;
 
     @InjectMocks
     private CouponServiceImpl couponService;
@@ -166,13 +169,15 @@ class CouponServiceTest {
 
     @Test
     void getCouponsByBookId_success() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expires = now.plusDays(5);
         BookCoupon bc = mock(BookCoupon.class);
         Book book = mock(Book.class);
         when(book.getId()).thenReturn(10L);
         when(book.getTitle()).thenReturn("Java");
 
         CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").build();
-        Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").build();
+        Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").expiresAt(expires).build();
         when(bc.getBook()).thenReturn(book);
         when(bc.getCoupon()).thenReturn(coupon);
         when(bc.getId()).thenReturn(5L);
@@ -183,12 +188,13 @@ class CouponServiceTest {
 
         PageResponse<CouponResponse> page =
                 couponService.getCouponsByBookId(10L, unpaged);
-        CouponResponse resp = page.content().get(0);
-        BookInfo info = resp.books().get(0);
+        CouponResponse resp = page.content().getFirst();
+        BookInfo info = resp.books().getFirst();
 
         assertEquals(5L, info.originId());
         assertEquals(10L, info.id());
         assertEquals("Java", info.title());
+        assertEquals("BOOK", info.originType());
     }
 
     @Test
@@ -203,13 +209,15 @@ class CouponServiceTest {
 
     @Test
     void getCouponsByCategoryId_success() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expires = now.plusDays(5);
         CategoryCoupon cc = mock(CategoryCoupon.class);
         Category cat = mock(Category.class);
         when(cat.getId()).thenReturn(8L);
         when(cat.getName()).thenReturn("Fiction");
 
         CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").build();
-        Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").build();
+        Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").expiresAt(expires).build();
 
         when(cc.getCategory()).thenReturn(cat);
         when(cc.getCoupon()).thenReturn(coupon);
@@ -221,11 +229,12 @@ class CouponServiceTest {
 
         PageResponse<CouponResponse> page =
                 couponService.getCouponsByCategoryId(8L, unpaged);
-        CategoryInfo info = page.content().get(0).categories().get(0);
+        CategoryInfo info = page.content().getFirst().categories().getFirst();
 
         assertEquals(6L, info.originId());
         assertEquals(8L, info.id());
         assertEquals("Fiction", info.name());
+        assertEquals("CATEGORY", info.originType());
     }
 
     @Test
