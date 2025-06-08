@@ -403,4 +403,20 @@ public class BookService {
         }
         return parent;
     }
+    @Transactional(readOnly = true)
+    public PageResponse<BookResponse> getBooksByCategory(String categoryName, Pageable pageable) {
+        Page<Book> books = bookRepository.findByCategoryName(categoryName, pageable);
+        Page<BookResponse> bookResponses = books.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(
+                        minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket)
+                );
+            }
+
+            return BookResponse.from(book, imageUrl);
+        });
+        return PageResponse.from(bookResponses);
+    }
 }

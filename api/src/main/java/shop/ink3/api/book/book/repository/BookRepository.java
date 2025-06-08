@@ -33,4 +33,13 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     """)
     Page<Book> findRecommendedBooks(Pageable pageable);
 
+    @Query("""
+    SELECT DISTINCT b
+    FROM Book b
+    JOIN b.bookCategories bc
+    JOIN bc.category c
+    WHERE c.name = :categoryName
+""")
+    Page<Book> findByCategoryName(String categoryName, Pageable pageable);
+
 }
