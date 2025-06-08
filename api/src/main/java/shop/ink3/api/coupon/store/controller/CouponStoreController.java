@@ -88,7 +88,5 @@ public class CouponStoreController {
         List<CouponStoreDto> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
         return ResponseEntity.ok(stores);
     }
-
-
 }
 
