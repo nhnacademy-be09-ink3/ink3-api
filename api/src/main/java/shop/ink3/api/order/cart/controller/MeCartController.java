@@ -55,9 +55,16 @@ public class MeCartController {
         return ResponseEntity.ok(CommonResponse.update(cartService.updateCartQuantity(cartId, request)));
     }
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<List<CartCouponResponse>>> getCarts(@RequestHeader(name = "X-User-Id") Long userId) {
+    @GetMapping("/coupons")
+    public ResponseEntity<CommonResponse<List<CartCouponResponse>>> getCartsWithCoupon(@RequestHeader(name = "X-User-Id") Long userId) {
         List<CartCouponResponse> carts = cartService.getCartItemsWithCoupons(userId);
+        log.warn(carts.toString());
+        return ResponseEntity.ok(CommonResponse.success(carts));
+    }
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<CartResponse>>> getCarts(@RequestHeader(name = "X-User-Id") Long userId) {
+        List<CartResponse> carts = cartService.getCartItems(userId);
         log.warn(carts.toString());
         return ResponseEntity.ok(CommonResponse.success(carts));
     }

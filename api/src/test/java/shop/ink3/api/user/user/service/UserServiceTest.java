@@ -56,25 +56,25 @@ class UserServiceTest {
     @Test
     void isLoginIdAvailable() {
         when(userRepository.existsByLoginId(anyString())).thenReturn(false);
-        Assertions.assertTrue(userService.isLoginIdAvailable("loginId"));
+        Assertions.assertTrue(userService.isLoginIdAvailable("loginId").available());
     }
 
     @Test
     void isLoginIdAvailableWithExists() {
         when(userRepository.existsByLoginId(anyString())).thenReturn(true);
-        Assertions.assertFalse(userService.isLoginIdAvailable("loginId"));
+        Assertions.assertFalse(userService.isLoginIdAvailable("loginId").available());
     }
 
     @Test
     void isEmailAvailable() {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        Assertions.assertTrue(userService.isEmailAvailable("email@email.com"));
+        Assertions.assertTrue(userService.isEmailAvailable("email@email.com").available());
     }
 
     @Test
     void isEmailAvailableWithExists() {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
-        Assertions.assertFalse(userService.isEmailAvailable("email@email.com"));
+        Assertions.assertFalse(userService.isEmailAvailable("email@email.com").available());
     }
 
     @Test

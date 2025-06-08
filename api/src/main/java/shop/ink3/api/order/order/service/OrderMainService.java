@@ -4,6 +4,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
+import shop.ink3.api.coupon.store.service.CouponStoreService;
 import shop.ink3.api.order.order.dto.OrderFormCreateRequest;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
@@ -32,6 +35,7 @@ public class OrderMainService {
     private final PaymentService paymentService;
     private final PointService pointService;
     private final OrderPointService orderPointService;
+    private final CouponStoreService couponStoreService;
 
     // 결제 시 주문서 생성 (주문 관련 데이터 저장)
     public OrderResponse createOrderForm(OrderFormCreateRequest request) {
@@ -51,7 +55,6 @@ public class OrderMainService {
         return refund;
     }
 
-    //TODO : 사용된 쿠폰 재발급
     // 반품 승인
     public void approveRefund(long userId, long orderId) {
         RefundResponse refund = refundService.updateApproved(orderId);
@@ -70,5 +73,12 @@ public class OrderMainService {
         for (OrderPoint orderPoint : orderPoints) {
             pointService.cancelPoint(userId, orderPoint.getPointHistory().getId());
         }
+
+        // 사용 쿠폰 복구
+        orderBookService.getOrderCouponStoreId(orderId)
+                .ifPresent(couponStoreId -> {
+                    CouponStoreUpdateRequest request = new CouponStoreUpdateRequest(CouponStatus.READY, null);
+                    couponStoreService.updateStore(couponStoreId, request);
+                });
     }
 }

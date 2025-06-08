@@ -11,6 +11,7 @@ public record MainBookResponse(
     int salePrice,
     int discountRate,
     String thumbnailUrl,
+    boolean isPackable,
     List<String> authorNames
 ) {
     public static MainBookResponse from(Book book) {
@@ -24,6 +25,7 @@ public record MainBookResponse(
             salePrice,
             book.getDiscountRate(),
             book.getThumbnailUrl(),
+            book.isPackable(),
             book.getBookAuthors()
                 .stream()
                 .map(ba -> ba.getAuthor().getName() + " (" + ba.getRole() + ")")
