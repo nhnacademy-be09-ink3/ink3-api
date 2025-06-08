@@ -81,12 +81,12 @@ public class CouponStoreController {
     }
 
     @GetMapping("/applicable-coupons")
-    public ResponseEntity<List<CouponStoreDto>> getApplicableCoupons(
+    public ResponseEntity<CommonResponse<List<CouponStoreDto>>> getApplicableCoupons(
             @RequestParam Long userId,
             @RequestParam Long bookId
     ) {
         List<CouponStoreDto> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
-        return ResponseEntity.ok(stores);
+        return ResponseEntity.ok(CommonResponse.success(stores));
     }
 }
 
