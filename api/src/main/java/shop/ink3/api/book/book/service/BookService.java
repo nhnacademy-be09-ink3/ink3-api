@@ -50,6 +50,7 @@ import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
 import shop.ink3.api.common.util.PresignUrlPrefixUtil;
 import shop.ink3.api.review.review.repository.ReviewRepository;
+import shop.ink3.api.user.like.repository.LikeRepository;
 
 @Transactional
 @RequiredArgsConstructor
@@ -61,6 +62,7 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
+    private final LikeRepository likeRepository;
     private final MinioUploader minioUploader;
     private final PresignUrlPrefixUtil presignUrlPrefixUtil;
 
@@ -123,7 +125,12 @@ public class BookService {
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllBestSellerBooks(SortType sortType, Pageable pageable) {
         Page<Book> bestSellerBooks = bookRepository.findSortedBestSellerBooks(sortType, pageable);
-        return PageResponse.from(bestSellerBooks.map(MainBookResponse::from));
+        Page<MainBookResponse> responses = bestSellerBooks.map(book -> {
+            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
+            long likeCount = likeRepository.countByBookId(book.getId());
+            return MainBookResponse.from(book, reviewCount, likeCount);
+        });
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
@@ -135,7 +142,12 @@ public class BookService {
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllNewBooks(SortType sortType, Pageable pageable) {
         Page<Book> bestRecommendedBooks = bookRepository.findSortedNewBooks(sortType, pageable);
-        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
+        Page<MainBookResponse> responses = bestRecommendedBooks.map(book -> {
+            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
+            long likeCount = likeRepository.countByBookId(book.getId());
+            return MainBookResponse.from(book, reviewCount, likeCount);
+        });
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
@@ -147,7 +159,12 @@ public class BookService {
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllRecommendedBooks(SortType sortType, Pageable pageable) {
         Page<Book> bestRecommendedBooks = bookRepository.findSortedRecommendedBooks(sortType, pageable);
-        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
+        Page<MainBookResponse> responses = bestRecommendedBooks.map(book -> {
+            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
+            long likeCount = likeRepository.countByBookId(book.getId());
+            return MainBookResponse.from(book, reviewCount, likeCount);
+        });
+        return PageResponse.from(responses);
     }
 
     public BookResponse createBook(BookCreateRequest request, MultipartFile coverImage) {
