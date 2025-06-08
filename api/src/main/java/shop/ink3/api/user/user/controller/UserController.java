@@ -76,7 +76,7 @@ public class UserController {
 
     @GetMapping(params = "birthday")
     public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
-            @RequestParam LocalDate birthday
+            @RequestParam(required = false) LocalDate birthday
     ) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUsersByBirthday(birthday)));
     }
