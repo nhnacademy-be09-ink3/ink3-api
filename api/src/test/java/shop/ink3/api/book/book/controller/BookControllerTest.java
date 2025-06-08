@@ -71,7 +71,8 @@ class BookControllerTest {
             categories,                     // List<CategoryResponse>
             authors,                        // List<AuthorDto>
             tags,                           // List<TagResponse>
-            4.5                             // ⭐️ averageRating 추가
+            4.5,                            // ⭐️ averageRating 추가
+            0L
         );
 
         this.mainBookResponse = new MainBookResponse(

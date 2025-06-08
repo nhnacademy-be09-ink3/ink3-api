@@ -74,12 +74,13 @@ public class BookService {
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         double averageRating = getAverageRating(bookId);
+        long likeCount = likeRepository.countByBookId(book.getId());
 
         String imageUrl = book.getThumbnailUrl();
         if (imageUrl != null && !imageUrl.startsWith("https")) {
             imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
         }
-        return BookResponse.from(book, imageUrl, averageRating);
+        return BookResponse.from(book, imageUrl, averageRating, likeCount);
     }
 
     @Transactional(readOnly = true)
@@ -294,8 +295,9 @@ public class BookService {
             book.addBookTag(tag);
         }
         double averageRating = getAverageRating(bookId);
+        long likeCount = likeRepository.countByBookId(book.getId());
 
-        return BookResponse.from(book, imageUrl, averageRating);
+        return BookResponse.from(book, imageUrl, averageRating, likeCount);
     }
 
     public void deleteBook(@PathVariable Long bookId) {
