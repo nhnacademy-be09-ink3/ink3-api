@@ -15,7 +15,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     //TODO 유지보수를 위해 querydsl 방식으로 수정 해야할거 같음
     @Query(
             value = """
-        SELECT 
+        SELECT\s
             o.id AS id,
             o.order_uuid AS orderUUID,
             o.status AS status,
@@ -29,7 +29,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                 SELECT COUNT(DISTINCT ob2.book_id)
                 FROM order_books ob2
                 WHERE ob2.order_id = o.id
-            ) AS bookTypeCount
+            ) AS bookTypeCount,
+            
+            ob.id AS orderBookId,
+                b.id AS bookId,
+                EXISTS (
+                    SELECT 1
+                    FROM reviews r
+                    WHERE r.order_book_id = ob.id
+                ) AS hasReview
+            
         FROM orders o
         JOIN payments p ON p.order_id = o.id
         JOIN order_books ob ON ob.id = (
@@ -39,7 +48,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         )
         JOIN books b ON ob.book_id = b.id
         WHERE o.user_id = :userId
-        """,
+        ORDER BY o.ordered_at DESC
+       \s""",
             countQuery = "SELECT COUNT(*) FROM orders o WHERE o.user_id = :userId",
             nativeQuery = true
     )

@@ -3,6 +3,7 @@ package shop.ink3.api.payment.paymentUtil.processor.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import shop.ink3.api.order.guest.dto.GuestPaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.exception.PaymentProcessorFailException;
 import shop.ink3.api.payment.paymentUtil.processor.PaymentProcessor;
@@ -27,13 +28,22 @@ public class TossPaymentProcessor implements PaymentProcessor {
 
     @Override
     public String processPayment(PaymentConfirmRequest confirmRequest) {
+        return executePaymentConfirm(confirmRequest.paymentKey(), confirmRequest.amount(), confirmRequest.orderUUID());
+    }
+
+    @Override
+    public String processPayment(GuestPaymentConfirmRequest confirmRequest) {
+        return executePaymentConfirm(confirmRequest.paymentKey(), confirmRequest.amount(), confirmRequest.orderUUID());
+    }
+
+    private String executePaymentConfirm(String paymentKey, int amount, String orderUUID) {
         try {
             String basicAuthHeader = AUTH_HEADER_PREFIX + Base64.getEncoder().encodeToString((SECRET_KEY + ":").getBytes());
 
             Map<String, Object> body = Map.of(
-                    PAYMENT_KEY, confirmRequest.paymentKey(),
-                    PAYMENT_AMOUNT, confirmRequest.amount(),
-                    PAYMENT_ORDER_ID, confirmRequest.orderUUID()
+                    PAYMENT_KEY, paymentKey,
+                    PAYMENT_AMOUNT, amount,
+                    PAYMENT_ORDER_ID, orderUUID
             );
 
             return tossPaymentClient.confirmPayment(basicAuthHeader, body);
@@ -41,4 +51,5 @@ public class TossPaymentProcessor implements PaymentProcessor {
             throw new PaymentProcessorFailException(PAYMENT_METHOD, e);
         }
     }
+
 }

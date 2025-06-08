@@ -14,4 +14,7 @@ public interface OrderWithDetailsResponse {
     String getRepresentativeBookName();
     String getRepresentativeThumbnailUrl();
     Integer getBookTypeCount();
+    Long getOrderBookId();
+    Long getBookId();
+    Long getHasReview();
 }

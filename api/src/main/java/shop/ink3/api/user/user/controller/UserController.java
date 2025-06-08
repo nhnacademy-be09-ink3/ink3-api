@@ -2,11 +2,9 @@ package shop.ink3.api.user.user.controller;
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,14 +18,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
+import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.coupon.rabbitMq.message.WelcomeCouponMessage;
+import shop.ink3.api.coupon.rabbitMq.produce.WelcomeCouponProducer;
 import shop.ink3.api.user.social.dto.SocialUserResponse;
+import shop.ink3.api.user.user.dto.IdentifierAvailabilityResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
+import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
+import shop.ink3.api.user.user.dto.UserStatisticsResponse;
+import shop.ink3.api.user.user.dto.UserStatusResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.service.UserService;
 
@@ -36,6 +41,7 @@ import shop.ink3.api.user.user.service.UserService;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final WelcomeCouponProducer welcomeCouponProducer;
 
     @GetMapping("/{userId}")
     public ResponseEntity<CommonResponse<UserResponse>> getUser(@PathVariable long userId) {
@@ -61,38 +67,63 @@ public class UserController {
     }
 
     @GetMapping
+    public ResponseEntity<CommonResponse<PageResponse<UserListItemDto>>> getUsers(
+            @RequestParam(required = false) String keyword,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUsersForManagement(keyword, pageable)));
+    }
+
+    @GetMapping(params = "birthday")
     public ResponseEntity<CommonResponse<List<UserResponse>>> getUsersByBirthday(
             @RequestParam LocalDate birthday
     ) {
         return ResponseEntity.ok(CommonResponse.success(userService.getUsersByBirthday(birthday)));
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<CommonResponse<Map<String, Boolean>>> checkUserIdentifierAvailability(
-            @RequestParam(required = false) String loginId,
-            @RequestParam(required = false) String email
+    @GetMapping("/statistics")
+    public ResponseEntity<CommonResponse<UserStatisticsResponse>> getUserStatistics() {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUserStatistics()));
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<CommonResponse<UserStatusResponse>> getUserStatus(@RequestParam String loginId) {
+        return ResponseEntity.ok(CommonResponse.success(userService.getUserStatus(loginId)));
+    }
+
+    @GetMapping(value = "/available", params = "loginId")
+    public ResponseEntity<CommonResponse<IdentifierAvailabilityResponse>> checkLoginIdAvailable(
+            @RequestParam String loginId
     ) {
-        Map<String, Boolean> result = new HashMap<>();
-        if (Objects.nonNull(loginId)) {
-            result.put("loginIdAvailable", userService.isLoginIdAvailable(loginId));
-        }
-        if (Objects.nonNull(email)) {
-            result.put("emailAvailable", userService.isEmailAvailable(email));
-        }
-        return ResponseEntity.ok(CommonResponse.success(result));
+        return ResponseEntity.ok(CommonResponse.success(userService.isLoginIdAvailable(loginId)));
+    }
+
+    @GetMapping(value = "/available", params = "email")
+    public ResponseEntity<CommonResponse<IdentifierAvailabilityResponse>> checkEmailAvailable(
+            @RequestParam String email
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(userService.isEmailAvailable(email)));
     }
 
     @PostMapping
     public ResponseEntity<CommonResponse<UserResponse>> createUser(@RequestBody @Valid UserCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(userService.createUser(request)));
+        UserResponse user = userService.createUser(request);
+        long userId = user.id();
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userId);
+        welcomeCouponProducer.send(message);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(user));
     }
 
     @PostMapping("/social")
     public ResponseEntity<CommonResponse<UserResponse>> createSocialUser(
             @RequestBody @Valid SocialUserCreateRequest request
     ) {
+        UserResponse user = userService.createSocialUser(request);
+        long userId = user.id();
+        WelcomeCouponMessage message = new WelcomeCouponMessage(userId);
+        welcomeCouponProducer.send(message);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CommonResponse.create(userService.createSocialUser(request)));
+                .body(CommonResponse.create(user));
     }
 
     @PutMapping("/{userId}")
@@ -115,6 +146,12 @@ public class UserController {
     @PatchMapping("/{userId}/activate")
     public ResponseEntity<Void> activateUser(@PathVariable long userId) {
         userService.activateUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/login-id/{loginId}/activate")
+    public ResponseEntity<Void> activateUser(@PathVariable String loginId) {
+        userService.activateUser(loginId);
         return ResponseEntity.noContent().build();
     }
 

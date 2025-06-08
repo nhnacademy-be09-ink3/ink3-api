@@ -38,4 +38,8 @@ public class BookCategory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    public BookCategory(Category bc1) {
+        this.category = bc1;
+    }
 }

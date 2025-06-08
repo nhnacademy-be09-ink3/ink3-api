@@ -1,8 +1,11 @@
 package shop.ink3.api.order.orderBook.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,6 +14,7 @@ import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.common.dto.PageResponse;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.exception.CouponStoreNotFoundException;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
@@ -28,6 +32,7 @@ import shop.ink3.api.order.packaging.entity.Packaging;
 import shop.ink3.api.order.packaging.exception.PackagingNotFoundException;
 import shop.ink3.api.order.packaging.repository.PackagingRepository;
 
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -48,17 +53,21 @@ public class OrderBookService {
             Packaging packaging = (Objects.isNull(request.getPackagingId())) ? null
                     : packagingRepository.findById(request.getPackagingId())
                             .orElseThrow(() -> new PackagingNotFoundException(request.getPackagingId()));
+            CouponStore couponStore = (Objects.isNull(request.getCouponStoreId())) ? null
+                    : couponStoreRepository.findById(request.getCouponStoreId())
+                            .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
 
+            // 재고 처리
             if (book.getQuantity() < request.getQuantity()) {
+                log.info("재고 부족 에러");
                 throw new InsufficientBookStockException(book.getTitle(), request.getQuantity(), book.getQuantity());
             }
             book.decreaseQuantity(request.getQuantity());
             bookRepository.save(book);
 
-            CouponStore couponStore = null;
-            if(request.getCouponStoreId() != null) {
-                couponStore = couponStoreRepository.findById(request.getCouponStoreId())
-                        .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
+            // 쿠폰 상태 변경
+            if(couponStore != null ){
+                couponStore.update(CouponStatus.USED, LocalDateTime.now());
             }
 
             OrderBook orderBook = OrderBook.builder()
@@ -89,13 +98,21 @@ public class OrderBookService {
         return PageResponse.from(pageResponse);
     }
 
+    // 주문에 대한 쿠폰 사용 내역 조회 (없을 경우 null 반환)
+    @Transactional(readOnly = true)
+    public Optional<Long> getOrderCouponStoreId(long orderId) {
+        return orderBookRepository.findAllByOrderId(orderId).stream()
+                .filter(ob -> ob.getCouponStore() != null)
+                .map(ob -> ob.getCouponStore().getId())
+                .findFirst();
+    }
+
     // 수정
     public OrderBookResponse updateOrderBook(long orderBookId, OrderBookUpdateRequest request) {
         OrderBook orderBook = orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new OrderBookNotFoundException(orderBookId));
-        Packaging packaging = (Objects.isNull(request.getPackagingId())) ? null
-                : packagingRepository.findById(request.getPackagingId())
-                        .orElseThrow(() -> new PackagingNotFoundException(request.getPackagingId()));
+        Packaging packaging = packagingRepository.findById(request.getPackagingId())
+                .orElseThrow(() -> new PackagingNotFoundException(request.getPackagingId()));
         CouponStore couponStore = couponStoreRepository.findById(request.getCouponStoreId())
                 .orElseThrow(() -> new CouponStoreNotFoundException("해당 쿠폰을 찾지 못했습니다."));
         orderBook.update(request, packaging, couponStore);

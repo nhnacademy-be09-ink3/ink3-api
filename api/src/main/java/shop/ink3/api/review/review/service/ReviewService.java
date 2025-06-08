@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
+import shop.ink3.api.common.util.PresignUrlPrefixUtil;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
@@ -47,6 +48,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
     private final MinioUploader minioUploader;
+    private final PresignUrlPrefixUtil presignUrlPrefixUtil;
 
     @Value("${minio.review-bucket}")
     private String bucket;
@@ -166,12 +168,18 @@ public class ReviewService {
 
         Page<ReviewListResponse> mappedPage = page.map(dto -> {
             List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
-                .map(url -> new ReviewImageResponse(minioUploader.getPresignedUrl(url, bucket)))
+                .map(url -> {
+                    String presignedUrl = minioUploader.getPresignedUrl(url, bucket);
+                    return new ReviewImageResponse(presignUrlPrefixUtil.addPrefixUrl(presignedUrl));
+                })
                 .toList();
+
+            log.warn("PrefixUrl============{}", Arrays.toString(images.toArray()));
 
             return new ReviewListResponse(
                 dto.id(),
                 dto.userId(),
+                dto.bookId(),
                 dto.orderBookId(),
                 dto.userName(),
                 dto.title(),

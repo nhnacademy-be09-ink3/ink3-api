@@ -20,11 +20,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
+import shop.ink3.api.common.util.PresignUrlPrefixUtil;
 import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.orderBook.entity.OrderBook;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
 import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
+import shop.ink3.api.review.review.dto.ReviewListResponse;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -40,14 +43,21 @@ class ReviewServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
     @Mock
     private OrderBookRepository orderBookRepository;
+
     @Mock
     private ReviewRepository reviewRepository;
+
     @Mock
     private ReviewImageRepository reviewImageRepository;
+
     @Mock
     private MinioUploader minioUploader;
+
+    @Mock
+    private PresignUrlPrefixUtil presignUrlPrefixUtil;
 
     @InjectMocks
     private ReviewService reviewService;
@@ -111,40 +121,54 @@ class ReviewServiceTest {
     @Test
     @DisplayName("도서 ID로 리뷰 목록 조회")
     void getReviewsByBookId() {
-        ReviewDefaultListResponse dto = new ReviewDefaultListResponse(1L, 1L, 1L, "user1", "제목", "내용", 5, null,
-            null);
+        ReviewDefaultListResponse dto = new ReviewDefaultListResponse(1L, 1L, 1L, 1L, "user1", "제목", "내용", 5, null, null);
         Page<ReviewDefaultListResponse> page = new PageImpl<>(List.of(dto));
 
         Review review = new Review(user, orderBook, "제목", "내용", 5);
         ReflectionTestUtils.setField(review, "id", 1L);
 
-        ReviewImage image = ReviewImage.builder().imageUrl("img1.jpg").review(review).build();
+        ReviewImage image = ReviewImage.builder()
+            .imageUrl("img1.jpg")
+            .review(review)
+            .build();
 
         when(reviewRepository.findListByBookId(any(), anyLong())).thenReturn(page);
         when(reviewImageRepository.findByReviewIdIn(List.of(1L))).thenReturn(List.of(image));
+        when(minioUploader.getPresignedUrl(anyString(), anyString()))
+            .thenReturn("http://storage.java21.net:8000/ink3-dev-reviews-images/sample.jpg");
+        when(presignUrlPrefixUtil.addPrefixUrl(anyString()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = reviewService.getReviewsByBookId(PageRequest.of(0, 10), 1L);
+        PageResponse<ReviewListResponse> response = reviewService.getReviewsByBookId(PageRequest.of(0, 10), 1L);
 
         assertThat(response.content()).hasSize(1);
-        assertThat(response.content().get(0).images()).hasSize(1);
+        assertThat(response.content().getFirst().images()).hasSize(1);
     }
 
     @Test
     @DisplayName("유저의 리뷰 목록 조회")
     void getReviewsByUserId() {
-        ReviewDefaultListResponse dto = new ReviewDefaultListResponse(1L, 1L, 1L, "user1", "제목", "내용", 5, null,
-            null);
+        ReviewDefaultListResponse dto = new ReviewDefaultListResponse(
+            1L, 1L, 1L, 1L, "user1", "제목", "내용", 5, null, null
+        );
         Page<ReviewDefaultListResponse> page = new PageImpl<>(List.of(dto));
 
         Review review = new Review(user, orderBook, "제목", "내용", 5);
         ReflectionTestUtils.setField(review, "id", 1L);
 
-        ReviewImage image = ReviewImage.builder().imageUrl("img1.jpg").review(review).build();
+        ReviewImage image = ReviewImage.builder()
+            .imageUrl("img1.jpg")
+            .review(review)
+            .build();
 
         when(reviewRepository.findListByUserId(any(), anyLong())).thenReturn(page);
         when(reviewImageRepository.findByReviewIdIn(List.of(1L))).thenReturn(List.of(image));
+        when(minioUploader.getPresignedUrl(anyString(), anyString()))
+            .thenReturn("http://storage.java21.net:8000/ink3-dev-reviews-images/sample.jpg");
+        when(presignUrlPrefixUtil.addPrefixUrl(anyString()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = reviewService.getReviewsByUserId(PageRequest.of(0, 10), 1L);
+        PageResponse<ReviewListResponse> response = reviewService.getReviewsByUserId(PageRequest.of(0, 10), 1L);
 
         assertThat(response.content()).hasSize(1);
         assertThat(response.content().get(0).images()).hasSize(1);

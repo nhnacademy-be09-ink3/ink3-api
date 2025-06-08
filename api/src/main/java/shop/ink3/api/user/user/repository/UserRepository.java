@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import shop.ink3.api.user.user.entity.User;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserQuerydslRepository {
     boolean existsByLoginId(String loginId);
 
     boolean existsByEmail(String email);

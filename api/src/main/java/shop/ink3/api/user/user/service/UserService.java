@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.user.common.exception.DormantException;
 import shop.ink3.api.user.common.exception.InvalidPasswordException;
 import shop.ink3.api.user.common.exception.WithdrawnException;
@@ -16,13 +18,17 @@ import shop.ink3.api.user.membership.repository.MembershipRepository;
 import shop.ink3.api.user.social.dto.SocialUserResponse;
 import shop.ink3.api.user.social.entity.Social;
 import shop.ink3.api.user.social.repository.SocialRepository;
+import shop.ink3.api.user.user.dto.IdentifierAvailabilityResponse;
 import shop.ink3.api.user.user.dto.SocialUserCreateRequest;
 import shop.ink3.api.user.user.dto.UserAuthResponse;
 import shop.ink3.api.user.user.dto.UserCreateRequest;
 import shop.ink3.api.user.user.dto.UserDetailResponse;
+import shop.ink3.api.user.user.dto.UserListItemDto;
 import shop.ink3.api.user.user.dto.UserMembershipUpdateRequest;
 import shop.ink3.api.user.user.dto.UserPasswordUpdateRequest;
 import shop.ink3.api.user.user.dto.UserResponse;
+import shop.ink3.api.user.user.dto.UserStatisticsResponse;
+import shop.ink3.api.user.user.dto.UserStatusResponse;
 import shop.ink3.api.user.user.dto.UserUpdateRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -41,13 +47,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public boolean isLoginIdAvailable(String loginId) {
-        return !userRepository.existsByLoginId(loginId);
+    public IdentifierAvailabilityResponse isLoginIdAvailable(String loginId) {
+        return new IdentifierAvailabilityResponse(!userRepository.existsByLoginId(loginId));
     }
 
     @Transactional(readOnly = true)
-    public boolean isEmailAvailable(String email) {
-        return !userRepository.existsByEmail(email);
+    public IdentifierAvailabilityResponse isEmailAvailable(String email) {
+        return new IdentifierAvailabilityResponse(!userRepository.existsByEmail(email));
     }
 
     @Transactional(readOnly = true)
@@ -90,6 +96,22 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<UserResponse> getUsersByBirthday(LocalDate birthday) {
         return userRepository.findAllByBirthday(birthday).stream().map(UserResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<UserListItemDto> getUsersForManagement(String keyword, Pageable pageable) {
+        return PageResponse.from(userRepository.getUsersForManagement(keyword, pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public UserStatisticsResponse getUserStatistics() {
+        return userRepository.getUserStatistics();
+    }
+
+    @Transactional(readOnly = true)
+    public UserStatusResponse getUserStatus(String loginId) {
+        User user = userRepository.findByLoginId(loginId).orElseThrow(() -> new UserNotFoundException(loginId));
+        return new UserStatusResponse(user.getStatus());
     }
 
     public UserResponse createUser(UserCreateRequest request) {
@@ -155,6 +177,12 @@ public class UserService {
 
     public void activateUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        user.activate();
+        userRepository.save(user);
+    }
+
+    public void activateUser(String loginId) {
+        User user = userRepository.findByLoginId(loginId).orElseThrow(() -> new UserNotFoundException(loginId));
         user.activate();
         userRepository.save(user);
     }

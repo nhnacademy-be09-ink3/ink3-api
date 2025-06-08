@@ -2,6 +2,7 @@ package shop.ink3.api.order.refund.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
@@ -27,6 +30,13 @@ import shop.ink3.api.order.refund.service.RefundService;
 public class RefundController {
     private final RefundService refundService;
     private final OrderMainService orderMainService;
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<PageResponse<RefundResponse>>> getRefunds(@RequestParam int page, @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        PageResponse<RefundResponse> allRefundList = refundService.getAllRefundList(pageable);
+        return ResponseEntity.ok(CommonResponse.success(allRefundList));
+    }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<RefundResponse>> getRefund(
@@ -47,6 +57,14 @@ public class RefundController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(CommonResponse.create(orderMainService.createRefund(request)));
+    }
+
+    @PostMapping("/{orderId}/users/{userId}")
+    public ResponseEntity<Void> approveRefund(
+            @PathVariable long orderId,
+            @PathVariable long userId) {
+        orderMainService.approveRefund(userId, orderId);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{orderId}")

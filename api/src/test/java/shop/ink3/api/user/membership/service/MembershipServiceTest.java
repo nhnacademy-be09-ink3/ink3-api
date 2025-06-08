@@ -2,7 +2,6 @@ package shop.ink3.api.user.membership.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +23,8 @@ import shop.ink3.api.user.membership.dto.MembershipCreateRequest;
 import shop.ink3.api.user.membership.dto.MembershipResponse;
 import shop.ink3.api.user.membership.dto.MembershipUpdateRequest;
 import shop.ink3.api.user.membership.entity.Membership;
+import shop.ink3.api.user.membership.exception.CannotDeactivateDefaultMembershipException;
+import shop.ink3.api.user.membership.exception.CannotDeleteDefaultMembershipException;
 import shop.ink3.api.user.membership.exception.DefaultMembershipNotFoundException;
 import shop.ink3.api.user.membership.exception.MembershipNotFoundException;
 import shop.ink3.api.user.membership.repository.MembershipRepository;
@@ -234,7 +235,6 @@ class MembershipServiceTest {
         membershipService.activateMembership(1L);
 
         Assertions.assertTrue(membership.getIsActive());
-        verify(membershipRepository).save(membership);
     }
 
     @Test
@@ -260,7 +260,6 @@ class MembershipServiceTest {
         membershipService.deactivateMembership(1L);
 
         Assertions.assertFalse(membership.getIsActive());
-        verify(membershipRepository).save(membership);
     }
 
     @Test
@@ -277,7 +276,8 @@ class MembershipServiceTest {
 
         when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
 
-        Assertions.assertThrows(IllegalStateException.class, () -> membershipService.deactivateMembership(1L));
+        Assertions.assertThrows(CannotDeactivateDefaultMembershipException.class,
+                () -> membershipService.deactivateMembership(1L));
     }
 
     @Test
@@ -348,7 +348,6 @@ class MembershipServiceTest {
         membershipService.setDefaultMembership(1L);
 
         Assertions.assertTrue(membership.getIsDefault());
-        verify(membershipRepository, times(1)).save(membership);
     }
 
     @Test
@@ -369,7 +368,8 @@ class MembershipServiceTest {
     void deleteDefaultMembership() {
         Membership membership = Membership.builder().id(1L).isDefault(true).build();
         when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
-        Assertions.assertThrows(IllegalStateException.class, () -> membershipService.deleteMembership(1L));
+        Assertions.assertThrows(CannotDeleteDefaultMembershipException.class,
+                () -> membershipService.deleteMembership(1L));
     }
 
     @Test
