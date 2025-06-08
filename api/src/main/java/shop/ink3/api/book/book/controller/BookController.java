@@ -1,6 +1,7 @@
 package shop.ink3.api.book.book.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,16 +13,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.multipart.MultipartFile;
+
 import shop.ink3.api.book.book.dto.BookCreateRequest;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
 import shop.ink3.api.book.book.dto.MainBookResponse;
+import shop.ink3.api.book.book.enums.SortType;
 import shop.ink3.api.book.book.service.BookService;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
@@ -33,19 +38,16 @@ public class BookController {
     private final BookService bookService;
     private final ObjectMapper objectMapper;
 
-
     // 도서 상세 조회 (ID 기반 단건 조회)
     @GetMapping("/{bookId}")
     public ResponseEntity<CommonResponse<BookResponse>> getBookById(@PathVariable Long bookId) {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBook(bookId)));
     }
 
-
     @GetMapping("/{bookId}/parent-categories")
     public ResponseEntity<CommonResponse<BookResponse>> getBookByIdWithParentCategory(@PathVariable Long bookId) {
         return ResponseEntity.ok(CommonResponse.success(bookService.getBookWithCategory(bookId)));
     }
-
 
     // 전체 도서 목록 조회
     @GetMapping
@@ -59,8 +61,9 @@ public class BookController {
     }
 
     @GetMapping("/bestseller-all")
-    public ResponseEntity<CommonResponse<PageResponse<MainBookResponse>>> getAllBestsellerBooks(Pageable pageable) {
-        return ResponseEntity.ok(CommonResponse.success(bookService.getAllBestSellerBooks(pageable)));
+    public ResponseEntity<CommonResponse<PageResponse<MainBookResponse>>> getAllBestsellerBooks(
+        @RequestParam(defaultValue = "REVIEW") SortType sortType, Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.getAllBestSellerBooks(sortType, pageable)));
     }
 
     @GetMapping("/new")
@@ -69,8 +72,8 @@ public class BookController {
     }
 
     @GetMapping("/new-all")
-    public ResponseEntity<CommonResponse<PageResponse<MainBookResponse>>> getAllNewBooks(Pageable pageable) {
-        return ResponseEntity.ok(CommonResponse.success(bookService.getAllNewBooks(pageable)));
+    public ResponseEntity<CommonResponse<PageResponse<MainBookResponse>>> getAllNewBooks(@RequestParam(defaultValue = "REVIEW") SortType sortType, Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.getAllNewBooks(sortType, pageable)));
     }
 
     @GetMapping("/recommend")
@@ -79,17 +82,18 @@ public class BookController {
     }
 
     @GetMapping("/recommend-all")
-    public ResponseEntity<CommonResponse<PageResponse<MainBookResponse>>> getAllRecommendedBooks(Pageable pageable) {
-        return ResponseEntity.ok(CommonResponse.success(bookService.getAllRecommendedBooks(pageable)));
+    public ResponseEntity<CommonResponse<PageResponse<MainBookResponse>>> getAllRecommendedBooks(@RequestParam(defaultValue = "REVIEW") SortType sortType, Pageable pageable) {
+        return ResponseEntity.ok(CommonResponse.success(bookService.getAllRecommendedBooks(sortType, pageable)));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<BookResponse>> createBook(
-            @RequestPart("book") String bookCreateRequestJson,
-            @RequestPart("coverImage") MultipartFile coverImage
+        @RequestPart("book") String bookCreateRequestJson,
+        @RequestPart("coverImage") MultipartFile coverImage
     ) {
         try {
-            BookCreateRequest bookCreateRequest = objectMapper.readValue(bookCreateRequestJson, BookCreateRequest.class);
+            BookCreateRequest bookCreateRequest = objectMapper.readValue(bookCreateRequestJson,
+                BookCreateRequest.class);
             BookResponse response = bookService.createBook(bookCreateRequest, coverImage);
             return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
         } catch (Exception e) {
@@ -99,12 +103,13 @@ public class BookController {
 
     @PutMapping("/{bookId}")
     public ResponseEntity<CommonResponse<BookResponse>> updateBook(
-            @PathVariable Long bookId,
-            @RequestPart("book") String bookUpdateRequestJson,
-            @RequestPart("coverImage") MultipartFile coverImage
+        @PathVariable Long bookId,
+        @RequestPart("book") String bookUpdateRequestJson,
+        @RequestPart("coverImage") MultipartFile coverImage
     ) {
         try {
-            BookUpdateRequest bookUpdateRequest = objectMapper.readValue(bookUpdateRequestJson, BookUpdateRequest.class);
+            BookUpdateRequest bookUpdateRequest = objectMapper.readValue(bookUpdateRequestJson,
+                BookUpdateRequest.class);
             BookResponse response = bookService.updateBook(bookId, bookUpdateRequest, coverImage);
             return ResponseEntity.ok(CommonResponse.update(response));
         } catch (Exception e) {

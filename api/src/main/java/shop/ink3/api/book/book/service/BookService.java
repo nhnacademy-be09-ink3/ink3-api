@@ -1,22 +1,22 @@
 package shop.ink3.api.book.book.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+
+import lombok.RequiredArgsConstructor;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.author.exception.AuthorNotFoundException;
 import shop.ink3.api.book.author.repository.AuthorRepository;
@@ -28,6 +28,7 @@ import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
 import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.enums.SortType;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
 import shop.ink3.api.book.book.exception.InvalidCategoryDepthException;
@@ -120,8 +121,8 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<MainBookResponse> getAllBestSellerBooks(Pageable pageable) {
-        Page<Book> bestSellerBooks = bookRepository.findBestSellerBooks(pageable);
+    public PageResponse<MainBookResponse> getAllBestSellerBooks(SortType sortType, Pageable pageable) {
+        Page<Book> bestSellerBooks = bookRepository.findSortedBestSellerBooks(sortType, pageable);
         return PageResponse.from(bestSellerBooks.map(MainBookResponse::from));
     }
 
@@ -132,8 +133,8 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<MainBookResponse> getAllNewBooks(Pageable pageable) {
-        Page<Book> bestRecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(pageable);
+    public PageResponse<MainBookResponse> getAllNewBooks(SortType sortType, Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findSortedNewBooks(sortType, pageable);
         return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
@@ -144,8 +145,8 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<MainBookResponse> getAllRecommendedBooks(Pageable pageable) {
-        Page<Book> bestRecommendedBooks = bookRepository.findRecommendedBooks(pageable);
+    public PageResponse<MainBookResponse> getAllRecommendedBooks(SortType sortType, Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findSortedRecommendedBooks(sortType, pageable);
         return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
     }
 
