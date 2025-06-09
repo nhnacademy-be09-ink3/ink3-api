@@ -9,6 +9,8 @@ public record CouponResponse(
         String name,
         Long policyId,
         String policyName,
+        int discountRate,
+        int discountValue,
         LocalDateTime issuableFrom,
         LocalDateTime expiresAt,
         LocalDateTime createdAt,
@@ -23,6 +25,8 @@ public record CouponResponse(
                 coupon.getName(),
                 coupon.getCouponPolicy().getId(),
                 coupon.getCouponPolicy().getName(),
+                coupon.getCouponPolicy().getDiscountPercentage(),
+                coupon.getCouponPolicy().getDiscountValue(),
                 coupon.getIssuableFrom(),
                 coupon.getExpiresAt(),
                 coupon.getCreatedAt(),
@@ -31,6 +35,6 @@ public record CouponResponse(
         );
     }
 
-    public record BookInfo(Long originId, Long id, String title) {}
-    public record CategoryInfo(Long originId, Long id, String name) {}
+    public record BookInfo(Long originId, Long id, String title, String originType) {}
+    public record CategoryInfo(Long originId, Long id, String name, String originType) {}
 }

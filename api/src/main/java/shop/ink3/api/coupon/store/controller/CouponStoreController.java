@@ -25,13 +25,6 @@ public class CouponStoreController {
     private final BookCouponRepository bookCouponRepository;
     private final CategoryCouponRepository categoryCouponRepository;
 
-    // 쿠폰 발급 (store 생성)
-    @PostMapping("/users/coupon-stores")
-    public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(@RequestBody CouponIssueRequest request) {
-        CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
-    }
-
     // ✅ 유저의 전체 쿠폰 조회 → /users/{userId}/stores
     @GetMapping("/users/{userId}/coupon-stores")
     public ResponseEntity<CommonResponse<List<CouponStoreResponse>>> getStoresByUserId(@PathVariable Long userId) {

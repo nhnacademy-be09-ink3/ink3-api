@@ -25,6 +25,7 @@ import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
+import shop.ink3.api.coupon.store.dto.CommonCouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
@@ -72,14 +73,14 @@ class CouponStoreServiceTest {
         Long couponId = 100L;
         OriginType originType = OriginType.BOOK;
         Long originId = 200L;
-        var request = new CouponIssueRequest(userId, couponId, originType, originId);
+        var request = new CommonCouponIssueRequest(userId, couponId, originType, originId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
         when(couponStoreRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginId(
                 userId, couponId, originType, originId)).thenReturn(false);
 
-        CouponStore result = couponStoreService.issueCoupon(request);
+        CouponStore result = couponStoreService.issueCommonCoupon(request);
 
         assertNotNull(result);
         assertEquals(originType, result.getOriginType());
@@ -94,7 +95,7 @@ class CouponStoreServiceTest {
         Long couponId = 100L;
         OriginType originType = OriginType.BOOK;
         Long originId = 200L;
-        var request = new CouponIssueRequest(userId, couponId, originType, originId);
+        var request = new CouponIssueRequest(couponId, originType, originId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
@@ -102,7 +103,7 @@ class CouponStoreServiceTest {
                 userId, couponId, originType, originId)).thenReturn(true);
 
         assertThrows(DuplicateCouponException.class,
-                () -> couponStoreService.issueCoupon(request));
+                () -> couponStoreService.issueCoupon(request, 1L));
         verify(couponStoreRepository, never()).save(any());
     }
 
@@ -111,13 +112,13 @@ class CouponStoreServiceTest {
         Long userId = 1L;
         Long couponId = 101L;
         OriginType originType = OriginType.WELCOME;
-        var request = new CouponIssueRequest(userId, couponId, originType, null);
+        var request = new CommonCouponIssueRequest(userId, couponId, originType, null);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
         when(couponStoreRepository.existsByUserIdAndOriginType(userId, originType)).thenReturn(false);
 
-        CouponStore result = couponStoreService.issueCoupon(request);
+        CouponStore result = couponStoreService.issueCommonCoupon(request);
 
         assertNotNull(result);
         assertEquals(originType, result.getOriginType());
@@ -131,14 +132,14 @@ class CouponStoreServiceTest {
         Long userId = 1L;
         Long couponId = 102L;
         OriginType originType = OriginType.WELCOME;
-        var request = new CouponIssueRequest(userId, couponId, originType, null);
+        var request = new CommonCouponIssueRequest(userId, couponId, originType, null);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
         when(couponStoreRepository.existsByUserIdAndOriginType(userId, originType)).thenReturn(true);
 
         assertThrows(DuplicateCouponException.class,
-                () -> couponStoreService.issueCoupon(request));
+                () -> couponStoreService.issueCommonCoupon(request));
         verify(couponStoreRepository, never()).save(any());
     }
 
@@ -146,12 +147,12 @@ class CouponStoreServiceTest {
     void issueCoupon_userNotFound_throwsUserNotFoundException() {
         Long userId = 9999L;
         Long couponId = 100L;
-        var request = new CouponIssueRequest(userId, couponId, OriginType.BOOK, 200L);
+        var request = new CouponIssueRequest(couponId, OriginType.BOOK, 200L);
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class,
-                () -> couponStoreService.issueCoupon(request));
+                () -> couponStoreService.issueCoupon(request, userId));
         verify(couponRepository, never()).findById(any());
         verify(couponStoreRepository, never()).save(any());
     }
@@ -160,13 +161,13 @@ class CouponStoreServiceTest {
     void issueCoupon_couponNotFound_throwsCouponNotFoundException() {
         Long userId = 1L;
         Long couponId = 9999L;
-        var request = new CouponIssueRequest(userId, couponId, OriginType.BOOK, 200L);
+        var request = new CouponIssueRequest(couponId, OriginType.BOOK, 200L);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(couponRepository.findById(couponId)).thenReturn(Optional.empty());
 
         assertThrows(CouponNotFoundException.class,
-                () -> couponStoreService.issueCoupon(request));
+                () -> couponStoreService.issueCoupon(request, userId));
         verify(couponStoreRepository, never()).save(any());
     }
 

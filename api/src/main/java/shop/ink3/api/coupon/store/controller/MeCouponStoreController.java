@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import shop.ink3.api.common.dto.CommonResponse;
-import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreResponse;
@@ -40,8 +38,10 @@ public class MeCouponStoreController {
 
     // 쿠폰 발급 (store 생성)
     @PostMapping("/users/coupon-stores")
-    public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(@RequestBody CouponIssueRequest request) {
-        CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request));
+    public ResponseEntity<CommonResponse<CouponStoreResponse>> issueCoupon(
+            @RequestHeader(name = "X-User-Id") Long userId,
+            @RequestBody CouponIssueRequest request) {
+        CouponStoreResponse response = CouponStoreResponse.fromEntity(couponStoreService.issueCoupon(request, userId));
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
     }
 
