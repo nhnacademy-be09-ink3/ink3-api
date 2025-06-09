@@ -25,7 +25,7 @@ public class OrderResponse {
     public static OrderResponse from(Order order){
         return new OrderResponse(
                 order.getId(),
-                order.getUser().getId(),
+                order.getUser() != null ? order.getUser().getId() : null,
                 order.getOrderUUID(),
                 order.getStatus(),
                 order.getOrderedAt(),

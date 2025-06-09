@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,9 @@ import shop.ink3.api.review.review.exception.ReviewNotFoundException;
 import shop.ink3.api.review.review.repository.ReviewRepository;
 import shop.ink3.api.review.reviewImage.entity.ReviewImage;
 import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
+import shop.ink3.api.user.point.history.entity.PointHistory;
+import shop.ink3.api.user.point.history.entity.PointHistoryStatus;
+import shop.ink3.api.user.point.history.service.PointService;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.repository.UserRepository;
 
@@ -52,6 +56,9 @@ class ReviewServiceTest {
 
     @Mock
     private ReviewImageRepository reviewImageRepository;
+
+    @Mock
+    private PointService pointService;
 
     @Mock
     private MinioUploader minioUploader;
@@ -77,6 +84,17 @@ class ReviewServiceTest {
             .order(order)
             .build();
         ReflectionTestUtils.setField(reviewService, "bucket", "test-bucket");
+
+        when(pointService.earnPoint(anyLong(), any())).thenReturn(
+            PointHistory.builder()
+                .id(1L)
+                .user(user)
+                .delta(100)
+                .status(PointHistoryStatus.EARN)
+                .description("100포인트가 적립되었습니다.")
+                .createdAt(LocalDateTime.now())
+                .build()
+        );
     }
 
     @Test
@@ -92,7 +110,7 @@ class ReviewServiceTest {
         when(reviewRepository.save(any())).thenReturn(review);
         when(reviewImageRepository.findByReviewId(1L)).thenReturn(List.of());
 
-        ReviewResponse response = reviewService.addReview(request, null);
+        ReviewResponse response = reviewService.addReview(request, List.of());
 
         assertThat(orderBook.getOrder()).isNotNull();
         assertThat(orderBook.getOrder().getUser()).isEqualTo(user);
