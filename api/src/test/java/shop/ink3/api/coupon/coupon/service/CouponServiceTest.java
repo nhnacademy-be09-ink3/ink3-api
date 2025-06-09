@@ -15,10 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -76,7 +74,7 @@ class CouponServiceTest {
         );
 
         when(policyRepository.findById(1L))
-                .thenReturn(Optional.of(CouponPolicy.builder().id(1L).name("P1").build()));
+                .thenReturn(Optional.of(CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build()));
 
         when(couponRepository.save(any(Coupon.class)))
                 .thenAnswer((Answer<Coupon>) invocation -> {
@@ -119,7 +117,7 @@ class CouponServiceTest {
 
     @Test
     void getCouponById_success() {
-        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").build();
+        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
         Coupon coupon = Coupon.builder()
                 .id(7L)
                 .couponPolicy(policy)
@@ -151,7 +149,7 @@ class CouponServiceTest {
 
     @Test
     void getAllCoupons_success() {
-        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").build();
+        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
         Coupon c1 = Coupon.builder().id(11L).couponPolicy(policy).build();
         Coupon c2 = Coupon.builder().id(22L).couponPolicy(policy).build();
 
@@ -176,7 +174,7 @@ class CouponServiceTest {
         when(book.getId()).thenReturn(10L);
         when(book.getTitle()).thenReturn("Java");
 
-        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").build();
+        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
         Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").expiresAt(expires).build();
         when(bc.getBook()).thenReturn(book);
         when(bc.getCoupon()).thenReturn(coupon);
@@ -216,7 +214,7 @@ class CouponServiceTest {
         when(cat.getId()).thenReturn(8L);
         when(cat.getName()).thenReturn("Fiction");
 
-        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").build();
+        CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
         Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").expiresAt(expires).build();
 
         when(cc.getCategory()).thenReturn(cat);
@@ -256,7 +254,7 @@ class CouponServiceTest {
 
         Coupon existing = Coupon.builder()
                 .id(couponId)
-                .couponPolicy(CouponPolicy.builder().id(1L).name("P1").build())
+                .couponPolicy(CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build())
                 .name("old-name")
                 .issuableFrom(now)
                 .expiresAt(now.plusDays(5))
@@ -269,7 +267,7 @@ class CouponServiceTest {
                 .thenReturn(Optional.of(existing));
 
         when(policyRepository.findById(2L))
-                .thenReturn(Optional.of(CouponPolicy.builder().id(2L).name("P2").build()));
+                .thenReturn(Optional.of(CouponPolicy.builder().id(2L).name("P2").discountPercentage(10).discountValue(0).build()));
 
         List<Long> bookIds = List.of(101L,102L);
         List<Long> catIds = List.of(201L);
