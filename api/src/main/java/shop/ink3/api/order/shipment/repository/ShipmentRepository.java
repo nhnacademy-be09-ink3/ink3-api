@@ -1,5 +1,6 @@
 package shop.ink3.api.order.shipment.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,4 +14,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     Optional<Shipment> findByOrderId(long orderId);
 
     Page<Shipment> findAllByOrderUserIdAndOrderStatus(long userId,OrderStatus status, Pageable pageable);
+
+    List<Shipment> findAllByOrderStatus(OrderStatus status);
 }

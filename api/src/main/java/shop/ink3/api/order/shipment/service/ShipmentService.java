@@ -1,7 +1,9 @@
 package shop.ink3.api.order.shipment.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +64,12 @@ public class ShipmentService {
         Page<Shipment> shipmentPage = shipmentRepository.findAllByOrderUserIdAndOrderStatus(userId, status, pageable);
         Page<ShipmentResponse> shipmentResponsePage = shipmentPage.map(ShipmentResponse::from);
         return PageResponse.from(shipmentResponsePage);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ShipmentResponse> getShipmentByOrderStatus(OrderStatus status) {
+        List<Shipment> shipmentList = shipmentRepository.findAllByOrderStatus(status);
+        return shipmentList.stream().map(ShipmentResponse::from).collect(Collectors.toList());
     }
 
     // 수정
