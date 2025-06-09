@@ -1,22 +1,22 @@
 package shop.ink3.api.book.book.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+
+import lombok.RequiredArgsConstructor;
 import shop.ink3.api.book.author.entity.Author;
 import shop.ink3.api.book.author.exception.AuthorNotFoundException;
 import shop.ink3.api.book.author.repository.AuthorRepository;
@@ -28,6 +28,7 @@ import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.BookUpdateRequest;
 import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.enums.SortType;
 import shop.ink3.api.book.book.exception.BookNotFoundException;
 import shop.ink3.api.book.book.exception.DuplicateIsbnException;
 import shop.ink3.api.book.book.exception.InvalidCategoryDepthException;
@@ -49,6 +50,7 @@ import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioUploader;
 import shop.ink3.api.common.util.PresignUrlPrefixUtil;
 import shop.ink3.api.review.review.repository.ReviewRepository;
+import shop.ink3.api.user.like.repository.LikeRepository;
 
 @Transactional
 @RequiredArgsConstructor
@@ -60,6 +62,7 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
+    private final LikeRepository likeRepository;
     private final MinioUploader minioUploader;
     private final PresignUrlPrefixUtil presignUrlPrefixUtil;
 
@@ -71,12 +74,13 @@ public class BookService {
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         double averageRating = getAverageRating(bookId);
+        long likeCount = likeRepository.countByBookId(book.getId());
 
         String imageUrl = book.getThumbnailUrl();
         if (imageUrl != null && !imageUrl.startsWith("https")) {
             imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
         }
-        return BookResponse.from(book, imageUrl, averageRating);
+        return BookResponse.from(book, imageUrl, averageRating, likeCount);
     }
 
     @Transactional(readOnly = true)
@@ -120,9 +124,14 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<MainBookResponse> getAllBestSellerBooks(Pageable pageable) {
-        Page<Book> bestSellerBooks = bookRepository.findBestSellerBooks(pageable);
-        return PageResponse.from(bestSellerBooks.map(MainBookResponse::from));
+    public PageResponse<MainBookResponse> getAllBestSellerBooks(SortType sortType, Pageable pageable) {
+        Page<Book> bestSellerBooks = bookRepository.findSortedBestSellerBooks(sortType, pageable);
+        Page<MainBookResponse> responses = bestSellerBooks.map(book -> {
+            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
+            long likeCount = likeRepository.countByBookId(book.getId());
+            return MainBookResponse.from(book, reviewCount, likeCount);
+        });
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
@@ -132,9 +141,14 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<MainBookResponse> getAllNewBooks(Pageable pageable) {
-        Page<Book> bestRecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(pageable);
-        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
+    public PageResponse<MainBookResponse> getAllNewBooks(SortType sortType, Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findSortedNewBooks(sortType, pageable);
+        Page<MainBookResponse> responses = bestRecommendedBooks.map(book -> {
+            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
+            long likeCount = likeRepository.countByBookId(book.getId());
+            return MainBookResponse.from(book, reviewCount, likeCount);
+        });
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
@@ -144,9 +158,14 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<MainBookResponse> getAllRecommendedBooks(Pageable pageable) {
-        Page<Book> bestRecommendedBooks = bookRepository.findRecommendedBooks(pageable);
-        return PageResponse.from(bestRecommendedBooks.map(MainBookResponse::from));
+    public PageResponse<MainBookResponse> getAllRecommendedBooks(SortType sortType, Pageable pageable) {
+        Page<Book> bestRecommendedBooks = bookRepository.findSortedRecommendedBooks(sortType, pageable);
+        Page<MainBookResponse> responses = bestRecommendedBooks.map(book -> {
+            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
+            long likeCount = likeRepository.countByBookId(book.getId());
+            return MainBookResponse.from(book, reviewCount, likeCount);
+        });
+        return PageResponse.from(responses);
     }
 
     public BookResponse createBook(BookCreateRequest request, MultipartFile coverImage) {
@@ -276,8 +295,9 @@ public class BookService {
             book.addBookTag(tag);
         }
         double averageRating = getAverageRating(bookId);
+        long likeCount = likeRepository.countByBookId(book.getId());
 
-        return BookResponse.from(book, imageUrl, averageRating);
+        return BookResponse.from(book, imageUrl, averageRating, likeCount);
     }
 
     public void deleteBook(@PathVariable Long bookId) {
@@ -402,5 +422,32 @@ public class BookService {
                     });
         }
         return parent;
+    }
+  
+    @Transactional(readOnly = true)
+    public PageResponse<BookResponse> getBooksByCategory(String categoryName, Pageable pageable) {
+        // 1. 카테고리 엔티티 조회
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryName));
+
+        // 2. 자기 자신 포함 하위 카테고리 ID 전체 조회
+        List<Category> allCategories = categoryRepository.findAllDescendantsIncludingSelf(category.getId());
+        List<Long> categoryIds = allCategories.stream()
+                .map(Category::getId)
+                .toList();
+
+        // 3. 책 목록 조회
+        Page<Book> books = bookRepository.findByCategoryIds(categoryIds, pageable);
+
+        // 4. 이미지 URL 가공 및 DTO 변환
+        Page<BookResponse> bookResponses = books.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return BookResponse.from(book, imageUrl);
+        });
+
+        return PageResponse.from(bookResponses);
     }
 }

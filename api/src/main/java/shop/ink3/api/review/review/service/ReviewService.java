@@ -1,5 +1,7 @@
 package shop.ink3.api.review.review.service;
 
+import static shop.ink3.api.review.review.dto.ReviewPointType.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
 import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
 import shop.ink3.api.review.review.dto.ReviewListResponse;
+import shop.ink3.api.review.review.dto.ReviewPointType;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -34,6 +37,9 @@ import shop.ink3.api.review.reviewImage.dto.ReviewImageMapping;
 import shop.ink3.api.review.reviewImage.dto.ReviewImageResponse;
 import shop.ink3.api.review.reviewImage.entity.ReviewImage;
 import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
+import shop.ink3.api.user.point.history.entity.PointHistory;
+import shop.ink3.api.user.point.history.service.PointService;
+import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
@@ -47,6 +53,7 @@ public class ReviewService {
     private final OrderBookRepository orderBookRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
+    private final PointService pointService;
     private final MinioUploader minioUploader;
     private final PresignUrlPrefixUtil presignUrlPrefixUtil;
 
@@ -76,10 +83,11 @@ public class ReviewService {
             .build();
         Review savedReview = reviewRepository.save(review);
 
-        List<String> imageUrls = saveImages(images, savedReview);
-        log.warn("ReviewService===========imageUrls={}", Arrays.toString(imageUrls.toArray()));
+        PointHistory pointHistory = getPointHistory(images, user);
 
-        return ReviewResponse.from(savedReview, imageUrls);
+        List<String> imageUrls = saveImages(images, savedReview);
+
+        return ReviewResponse.from(savedReview, imageUrls, pointHistory.getDescription());
     }
 
     public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request, List<MultipartFile> images, Long userId) {
@@ -135,6 +143,17 @@ public class ReviewService {
         }
 
         reviewRepository.deleteById(reviewId);
+    }
+
+    private PointHistory getPointHistory(List<MultipartFile> images, User user) {
+        ReviewPointType pointType;
+        if (images != null && !images.isEmpty()) {
+            pointType = REVIEW_IMAGE;
+        } else {
+            pointType = REVIEW;
+        }
+        return pointService.earnPoint(user.getId(),
+            new UserPointRequest(pointType.getAmount(), "리뷰 작성에 따른 " + pointType.getAmount() + " 포인트 적립"));
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {

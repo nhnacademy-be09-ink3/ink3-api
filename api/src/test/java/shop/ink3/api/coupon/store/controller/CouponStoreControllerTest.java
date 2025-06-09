@@ -352,10 +352,10 @@ class CouponStoreControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 // 해당 엔드포인트는 List<CouponStoreDto>를 직접 반환하므로, 최상위 배열 형태로 검증
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].storeId", is(7)))
-                .andExpect(jsonPath("$[0].couponId", is(100)))
-                .andExpect(jsonPath("$[0].originType", is("BOOK")));
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].storeId", is(7)))
+                .andExpect(jsonPath("$.data[0].couponId", is(100)))
+                .andExpect(jsonPath("$.data[0].originType", is("BOOK")));
 
         verify(couponStoreService, times(1))
                 .getApplicableCouponStores(userId, bookId);

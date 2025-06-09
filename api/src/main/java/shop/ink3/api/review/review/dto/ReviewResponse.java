@@ -15,7 +15,8 @@ public record ReviewResponse(
     int rating,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt,
-    List<String> images
+    List<String> images,
+    String description
 ) {
     public static ReviewResponse from(Review review, List<String> imageUrls) {
         return new ReviewResponse(
@@ -28,7 +29,24 @@ public record ReviewResponse(
             review.getRating(),
             review.getCreatedAt(),
             review.getModifiedAt(),
-            imageUrls
+            imageUrls,
+            null
+        );
+    }
+
+    public static ReviewResponse from(Review review, List<String> imageUrls, String description) {
+        return new ReviewResponse(
+            review.getId(),
+            review.getUser().getId(),
+            review.getOrderBook().getBook().getId(),
+            review.getOrderBook().getId(),
+            review.getTitle(),
+            review.getContent(),
+            review.getRating(),
+            review.getCreatedAt(),
+            review.getModifiedAt(),
+            imageUrls,
+            description
         );
     }
 }

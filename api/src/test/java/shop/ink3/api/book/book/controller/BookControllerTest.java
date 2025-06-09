@@ -19,6 +19,7 @@ import shop.ink3.api.book.book.dto.AuthorDto;
 import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.book.enums.SortType;
 import shop.ink3.api.book.book.service.BookService;
 import shop.ink3.api.book.category.dto.CategoryResponse;
 import shop.ink3.api.book.tag.dto.TagResponse;
@@ -70,14 +71,15 @@ class BookControllerTest {
             categories,                     // List<CategoryResponse>
             authors,                        // List<AuthorDto>
             tags,                           // List<TagResponse>
-            4.5                             // ⭐️ averageRating 추가
+            4.5,                            // ⭐️ averageRating 추가
+            0L
         );
 
         this.mainBookResponse = new MainBookResponse(
             1L, "책 제목", 20000, 18000, 10,
             "https://example.com/image.jpg",
             true,
-            List.of("홍길동 (저자)")
+            List.of("홍길동 (저자)"), 5, 5
         );
     }
 
@@ -129,7 +131,7 @@ class BookControllerTest {
     @DisplayName("전체 베스트셀러 조회")
     void getAllBestsellerBooks() throws Exception {
         PageResponse<MainBookResponse> response = PageResponse.from(new PageImpl<>(List.of(mainBookResponse)));
-        when(bookService.getAllBestSellerBooks(any())).thenReturn(response);
+        when(bookService.getAllBestSellerBooks(eq(SortType.REVIEW), any())).thenReturn(response);
 
         mockMvc.perform(get("/books/bestseller-all"))
             .andExpect(status().isOk())
@@ -140,7 +142,7 @@ class BookControllerTest {
     @DisplayName("전체 신간 조회")
     void getAllNewBooks() throws Exception {
         PageResponse<MainBookResponse> response = PageResponse.from(new PageImpl<>(List.of(mainBookResponse)));
-        when(bookService.getAllNewBooks(any())).thenReturn(response);
+        when(bookService.getAllNewBooks(eq(SortType.REVIEW), any())).thenReturn(response);
 
         mockMvc.perform(get("/books/new-all"))
             .andExpect(status().isOk())
@@ -151,7 +153,7 @@ class BookControllerTest {
     @DisplayName("전체 추천도서 조회")
     void getAllRecommendedBooks() throws Exception {
         PageResponse<MainBookResponse> response = PageResponse.from(new PageImpl<>(List.of(mainBookResponse)));
-        when(bookService.getAllRecommendedBooks(any())).thenReturn(response);
+        when(bookService.getAllRecommendedBooks(eq(SortType.REVIEW), any())).thenReturn(response);
 
         mockMvc.perform(get("/books/recommend-all"))
             .andExpect(status().isOk())

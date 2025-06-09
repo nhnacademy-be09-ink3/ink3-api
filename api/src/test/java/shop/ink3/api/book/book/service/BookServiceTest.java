@@ -22,9 +22,11 @@ import shop.ink3.api.book.book.dto.BookResponse;
 import shop.ink3.api.book.book.dto.MainBookResponse;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.book.enums.SortType;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.review.review.repository.ReviewRepository;
+import shop.ink3.api.user.like.repository.LikeRepository;
 
 class BookServiceTest {
     @Mock
@@ -32,6 +34,9 @@ class BookServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+    @Mock
+    private LikeRepository likeRepository;
 
     @InjectMocks
     private BookService bookService;
@@ -114,29 +119,44 @@ class BookServiceTest {
     @DisplayName("전체 베스트셀러 조회 성공")
     void getAllBestSellerBooksSuccess() {
         Page<Book> page = new PageImpl<>(List.of(book));
-        when(bookRepository.findBestSellerBooks(any(Pageable.class))).thenReturn(page);
-        PageResponse<MainBookResponse> result = bookService.getAllBestSellerBooks(PageRequest.of(0, 5));
+        when(bookRepository.findSortedBestSellerBooks(eq(SortType.REVIEW), any(Pageable.class))).thenReturn(page);
+        when(reviewRepository.countByOrderBookBookId(book.getId())).thenReturn(5L);
+        when(likeRepository.countByBookId(book.getId())).thenReturn(3L);
+
+        PageResponse<MainBookResponse> result = bookService.getAllBestSellerBooks(SortType.REVIEW, PageRequest.of(0, 5));
         assertThat(result.content()).hasSize(1);
         assertThat(result.content().get(0).title()).isEqualTo("책 제목");
+        assertThat(result.content().get(0).reviewCount()).isEqualTo(5L);
+        assertThat(result.content().get(0).likeCount()).isEqualTo(3L);
     }
 
     @Test
     @DisplayName("전체 신간 도서 조회 성공")
     void getAllNewBooksSuccess() {
         Page<Book> page = new PageImpl<>(List.of(book));
-        when(bookRepository.findAllByOrderByPublishedAtDesc(any(Pageable.class))).thenReturn(page);
-        PageResponse<MainBookResponse> result = bookService.getAllNewBooks(PageRequest.of(0, 5));
+        when(bookRepository.findSortedNewBooks(eq(SortType.REVIEW), any(Pageable.class))).thenReturn(page);
+        when(reviewRepository.countByOrderBookBookId(book.getId())).thenReturn(5L);
+        when(likeRepository.countByBookId(book.getId())).thenReturn(3L);
+
+        PageResponse<MainBookResponse> result = bookService.getAllNewBooks(SortType.REVIEW, PageRequest.of(0, 5));
         assertThat(result.content()).hasSize(1);
         assertThat(result.content().get(0).title()).isEqualTo("책 제목");
+        assertThat(result.content().get(0).reviewCount()).isEqualTo(5L);
+        assertThat(result.content().get(0).likeCount()).isEqualTo(3L);
     }
 
     @Test
     @DisplayName("전체 추천 도서 조회 성공")
     void getAllRecommendedBooksSuccess() {
         Page<Book> page = new PageImpl<>(List.of(book));
-        when(bookRepository.findRecommendedBooks(any(Pageable.class))).thenReturn(page);
-        PageResponse<MainBookResponse> result = bookService.getAllRecommendedBooks(PageRequest.of(0, 5));
+        when(bookRepository.findSortedRecommendedBooks(eq(SortType.REVIEW), any(Pageable.class))).thenReturn(page);
+        when(reviewRepository.countByOrderBookBookId(book.getId())).thenReturn(5L);
+        when(likeRepository.countByBookId(book.getId())).thenReturn(3L);
+
+        PageResponse<MainBookResponse> result = bookService.getAllRecommendedBooks(SortType.REVIEW, PageRequest.of(0, 5));
         assertThat(result.content()).hasSize(1);
         assertThat(result.content().get(0).title()).isEqualTo("책 제목");
+        assertThat(result.content().get(0).reviewCount()).isEqualTo(5L);
+        assertThat(result.content().get(0).likeCount()).isEqualTo(3L);
     }
 }

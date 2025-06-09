@@ -3,6 +3,7 @@ package shop.ink3.api.book.category.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,6 +83,12 @@ public class CategoryService {
     public PageResponse<CategoryResponse> getAllCategories(Pageable pageable) {
         Page<Category> categories = categoryRepository.findAll(pageable);
         return PageResponse.from(categories.map(CategoryResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getParentCategories(Long id) {
+        List<Category> categories = categoryRepository.findAllAncestors(id);
+        return categories.stream().map(CategoryResponse::from).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

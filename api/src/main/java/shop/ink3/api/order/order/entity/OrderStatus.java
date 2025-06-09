@@ -20,11 +20,10 @@ public enum OrderStatus {
 
     @JsonCreator
     public static OrderStatus getStatus(String str) {
-        for (OrderStatus status : OrderStatus.values()) {
-            if (status.label.equals(str)) {
-                return status;
-            }
+        try {
+            return OrderStatus.valueOf(str); // enum name 매핑
+        } catch (IllegalArgumentException e) {
+            return CREATED;
         }
-        return CREATED;
     }
 }
