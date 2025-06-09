@@ -3,6 +3,7 @@ package shop.ink3.api.order.order.repository;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import shop.ink3.api.order.order.dto.OrderWithDetailsResponse;
@@ -60,7 +61,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findAllByStatus(OrderStatus status, Pageable pageable);
     Page<Order> findAllByUserIdAndStatus(long userId, OrderStatus status, Pageable pageable);
-
     Page<Order> findAllByOrderedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     Page<Order> findAllByUserIdAndOrderedAtBetween(long userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

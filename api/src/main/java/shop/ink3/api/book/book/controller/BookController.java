@@ -122,4 +122,13 @@ public class BookController {
         bookService.deleteBook(bookId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/search-by-category")
+    public ResponseEntity<CommonResponse<PageResponse<BookResponse>>> getBooksByCategory(
+            @RequestParam("category") String categoryName,
+            Pageable pageable) {
+        return ResponseEntity.ok(
+                CommonResponse.success(bookService.getBooksByCategory(categoryName, pageable))
+        );
+    }
 }

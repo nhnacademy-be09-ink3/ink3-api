@@ -423,4 +423,31 @@ public class BookService {
         }
         return parent;
     }
+  
+    @Transactional(readOnly = true)
+    public PageResponse<BookResponse> getBooksByCategory(String categoryName, Pageable pageable) {
+        // 1. 카테고리 엔티티 조회
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryName));
+
+        // 2. 자기 자신 포함 하위 카테고리 ID 전체 조회
+        List<Category> allCategories = categoryRepository.findAllDescendantsIncludingSelf(category.getId());
+        List<Long> categoryIds = allCategories.stream()
+                .map(Category::getId)
+                .toList();
+
+        // 3. 책 목록 조회
+        Page<Book> books = bookRepository.findByCategoryIds(categoryIds, pageable);
+
+        // 4. 이미지 URL 가공 및 DTO 변환
+        Page<BookResponse> bookResponses = books.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return BookResponse.from(book, imageUrl);
+        });
+
+        return PageResponse.from(bookResponses);
+    }
 }

@@ -36,6 +36,7 @@ minio:
   secret-key: ${MINIO_SECRET_KEY}
   review-bucket: ink3-dev-reviews-images
   book-bucket: ink3-dev-books-images
+  logo-bucket: ink3-logo
 payment:
   toss:
     client_key: ${TOSS_PAYMENT_CLIENT_KEY}
