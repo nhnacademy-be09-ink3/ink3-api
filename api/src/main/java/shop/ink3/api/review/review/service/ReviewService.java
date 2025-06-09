@@ -39,6 +39,8 @@ import shop.ink3.api.review.reviewImage.entity.ReviewImage;
 import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
 import shop.ink3.api.user.point.history.entity.PointHistory;
 import shop.ink3.api.user.point.history.service.PointService;
+import shop.ink3.api.user.point.policy.dto.PointPolicyResponse;
+import shop.ink3.api.user.point.policy.service.PointPolicyService;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
@@ -53,6 +55,7 @@ public class ReviewService {
     private final OrderBookRepository orderBookRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
+    private final PointPolicyService pointPolicyService;
     private final PointService pointService;
     private final MinioUploader minioUploader;
     private final PresignUrlPrefixUtil presignUrlPrefixUtil;
@@ -83,7 +86,8 @@ public class ReviewService {
             .build();
         Review savedReview = reviewRepository.save(review);
 
-        PointHistory pointHistory = getPointHistory(images, user);
+        PointPolicyResponse response = pointPolicyService.getPointPolicy(1);
+        PointHistory pointHistory = getPointHistory(images, user, response);
 
         List<String> imageUrls = saveImages(images, savedReview);
 
@@ -145,15 +149,15 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    private PointHistory getPointHistory(List<MultipartFile> images, User user) {
-        ReviewPointType pointType;
+    private PointHistory getPointHistory(List<MultipartFile> images, User user, PointPolicyResponse response) {
+        Integer point;
         if (images != null && !images.isEmpty()) {
-            pointType = REVIEW_IMAGE;
+            point = response.imageReviewPoint();
         } else {
-            pointType = REVIEW;
+            point = response.reviewPoint();
         }
         return pointService.earnPoint(user.getId(),
-            new UserPointRequest(pointType.getAmount(), "리뷰 작성에 따른 " + pointType.getAmount() + " 포인트 적립"));
+            new UserPointRequest(point, "리뷰 작성에 따른 " + point + " 포인트 적립"));
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {

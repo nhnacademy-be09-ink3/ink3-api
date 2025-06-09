@@ -43,6 +43,7 @@ public class PointPolicyService {
                 request.name(),
                 request.joinPoint(),
                 request.reviewPoint(),
+                request.imageReviewPoint(),
                 request.defaultRate()
         ));
         return PointPolicyResponse.from(pointPolicy);
