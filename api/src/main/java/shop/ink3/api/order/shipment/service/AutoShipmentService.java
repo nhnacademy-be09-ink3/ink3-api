@@ -31,14 +31,14 @@ public class AutoShipmentService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 1 0 * * *")
     public void autoBatchToDELIVERED() {
         System.out.println("✅ 스케줄러 실행됨: " + LocalDateTime.now());
 
         List<ShipmentResponse> shipmentByOrderStatus = shipmentService.getShipmentByOrderStatus(OrderStatus.SHIPPING);
 
         for(ShipmentResponse shipmentResponse : shipmentByOrderStatus) {
-            if(shipmentResponse.getPreferredDeliveryDate().isBefore(LocalDate.now())){
+            if(shipmentResponse.getPreferredDeliveryDate().isEqual(LocalDate.now())){
                 orderService.updateOrderStatus(shipmentResponse.getOrderId(), new OrderStatusUpdateRequest(OrderStatus.DELIVERED));
                 shipmentService.updateShipmentDeliveredAt(shipmentResponse.getOrderId(), LocalDateTime.now());
             }
