@@ -62,7 +62,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{orderId}/delivered-at")
-    public ResponseEntity<CommonResponse<ShipmentResponse>> updateShipmentDeliveredAt(
+        public ResponseEntity<CommonResponse<ShipmentResponse>> updateShipmentDeliveredAt(
             @PathVariable long orderId,
             @RequestParam LocalDateTime deliveredAt) {
         return ResponseEntity
