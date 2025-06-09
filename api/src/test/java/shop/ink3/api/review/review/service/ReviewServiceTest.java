@@ -40,6 +40,8 @@ import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
 import shop.ink3.api.user.point.history.entity.PointHistory;
 import shop.ink3.api.user.point.history.entity.PointHistoryStatus;
 import shop.ink3.api.user.point.history.service.PointService;
+import shop.ink3.api.user.point.policy.dto.PointPolicyResponse;
+import shop.ink3.api.user.point.policy.service.PointPolicyService;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.repository.UserRepository;
 
@@ -59,6 +61,9 @@ class ReviewServiceTest {
 
     @Mock
     private PointService pointService;
+
+    @Mock
+    private PointPolicyService pointPolicyService;
 
     @Mock
     private MinioUploader minioUploader;
@@ -83,7 +88,19 @@ class ReviewServiceTest {
             .book(Book.builder().id(1L).build())
             .order(order)
             .build();
-        ReflectionTestUtils.setField(reviewService, "bucket", "test-bucket");
+
+        when(pointPolicyService.getPointPolicy(anyLong())).thenReturn(
+            new PointPolicyResponse(
+                1L,
+                "기본정책",
+                100,
+                200,
+                300,
+                5,
+                true,
+                LocalDateTime.now()
+            )
+        );
 
         when(pointService.earnPoint(anyLong(), any())).thenReturn(
             PointHistory.builder()
@@ -95,7 +112,10 @@ class ReviewServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build()
         );
+
+        ReflectionTestUtils.setField(reviewService, "bucket", "test-bucket");
     }
+
 
     @Test
     @DisplayName("리뷰 등록")

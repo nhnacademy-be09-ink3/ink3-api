@@ -38,8 +38,6 @@ class CartRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         Membership membership = Membership.builder()
             .name("membership1")
             .conditionAmount(10000)
