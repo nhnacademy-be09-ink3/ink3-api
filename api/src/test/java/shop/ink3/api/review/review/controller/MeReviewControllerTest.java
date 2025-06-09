@@ -44,7 +44,7 @@ class MeReviewControllerTest {
     void setUp() {
         reviewResponse = new ReviewResponse(1L, 1L, 1L, 1L, "제목", "내용", 5,
             LocalDateTime.now(), LocalDateTime.now(),
-            List.of("image1.jpg", "image2.jpg"));
+            List.of("image1.jpg", "image2.jpg"), null);
 
         reviewListResponse = new ReviewListResponse(1L, 1L, 1L, 1L, "user1", "제목", "내용", 5,
             LocalDateTime.now(), LocalDateTime.now(),
@@ -77,7 +77,7 @@ class MeReviewControllerTest {
     void updateReview() throws Exception {
         ReviewResponse updatedResponse = new ReviewResponse(1L, 1L, 1L, 1L, "제목 수정", "제목 내용 수정", 4,
             LocalDateTime.now(), LocalDateTime.now(),
-            List.of("image3.jpg", "image4.jpg"));
+            List.of("image3.jpg", "image4.jpg"), null);
 
         MockMultipartFile file = new MockMultipartFile("images", "image3.jpg", "image/jpeg", "test".getBytes());
 
