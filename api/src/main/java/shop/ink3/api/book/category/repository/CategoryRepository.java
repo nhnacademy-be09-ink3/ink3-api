@@ -33,4 +33,20 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
         ORDER BY depth DESC
         """, nativeQuery = true)
     List<Category> findAllAncestors(@Param("categoryId") Long categoryId);
+
+    @Query(value = """
+    WITH RECURSIVE subcategories AS (
+        SELECT id, name, parent_id
+        FROM categories
+        WHERE id = :categoryId
+
+        UNION ALL
+
+        SELECT c.id, c.name, c.parent_id
+        FROM categories c
+        INNER JOIN subcategories s ON c.parent_id = s.id
+    )
+    SELECT * FROM subcategories
+    """, nativeQuery = true)
+    List<Category> findAllDescendantsIncludingSelf(@Param("categoryId") Long categoryId);
 }
