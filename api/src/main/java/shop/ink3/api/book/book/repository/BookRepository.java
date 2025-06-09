@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.category.entity.Category;
 
-public interface BookRepository extends JpaRepository<Book, Long> {
+public interface BookRepository extends JpaRepository<Book, Long>, BookQuerydslRepository {
 
     boolean existsByIsbn(String isbn);
 

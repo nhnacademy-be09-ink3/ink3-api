@@ -64,4 +64,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             WHERE ob.book.id = :bookId
         """)
     Optional<Double> findAverageRatingByBookId(@Param("bookId") Long bookId);
+
+    Long countByOrderBookBookId(Long bookId);
 }
