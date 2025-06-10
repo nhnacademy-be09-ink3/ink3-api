@@ -9,7 +9,7 @@ import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.shipment.entity.Shipment;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
-    Page<Shipment> findAllByOrderUserId(long userId, Pageable pageable);
+    Page<Shipment> findAll(Pageable pageable);
 
     Optional<Shipment> findByOrderId(long orderId);
 
