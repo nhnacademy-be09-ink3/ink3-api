@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 
 import shop.ink3.api.coupon.coupon.entity.QCoupon;
@@ -67,7 +68,10 @@ public class CouponStoreQuerydslRepositoryImpl extends QuerydslRepositorySupport
             query.where(cs.status.in(statuses));
         }
 
-        query.orderBy(cs.issuedAt.desc());
+        query.orderBy(
+            Expressions.stringTemplate("case when {0} = 'READY' then 0 else 1 end", cs.status).asc(),
+            cs.issuedAt.desc()
+        );
 
         JPQLQuery<CouponStore> pagedQuery = getQuerydsl().applyPagination(pageable, query);
         List<CouponStore> content = pagedQuery.fetch();
