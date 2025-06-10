@@ -28,8 +28,9 @@ public class PackagingService {
                 .price(request.getPrice())
                 .isAvailable(false)
                 .build();
-
-        return PackagingResponse.from(packagingRepository.save(packaging));
+        Packaging save = packagingRepository.save(packaging);
+        activate(save.getId());
+        return PackagingResponse.from(save);
     }
 
 
