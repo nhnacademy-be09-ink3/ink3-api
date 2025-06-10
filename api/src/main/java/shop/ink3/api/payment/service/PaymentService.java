@@ -21,6 +21,7 @@ import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.orderBook.service.OrderBookService;
 import shop.ink3.api.order.orderPoint.entity.OrderPoint;
 import shop.ink3.api.order.orderPoint.service.OrderPointService;
+import shop.ink3.api.payment.dto.PaymentCancelRequest;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
 import shop.ink3.api.payment.dto.ZeroPaymentRequest;
@@ -126,7 +127,7 @@ public class PaymentService {
     }
 
     // 결제 취소
-    public void cancelPayment(long orderId, long userId) {
+    public void cancelPayment(long orderId, long userId, PaymentCancelRequest cancelRequest) {
         OrderResponse orderResponse = orderService.getOrder(orderId);
         // 결제 취소 가능 여부 확인
         if (!orderResponse.getStatus().equals(OrderStatus.CONFIRMED)) {
@@ -136,18 +137,28 @@ public class PaymentService {
         // 금액 환불
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException(orderId));
-        pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), PAYMENT_CANCEL_MESSAGE));
+        if(payment.getPaymentType().equals(PaymentType.POINT)) {
+            // 포인트 결제 -> 전체 환불
+            pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), PAYMENT_CANCEL_MESSAGE));
+        }else {
+            // 외부 API 결제 -> 결제 취소 요청
+            PaymentProcessor paymentProcessor = paymentProcessorResolver.getPaymentProcessor(
+                    String.format("%s-%s", String.valueOf(payment.getPaymentType()).toUpperCase(), "PROCESSOR"));
+            paymentProcessor.cancelPayment(cancelRequest);
+        }
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
         // 주문 상태 변경
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.CANCELLED));
+
         // 사용된 쿠폰 되돌리기
         orderBookService.getOrderCouponStoreId(orderId)
                 .ifPresent(couponStoreId -> {
                     CouponStoreUpdateRequest request = new CouponStoreUpdateRequest(CouponStatus.READY, null);
                     couponStoreService.updateStore(couponStoreId, request);
                 });
+
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(orderId);
         for (OrderPoint orderPoint : orderPoints) {

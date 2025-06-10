@@ -15,6 +15,7 @@ import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.service.OrderService;
+import shop.ink3.api.payment.dto.PaymentCancelRequest;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
 import shop.ink3.api.payment.dto.ZeroPaymentRequest;
@@ -62,8 +63,9 @@ public class PaymentController {
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<CommonResponse<Void>> cancelPayment(
             @PathVariable long orderId,
-            @RequestHeader("X-User-Id") long userId) {
-        paymentService.cancelPayment(orderId, userId);
+            @RequestHeader("X-User-Id") long userId,
+            @RequestBody PaymentCancelRequest cancelRequest) {
+        paymentService.cancelPayment(orderId, userId, cancelRequest);
         return ResponseEntity.noContent().build();
     }
 
