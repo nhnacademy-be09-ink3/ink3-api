@@ -130,6 +130,10 @@ public class Book {
         tag.addBookTag(bookTag);
     }
 
+    public void deleteBook(){
+        this.status = BookStatus.DELETED;
+    }
+
     public void updateBook(
             String isbn,
             String title,

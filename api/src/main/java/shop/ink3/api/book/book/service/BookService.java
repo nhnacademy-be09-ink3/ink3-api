@@ -286,11 +286,7 @@ public class BookService {
 
         // 도서 삭제 로직 수정 필요 -> 실제 삭제를 하는 것이 아닌 도서의 상태를 "삭제"로 변경
 
-        book.getBookCategories().clear();
-        book.getBookAuthors().clear();
-        book.getBookTags().clear();
-
-        bookRepository.delete(book);
+         book.deleteBook();
     }
 
     // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
