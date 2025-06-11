@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +26,14 @@ import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.CategoryInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.coupon.exception.CouponInUseException;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.coupon.service.CouponService;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
+import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 
 
 @Transactional
@@ -44,6 +47,7 @@ public class CouponServiceImpl implements CouponService {
     private final BookRepository bookRepository;
     private final BookCouponRepository bookCouponRepository;
     private final CategoryCouponRepository categoryCouponRepository;
+    private final CouponStoreRepository couponStoreRepository;
 
     @Override
     public CouponResponse createCoupon(CouponCreateRequest req) {
@@ -75,10 +79,10 @@ public class CouponServiceImpl implements CouponService {
 
         couponRepository.save(coupon);
         List<BookInfo> books = coupon.getBookCoupons().stream()
-                .map(bc -> new CouponResponse.BookInfo(bc.getId(), bc.getBook().getId(), bc.getBook().getTitle()))
+                .map(bc -> new CouponResponse.BookInfo(bc.getId(), bc.getBook().getId(), bc.getBook().getTitle(), "BOOK"))
                 .toList();
         List<CategoryInfo> categories = coupon.getCategoryCoupons().stream()
-                .map(cc -> new CouponResponse.CategoryInfo(cc.getId(), cc.getCategory().getId(), cc.getCategory().getName()))
+                .map(cc -> new CouponResponse.CategoryInfo(cc.getId(), cc.getCategory().getId(), cc.getCategory().getName(), "CATEGORY"))
                 .toList();
 
         return CouponResponse.from(coupon, books, categories);
@@ -107,14 +111,16 @@ public class CouponServiceImpl implements CouponService {
                 .map(bc -> new CouponResponse.BookInfo(
                         bc.getId(),
                         bc.getBook().getId(),
-                        bc.getBook().getTitle()))
+                        bc.getBook().getTitle(),
+                        "BOOK"))
                 .collect(Collectors.toList());
 
         List<CategoryInfo> categoryInfos = categoryCoupons.stream()
                 .map(cc -> new CouponResponse.CategoryInfo(
                         cc.getId(),
                         cc.getCategory().getId(),
-                        cc.getCategory().getName()))
+                        cc.getCategory().getName(),
+                        "CATEGORY"))
                 .collect(Collectors.toList());
 
         return CouponResponse.from(coupon, bookInfos, categoryInfos);
@@ -135,38 +141,73 @@ public class CouponServiceImpl implements CouponService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<CouponResponse> getCouponsByBookId(long bookId, Pageable pageable) {
+        // 1) 원본 조회
         Page<BookCoupon> bookCoupons = bookCouponRepository.findAllByBookId(bookId, pageable);
-        if (bookCoupons.isEmpty()) {
+
+        // 2) 만료되지 않은(coupon.expiresAt 이후) 것만 필터링
+        LocalDateTime now = LocalDateTime.now();
+        List<BookCoupon> validList = bookCoupons.stream()
+                .filter(bc -> bc.getCoupon().getExpiresAt().isAfter(now))
+                .toList();
+
+        // 3) 유효 쿠폰이 하나도 없으면 예외
+        if (validList.isEmpty()) {
             throw new CouponNotFoundException(bookId + " 북 쿠폰이 존재하지 않습니다.");
         }
-        Page<CouponResponse> dtoPage = bookCoupons.map(bc -> {
+
+        // 4) 필터링된 리스트로 새로운 Page 객체 생성
+        Page<BookCoupon> validPage = new PageImpl<>(validList, pageable, validList.size());
+
+        // 5) DTO 로 매핑
+        Page<CouponResponse> dtoPage = validPage.map(bc -> {
             BookInfo info = new BookInfo(
                     bc.getId(),
                     bc.getBook().getId(),
-                    bc.getBook().getTitle()
+                    bc.getBook().getTitle(),
+                    "BOOK"
             );
             return CouponResponse.from(bc.getCoupon(), List.of(info), List.of());
         });
+
         return PageResponse.from(dtoPage);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<CouponResponse> getCouponsByCategoryId(long categoryId, Pageable pageable) {
-        Page<CategoryCoupon> categoryCoupons = categoryCouponRepository.findAllByCategoryId(categoryId, pageable);
-        if (categoryCoupons.isEmpty()) {
+        // 1) 원본 조회
+        Page<CategoryCoupon> categoryCoupons =
+                categoryCouponRepository.findAllByCategoryId(categoryId, pageable);
+
+        // 2) 만료되지 않은 것만 필터링
+        LocalDateTime now = LocalDateTime.now();
+        List<CategoryCoupon> validList = categoryCoupons.stream()
+                .filter(cc -> cc.getCoupon().getExpiresAt().isAfter(now))
+                .toList();
+
+        // 3) 유효 쿠폰이 하나도 없으면 예외
+        if (validList.isEmpty()) {
             throw new CouponNotFoundException(categoryId + " 카테고리 쿠폰이 존재하지 않습니다.");
         }
-        Page<CouponResponse> dtoPage = categoryCoupons.map(cc -> {
+
+        // 4) 필터링된 리스트로 새 Page 생성
+        Page<CategoryCoupon> validPage =
+                new PageImpl<>(validList, pageable, validList.size());
+
+        // 5) DTO 매핑
+        Page<CouponResponse> dtoPage = validPage.map(cc -> {
             CategoryInfo info = new CategoryInfo(
                     cc.getId(),
                     cc.getCategory().getId(),
-                    cc.getCategory().getName()
+                    cc.getCategory().getName(),
+                    "CATEGORY"
             );
             return CouponResponse.from(cc.getCoupon(), List.of(), List.of(info));
         });
+
         return PageResponse.from(dtoPage);
     }
+
 
     @Override
     public CouponResponse updateCoupon(Long couponId, CouponUpdateRequest req) {
@@ -211,14 +252,16 @@ public class CouponServiceImpl implements CouponService {
                 .map(bc -> new BookInfo(
                         bc.getId(),
                         bc.getBook().getId(),
-                        bc.getBook().getTitle()))
+                        bc.getBook().getTitle(),
+                        "BOOK"))
                 .collect(Collectors.toList());
 
         List<CategoryInfo> updatedCategoryInfos = saved.getCategoryCoupons().stream()
                 .map(cc -> new CategoryInfo(
                         cc.getId(),
                         cc.getCategory().getId(),
-                        cc.getCategory().getName()))
+                        cc.getCategory().getName(),
+                        "CATEGORY"))
                 .collect(Collectors.toList());
 
         return CouponResponse.from(saved, updatedBookInfos, updatedCategoryInfos);
@@ -227,6 +270,11 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     public void deleteCouponById(Long couponId) {
+        boolean issued = couponStoreRepository.existsByCouponId(couponId);
+        if (issued) {
+            throw new CouponInUseException("이미 사용자에게 발급된 쿠폰이 있어 삭제할 수 없습니다.");
+        }
+        // 2) 문제 없으면 삭제
         couponRepository.deleteById(couponId);
     }
 

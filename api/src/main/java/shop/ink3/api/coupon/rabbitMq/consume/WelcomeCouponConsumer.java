@@ -14,7 +14,7 @@ import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 import shop.ink3.api.coupon.rabbitMq.message.WelcomeCouponMessage;
-import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CommonCouponIssueRequest;
 import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
 
@@ -38,8 +38,8 @@ public class WelcomeCouponConsumer {
             CouponResponse coupon = couponService.createCoupon(couponCreateRequest);
             Long couponId = coupon.couponId();
 
-            couponStoreService.issueCoupon(
-                    new CouponIssueRequest(message.userId(), couponId, OriginType.WELCOME, null)
+            couponStoreService.issueCommonCoupon(
+                    new CommonCouponIssueRequest(message.userId(), couponId, OriginType.WELCOME, null)
             );
             log.info("쿠폰 발급 성공~!");
         }catch (Exception e){

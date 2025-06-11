@@ -15,7 +15,7 @@ import shop.ink3.api.coupon.coupon.dto.CouponCreateRequest;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 import shop.ink3.api.coupon.rabbitMq.message.BirthdayCouponMessage;
-import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CommonCouponIssueRequest;
 import shop.ink3.api.coupon.store.entity.OriginType;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
 
@@ -43,8 +43,8 @@ public class BirthdayCouponConsumer {
             Long couponId = coupon.couponId();
 
             message.userIds().forEach(id ->
-                    couponStoreService.issueCoupon(
-                            new CouponIssueRequest(id, couponId, OriginType.BIRTHDAY, null)
+                    couponStoreService.issueCommonCoupon(
+                            new CommonCouponIssueRequest(id, couponId, OriginType.BIRTHDAY, null)
                     )
             );
 

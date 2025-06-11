@@ -18,11 +18,11 @@ import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCoupon;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponService;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
+import shop.ink3.api.coupon.store.dto.CommonCouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
@@ -53,7 +53,40 @@ public class CouponStoreService {
      * 1) 쿠폰 발급
      */
     @Transactional // write 트랜잭션
-    public CouponStore issueCoupon(CouponIssueRequest req) {
+    public CouponStore issueCoupon(CouponIssueRequest req, Long userId) {
+        // 1) 회원/쿠폰 존재 검증
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        Coupon policy = couponRepository.findById(req.couponId())
+                .orElseThrow(() -> new CouponNotFoundException("Coupon not found"));
+
+        // 2) 중복 발급 검사 (originId 유·무 상관없이)
+        if (req.originId() == null) {
+            if (couponStoreRepository.existsByUserIdAndOriginType(user.getId(), req.originType())) {
+                throw new DuplicateCouponException("Duplicate coupon found");
+            }
+        } else {
+            if (couponStoreRepository.existsByUserIdAndCouponIdAndOriginTypeAndOriginId(
+                    user.getId(), policy.getId(), req.originType(), req.originId())) {
+                throw new DuplicateCouponException("Duplicate coupon found");
+            }
+        }
+
+        CouponStore couponStore = CouponStore.builder()
+                .user(userRepository.getReferenceById(userId))
+                .coupon(couponRepository.getReferenceById(req.couponId()))
+                .originType(req.originType())
+                .originId(req.originId())
+                .status(CouponStatus.READY)
+                .usedAt(null)
+                .issuedAt(LocalDateTime.now())
+                .build();
+        couponStoreRepository.save(couponStore);
+        return couponStore;
+    }
+
+    @Transactional // write 트랜잭션
+    public CouponStore issueCommonCoupon(CommonCouponIssueRequest req) {
         // 1) 회원/쿠폰 존재 검증
         User user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
@@ -95,7 +128,7 @@ public class CouponStoreService {
 
     @Transactional(readOnly = true)
     public Page<CouponStore> getStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserId(userId, pageable);
+        return couponStoreRepository.findStoresByUserId(userId, List.of(CouponStatus.READY, CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 
     /**
@@ -112,20 +145,19 @@ public class CouponStoreService {
      */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
-
         return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
     }
 
     // 미사용 쿠폰 페이징 조회
     @Transactional(readOnly = true)
     public Page<CouponStore> getUnusedStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY, pageable);
+        return couponStoreRepository.findStoresByUserId(userId, CouponStatus.READY, pageable);
     }
 
     // 사용 및 만료 쿠폰 페이징 조회
     @Transactional(readOnly = true)
     public Page<CouponStore> getUsedOrExpiredStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserIdAndStatusIn(userId,
+        return couponStoreRepository.findStoresByUserId(userId,
             List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 

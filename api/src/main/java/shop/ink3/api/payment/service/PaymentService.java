@@ -13,6 +13,7 @@ import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
 import shop.ink3.api.order.order.dto.OrderResponse;
 import shop.ink3.api.order.order.dto.OrderStatusUpdateRequest;
+import shop.ink3.api.order.order.entity.Order;
 import shop.ink3.api.order.order.entity.OrderStatus;
 import shop.ink3.api.order.order.exception.OrderNotFoundException;
 import shop.ink3.api.order.order.repository.OrderRepository;
@@ -20,9 +21,12 @@ import shop.ink3.api.order.order.service.OrderService;
 import shop.ink3.api.order.orderBook.service.OrderBookService;
 import shop.ink3.api.order.orderPoint.entity.OrderPoint;
 import shop.ink3.api.order.orderPoint.service.OrderPointService;
+import shop.ink3.api.payment.dto.PaymentCancelRequest;
 import shop.ink3.api.payment.dto.PaymentConfirmRequest;
 import shop.ink3.api.payment.dto.PaymentResponse;
+import shop.ink3.api.payment.dto.ZeroPaymentRequest;
 import shop.ink3.api.payment.entity.Payment;
+import shop.ink3.api.payment.entity.PaymentType;
 import shop.ink3.api.payment.exception.PaymentAlreadyExistsException;
 import shop.ink3.api.payment.exception.PaymentCancelNotAllowedException;
 import shop.ink3.api.payment.exception.PaymentNotFoundException;
@@ -41,16 +45,20 @@ import shop.ink3.api.user.user.dto.UserPointRequest;
 @Service
 public class PaymentService {
     private static final String PAYMENT_CANCEL_MESSAGE ="결제 취소로 인한 환불금액";
+
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+
     private final OrderService orderService;
     private final OrderBookService orderBookService;
     private final OrderPointService orderPointService;
     private final PointService pointService;
     private final CouponStoreService couponStoreService;
+
     private final PaymentProcessorResolver paymentProcessorResolver;
     private final PaymentResponseParserResolver paymentResponseParserResolver;
     private final ApplicationEventPublisher eventPublisher;
+
 
     // 결제 승인 API 호출 및 ApproveResponse 반환
     @Transactional(readOnly = true)
@@ -87,6 +95,23 @@ public class PaymentService {
         return PaymentResponse.from(savePayment);
     }
 
+    // 생성 (0원 결제)
+    public PaymentResponse createZeroPayment(ZeroPaymentRequest request) {
+        Order order = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new OrderNotFoundException(request.orderId()));
+        Payment payment = Payment.builder()
+                .order(order)
+                .paymentKey(null)
+                .usedPoint(request.usedPointAmount())
+                .discountPrice(request.discountAmount())
+                .paymentAmount(request.amount())
+                .paymentType(PaymentType.POINT)
+                .requestAt(LocalDateTime.now())
+                .approvedAt(LocalDateTime.now())
+                .build();
+        return PaymentResponse.from(paymentRepository.save(payment));
+    }
+
     // 결제 실패
     public void failPayment(long orderId, long userId) {
         // 주문된 도서들의 재고를 원상복구
@@ -102,7 +127,7 @@ public class PaymentService {
     }
 
     // 결제 취소
-    public void cancelPayment(long orderId, long userId) {
+    public void cancelPayment(long orderId, long userId, PaymentCancelRequest cancelRequest) {
         OrderResponse orderResponse = orderService.getOrder(orderId);
         // 결제 취소 가능 여부 확인
         if (!orderResponse.getStatus().equals(OrderStatus.CONFIRMED)) {
@@ -112,18 +137,28 @@ public class PaymentService {
         // 금액 환불
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException(orderId));
-        pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), PAYMENT_CANCEL_MESSAGE));
+        if(payment.getPaymentType().equals(PaymentType.POINT)) {
+            // 포인트 결제 -> 전체 환불
+            pointService.earnPoint(userId, new UserPointRequest(payment.getPaymentAmount(), PAYMENT_CANCEL_MESSAGE));
+        }else {
+            // 외부 API 결제 -> 결제 취소 요청
+            PaymentProcessor paymentProcessor = paymentProcessorResolver.getPaymentProcessor(
+                    String.format("%s-%s", String.valueOf(payment.getPaymentType()).toUpperCase(), "PROCESSOR"));
+            paymentProcessor.cancelPayment(cancelRequest);
+        }
 
         // 주문된 도서들의 재고를 원상복구
         orderBookService.resetBookQuantity(orderId);
         // 주문 상태 변경
         orderService.updateOrderStatus(orderId, new OrderStatusUpdateRequest(OrderStatus.CANCELLED));
+
         // 사용된 쿠폰 되돌리기
         orderBookService.getOrderCouponStoreId(orderId)
                 .ifPresent(couponStoreId -> {
                     CouponStoreUpdateRequest request = new CouponStoreUpdateRequest(CouponStatus.READY, null);
                     couponStoreService.updateStore(couponStoreId, request);
                 });
+
         // 포인트 취소 (사용한 것도 취소 적립된 것도 취소)
         List<OrderPoint> orderPoints = orderPointService.getOrderPoints(orderId);
         for (OrderPoint orderPoint : orderPoints) {

@@ -91,7 +91,7 @@ public class GlobalExceptionHandler {
             InsufficientBookStockException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(CommonResponse.error(HttpStatus.CONFLICT, "Book stock insufficient.", e.getMessage()));
+                .body(CommonResponse.error(HttpStatus.CONFLICT, "BOOK_INSUFFICIENT_STOCK.", e.getMessage()));
     }
 
     @ExceptionHandler(PaymentParserFailException.class)
