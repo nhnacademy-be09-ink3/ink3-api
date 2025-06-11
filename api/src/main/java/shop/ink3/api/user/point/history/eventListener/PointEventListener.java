@@ -1,28 +1,23 @@
 package shop.ink3.api.user.point.history.eventListener;
 
-
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import shop.ink3.api.order.orderPoint.service.OrderPointService;
-import shop.ink3.api.user.membership.entity.Membership;
-import shop.ink3.api.user.membership.service.MembershipService;
 import shop.ink3.api.user.point.history.entity.PointHistory;
 import shop.ink3.api.user.point.history.service.PointService;
-import shop.ink3.api.user.point.policy.dto.PointPolicyResponse;
 import shop.ink3.api.user.point.policy.service.PointPolicyService;
 import shop.ink3.api.user.user.dto.UserPointRequest;
-import shop.ink3.api.user.user.dto.UserResponse;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
 import shop.ink3.api.user.user.repository.UserRepository;
-import shop.ink3.api.user.user.service.UserService;
 
 @Slf4j
 @Component
@@ -37,7 +32,7 @@ public class PointEventListener {
     private final OrderPointService orderPointService;
 
     @Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePointHistoryAfterPayment(PointHistoryAfterPaymentEven event) {
         boolean isActive = TransactionSynchronizationManager.isActualTransactionActive();
