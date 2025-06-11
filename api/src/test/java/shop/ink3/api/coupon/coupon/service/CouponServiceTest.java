@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -168,6 +169,7 @@ class CouponServiceTest {
     @Test
     void getCouponsByBookId_success() {
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime issuableFrom = now.minusDays(1);
         LocalDateTime expires = now.plusDays(5);
         BookCoupon bc = mock(BookCoupon.class);
         Book book = mock(Book.class);
@@ -175,7 +177,7 @@ class CouponServiceTest {
         when(book.getTitle()).thenReturn("Java");
 
         CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
-        Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").expiresAt(expires).build();
+        Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").issuableFrom(issuableFrom).expiresAt(expires).build();
         when(bc.getBook()).thenReturn(book);
         when(bc.getCoupon()).thenReturn(coupon);
         when(bc.getId()).thenReturn(5L);
@@ -209,13 +211,14 @@ class CouponServiceTest {
     void getCouponsByCategoryId_success() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expires = now.plusDays(5);
+        LocalDateTime issuableFrom = now.minusDays(1);
         CategoryCoupon cc = mock(CategoryCoupon.class);
         Category cat = mock(Category.class);
         when(cat.getId()).thenReturn(8L);
         when(cat.getName()).thenReturn("Fiction");
 
         CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
-        Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").expiresAt(expires).build();
+        Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").issuableFrom(issuableFrom).expiresAt(expires).build();
 
         when(cc.getCategory()).thenReturn(cat);
         when(cc.getCoupon()).thenReturn(coupon);
