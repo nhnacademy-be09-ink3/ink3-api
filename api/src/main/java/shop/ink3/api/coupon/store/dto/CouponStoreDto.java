@@ -5,6 +5,7 @@ import shop.ink3.api.coupon.policy.entity.DiscountType;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.OriginType;
 
+// 스토어 조회 response
 public record CouponStoreDto(
         Long storeId,
         Long couponId,

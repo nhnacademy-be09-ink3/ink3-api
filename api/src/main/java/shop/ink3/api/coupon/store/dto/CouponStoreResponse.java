@@ -11,7 +11,7 @@ import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.entity.OriginType;
 
-@Builder
+@Builder // 발급 response
 public record CouponStoreResponse(
     Long storeId,
     Long userId,

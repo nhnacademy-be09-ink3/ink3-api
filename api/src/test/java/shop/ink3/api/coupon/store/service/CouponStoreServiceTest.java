@@ -27,6 +27,7 @@ import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.entity.DiscountType;
 import shop.ink3.api.coupon.store.dto.CommonCouponIssueRequest;
 import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
+import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
@@ -53,6 +54,9 @@ class CouponStoreServiceTest {
 
     private User user;
     private Coupon coupon;
+    private final Long USER_ID = 1L;
+    private final Long BOOK_ID = 10L;
+    private LocalDateTime now;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +65,7 @@ class CouponStoreServiceTest {
 
         coupon = mock(Coupon.class);
         lenient().when(coupon.getId()).thenReturn(100L);
+        now = LocalDateTime.now();
     }
 
     // ===========================
@@ -303,82 +308,84 @@ class CouponStoreServiceTest {
     // =========================================
 
     @Test
-    void getApplicableCouponStores_filtersExpiredAndCombinesOrigins() {
-        Long userId = 1L;
-        Long bookId = 10L;
-
+    void getApplicableCouponStores_filtersByDateAndCombinesOrigins() {
         // 1) BOOK 기반 쿠폰 IDs
-        var bookCouponIds = List.of(100L, 101L);
-        when(bookCouponRepository.findIdsByBookId(bookId)).thenReturn(bookCouponIds);
+        List<Long> bookCouponIds = List.of(100L);
+        when(bookCouponRepository.findIdsByBookId(BOOK_ID)).thenReturn(bookCouponIds);
 
-        // 2) category IDs (book.getBookCategories 으로부터)
-        var bookEntity = mock(Book.class);
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(bookEntity));
-        var bc1 = mock(Category.class);
-        when(bc1.getId()).thenReturn(5L);
-        var directCategoryIds = List.of(5L);
-        when(bookEntity.getBookCategories()).thenReturn(List.of(
-                new BookCategory(bc1) // assume constructor or setter
-        ));
-        // 조상 카테고리 없다고 가정
-        when(categoryRepository.findAllAncestors(5L)).thenReturn(List.of());
+        // 1a) BOOK origin: valid vs expired
+        CouponPolicy validPolicy = mock(CouponPolicy.class);
+        when(validPolicy.getDiscountType()).thenReturn(DiscountType.RATE);
+        when(validPolicy.getDiscountValue()).thenReturn(null);
+        when(validPolicy.getDiscountPercentage()).thenReturn(15);
+        when(validPolicy.getMaximumDiscountAmount()).thenReturn(500);
 
-        // 3) WELCOME, 4) BIRTHDAY IDs: 각각 간단히 빈 리스트로
-        // Stub findWithCouponByUserAndOriginAndStatus for each origin
-        var now = LocalDateTime.now();
-        var policy = mock(CouponPolicy.class);
-        when(policy.getDiscountType()).thenReturn(DiscountType.RATE);
-        when(policy.getDiscountValue()).thenReturn(null);
-        when(policy.getDiscountPercentage()).thenReturn(10);
-        when(policy.getMaximumDiscountAmount()).thenReturn(1000);
+        Coupon validCoupon = mock(Coupon.class);
+        when(validCoupon.getId()).thenReturn(1000L);
+        when(validCoupon.getName()).thenReturn("BookCoupon");
+        when(validCoupon.getIssuableFrom()).thenReturn(now.minusHours(1));
+        when(validCoupon.getExpiresAt()).thenReturn(now.plusDays(1));
+        when(validCoupon.getCouponPolicy()).thenReturn(validPolicy);
 
-        var coupon = mock(Coupon.class);
-        when(coupon.getCouponPolicy()).thenReturn(policy);
-        var validStore = CouponStore.builder()
+        Coupon expiredCoupon = mock(Coupon.class);
+        when(expiredCoupon.getIssuableFrom()).thenReturn(now.minusDays(2));
+        when(expiredCoupon.getExpiresAt()).thenReturn(now.minusDays(1));
+
+        CouponStore validStore = CouponStore.builder()
                 .id(1L)
-                .user(user)
-                .coupon(coupon)
+                .coupon(validCoupon)
                 .originType(OriginType.BOOK)
                 .status(CouponStatus.READY)
-                .issuedAt(LocalDateTime.now())
                 .build();
-        // 만료되지 않은 쿠폰(ExpiresAt이 미래)
-        when(validStore.getCoupon().getExpiresAt()).thenReturn(now.plusDays(1));
 
-        var expiredCoupon = mock(Coupon.class);
-        var expiredStore = CouponStore.builder()
+        CouponStore expiredStore = CouponStore.builder()
                 .id(2L)
-                .user(user)
                 .coupon(expiredCoupon)
                 .originType(OriginType.BOOK)
                 .status(CouponStatus.READY)
-                .issuedAt(LocalDateTime.now())
                 .build();
-        // 만료된 쿠폰(ExpiresAt이 과거)
-        when(expiredStore.getCoupon().getExpiresAt()).thenReturn(now.minusDays(1));
 
-        // 책 기반: 하나는 유효, 하나는 만료
         when(couponStoreRepository.findWithCouponByUserAndOriginAndStatus(
-                userId, OriginType.BOOK, bookCouponIds, CouponStatus.READY))
+                USER_ID, OriginType.BOOK, bookCouponIds, CouponStatus.READY))
                 .thenReturn(List.of(validStore, expiredStore));
 
-        // CATEGORY 기반은 빈 리스트
+        // 2) CATEGORY 기반
+        Book book = mock(Book.class);
+        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book));
+        BookCategory bc = mock(BookCategory.class);
+        Category cat = mock(Category.class);
+        when(bc.getCategory()).thenReturn(cat);
+        when(cat.getId()).thenReturn(5L);
+        when(book.getBookCategories()).thenReturn(List.of(bc));
+        when(categoryRepository.findAllAncestors(5L)).thenReturn(List.of());
+        when(categoryCouponService.getCategoryCouponsWithFetch(Set.of(5L)))
+                .thenReturn(List.of());
         when(couponStoreRepository.findWithCouponByUserAndOriginAndStatus(
-                userId, OriginType.CATEGORY, List.of(), CouponStatus.READY))
+                USER_ID, OriginType.CATEGORY, List.of(), CouponStatus.READY))
                 .thenReturn(List.of());
 
-        // WELCOME, BIRTHDAY도 빈 리스트
+        // 3) WELCOME
         when(couponStoreRepository.findWithCouponByUserAndOriginAndStatus(
-                userId, OriginType.WELCOME, CouponStatus.READY))
-                .thenReturn(List.of());
-        when(couponStoreRepository.findWithCouponByUserAndOriginAndStatus(
-                userId, OriginType.BIRTHDAY, CouponStatus.READY))
+                USER_ID, OriginType.WELCOME, CouponStatus.READY))
                 .thenReturn(List.of());
 
-        var dtoList = couponStoreService.getApplicableCouponStores(userId, bookId);
+        // 4) BIRTHDAY
+        when(couponStoreRepository.findWithCouponByUserAndOriginAndStatus(
+                USER_ID, OriginType.BIRTHDAY, CouponStatus.READY))
+                .thenReturn(List.of());
 
-        // 유효한 store 하나만 반환
-        assertEquals(1, dtoList.size());
-        assertEquals(validStore.getId(), dtoList.get(0).storeId());
+        // 실행
+        List<CouponStoreDto> dtos = couponStoreService.getApplicableCouponStores(USER_ID, BOOK_ID);
+
+        // 검증: validStore 하나만 매핑
+        assertEquals(1, dtos.size());
+        CouponStoreDto dto = dtos.get(0);
+        assertEquals(validStore.getId(), dto.storeId());
+        assertEquals(validCoupon.getId(), dto.couponId());
+        assertEquals("BookCoupon", dto.couponName());
+        assertEquals(CouponStatus.READY, dto.status());
+        assertEquals(DiscountType.RATE, dto.discountType());
+        assertEquals(15, dto.discountPercentage().intValue());
+        assertEquals(500, dto.maximumDiscountAmount().intValue());
     }
 }
