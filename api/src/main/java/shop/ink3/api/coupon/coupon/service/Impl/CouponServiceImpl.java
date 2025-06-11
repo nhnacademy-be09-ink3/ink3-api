@@ -147,6 +147,8 @@ public class CouponServiceImpl implements CouponService {
         // 2) 만료되지 않은(coupon.expiresAt 이후) 것만 필터링
         LocalDateTime now = LocalDateTime.now();
         List<BookCoupon> validList = bookCoupons.stream()
+                .filter(bc -> bc.getCoupon().getIssuableFrom().isBefore(now)
+                        || bc.getCoupon().getIssuableFrom().isEqual(now))
                 .filter(bc -> bc.getCoupon().getExpiresAt().isAfter(now))
                 .toList();
 
@@ -182,6 +184,9 @@ public class CouponServiceImpl implements CouponService {
         // 2) 만료되지 않은 것만 필터링
         LocalDateTime now = LocalDateTime.now();
         List<CategoryCoupon> validList = categoryCoupons.stream()
+                .filter(cc -> cc.getCoupon().getIssuableFrom().isBefore(now)
+                        || cc.getCoupon().getIssuableFrom().isEqual(now))
+
                 .filter(cc -> cc.getCoupon().getExpiresAt().isAfter(now))
                 .toList();
 

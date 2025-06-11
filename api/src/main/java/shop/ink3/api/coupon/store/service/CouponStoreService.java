@@ -236,7 +236,8 @@ public class CouponStoreService {
         // 5) 결합 후 기한 필터링, → 엔티티를 DTO로 매핑
         return Stream.of(bookStores, categoryStores, welcomeStores, birthdayStores)
                 .flatMap(List::stream)
-                .filter(store->store.getCoupon().getIssuableFrom().isBefore(LocalDateTime.now()))
+                .filter(cc -> cc.getCoupon().getIssuableFrom().isBefore(LocalDateTime.now())
+                        || cc.getCoupon().getIssuableFrom().isEqual(LocalDateTime.now()))
                 .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
                 .map(this::toDto)
                 .toList();
