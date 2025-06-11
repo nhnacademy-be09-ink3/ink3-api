@@ -33,7 +33,7 @@ public class AladinController {
     }
 
     // 알라딘 API에서 Keyword로 조회한 도서 리스트에서 하나의 도서를 선택하고 자체적으로 설정할 내용 입력하여 도서 등록
-    @PostMapping("/register-book")
+    @PostMapping("/book-register")
     public ResponseEntity<CommonResponse<BookResponse>> registerBook(@RequestBody @Valid BookRegisterRequest request) {
         return ResponseEntity.ok(CommonResponse.success(bookService.registerBookByAladin(request)));
     }
