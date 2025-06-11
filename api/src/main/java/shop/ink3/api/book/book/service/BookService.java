@@ -387,15 +387,27 @@ public class BookService {
         for (int i = parts.size() - 1; i >= 0; i--) {
             String part = parts.get(i);
             Matcher matcher = pattern.matcher(part);
+
+            String name;
+            String role;
+
             if (matcher.matches()) {
-                String nameWithPossibleParens = matcher.group(1).trim();
+                name = matcher.group(1).trim();
                 currentRole = matcher.group(2).trim();
-                Author author = authorRepository.findByName(nameWithPossibleParens).orElseThrow(() -> new AuthorNotFoundException(nameWithPossibleParens));
-                result.set(i, new AuthorDto(author.getId(),nameWithPossibleParens, currentRole));
+                role = currentRole;
             } else {
-                Author author = authorRepository.findByName(part).orElseThrow(() -> new AuthorNotFoundException(part));
-                result.set(i, new AuthorDto(author.getId(), part, currentRole != null ? currentRole : "지은이"));
+                name = part;
+                role = (currentRole != null) ? currentRole : "지은이";
             }
+            Author author = authorRepository.findByName(name)
+                    .orElseGet(() -> {
+                        Author newAuthor = Author.builder()
+                                .name(name)
+                                .build();
+                        return authorRepository.save(newAuthor);
+                    });
+
+            result.set(i, new AuthorDto(author.getId(), name, role));
         }
         return result;
     }
@@ -403,7 +415,11 @@ public class BookService {
 
     public Category createCategoryHierarchy(String categoryPath) {
         String[] categoryNames = categoryPath.split(">");
-        Category parent = null;
+        Category parent = categoryRepository.findByName("ROOT")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("ROOT")
+                        .parent(null)
+                        .build()));
 
         for (String name : categoryNames) {
             name = name.trim();
