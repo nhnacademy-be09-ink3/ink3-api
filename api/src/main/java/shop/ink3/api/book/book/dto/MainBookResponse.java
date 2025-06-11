@@ -16,7 +16,7 @@ public record MainBookResponse(
     long reviewCount,
     long likeCount
 ) {
-    public static MainBookResponse from(Book book) {
+    public static MainBookResponse from(Book book, String imageUrl) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
 
@@ -26,7 +26,7 @@ public record MainBookResponse(
             originalPrice,
             salePrice,
             book.getDiscountRate(),
-            book.getThumbnailUrl(),
+            imageUrl,
             book.isPackable(),
             book.getBookAuthors()
                 .stream()
@@ -37,7 +37,7 @@ public record MainBookResponse(
         );
     }
 
-    public static MainBookResponse from(Book book, long reviewCount, long likeCount) {
+    public static MainBookResponse from(Book book, long reviewCount, long likeCount, String imageUrl) {
         int originalPrice = book.getOriginalPrice() != null ? book.getOriginalPrice() : 0;
         int salePrice = book.getSalePrice() != null ? book.getSalePrice() : 0;
 
@@ -47,7 +47,7 @@ public record MainBookResponse(
             originalPrice,
             salePrice,
             book.getDiscountRate(),
-            book.getThumbnailUrl(),
+            imageUrl,
             book.isPackable(),
             book.getBookAuthors()
                 .stream()
