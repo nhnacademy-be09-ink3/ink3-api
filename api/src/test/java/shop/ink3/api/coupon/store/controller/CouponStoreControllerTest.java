@@ -277,6 +277,7 @@ class CouponStoreControllerTest {
                 7L,
                 100L,
                 "DISCOUNT",
+                LocalDateTime.of(2025, 12, 1, 0, 0),
                 LocalDateTime.of(2025, 12, 31, 0, 0),
                 OriginType.BOOK,
                 10L,
@@ -284,6 +285,7 @@ class CouponStoreControllerTest {
                 DiscountType.FIXED,
                 3000,
                 null,
+                25000,
                 10000
         );
 

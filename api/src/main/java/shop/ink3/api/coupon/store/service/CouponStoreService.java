@@ -248,6 +248,7 @@ public class CouponStoreService {
                 cs.getId(),
                 cs.getCoupon().getId(),
                 cs.getCoupon().getName(),
+                cs.getCoupon().getIssuableFrom(),
                 cs.getCoupon().getExpiresAt(),
                 cs.getOriginType(),
                 cs.getOriginId(),
@@ -259,6 +260,7 @@ public class CouponStoreService {
                 (cs.getCoupon().getCouponPolicy().getDiscountPercentage() != null)
                         ? cs.getCoupon().getCouponPolicy().getDiscountPercentage()
                         : null,
+                cs.getCoupon().getCouponPolicy().getMinimumOrderAmount(),
                 cs.getCoupon().getCouponPolicy().getMaximumDiscountAmount()
         );
     }
