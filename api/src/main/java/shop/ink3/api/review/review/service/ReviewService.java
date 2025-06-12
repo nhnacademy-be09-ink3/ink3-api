@@ -1,8 +1,5 @@
 package shop.ink3.api.review.review.service;
 
-import static shop.ink3.api.review.review.dto.ReviewPointType.*;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,7 +21,6 @@ import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
 import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
 import shop.ink3.api.review.review.dto.ReviewListResponse;
-import shop.ink3.api.review.review.dto.ReviewPointType;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -196,8 +192,6 @@ public class ReviewService {
                     return new ReviewImageResponse(presignUrlPrefixUtil.addPrefixUrl(presignedUrl));
                 })
                 .toList();
-
-            log.warn("PrefixUrl============{}", Arrays.toString(images.toArray()));
 
             return new ReviewListResponse(
                 dto.id(),
