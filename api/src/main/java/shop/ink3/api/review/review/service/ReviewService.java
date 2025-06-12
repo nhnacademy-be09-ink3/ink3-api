@@ -47,6 +47,8 @@ import shop.ink3.api.user.user.repository.UserRepository;
 @RequiredArgsConstructor
 @Transactional
 public class ReviewService {
+    private static final String POINT_REVIEW = "리뷰 작성에 대한 적립";
+
     private final UserRepository userRepository;
     private final OrderBookRepository orderBookRepository;
     private final ReviewRepository reviewRepository;
@@ -153,7 +155,7 @@ public class ReviewService {
             point = response.reviewPoint();
         }
         return pointService.earnPoint(user.getId(),
-            new UserPointRequest(point, "리뷰 작성에 따른 " + point + " 포인트 적립"));
+            new UserPointRequest(point, POINT_REVIEW));
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {
