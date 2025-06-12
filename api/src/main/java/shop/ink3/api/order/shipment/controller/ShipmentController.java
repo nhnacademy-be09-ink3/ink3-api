@@ -32,6 +32,12 @@ import shop.ink3.api.user.address.service.AddressService;
 public class ShipmentController {
     private final ShipmentService shipmentService;
 
+    @GetMapping
+    public ResponseEntity<CommonResponse<PageResponse<ShipmentResponse>>> getShipments(Pageable pageable) {
+        return ResponseEntity
+                .ok(CommonResponse.success(shipmentService.getShipments(pageable)));
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<CommonResponse<ShipmentResponse>> getShipment(
             @PathVariable long orderId) {

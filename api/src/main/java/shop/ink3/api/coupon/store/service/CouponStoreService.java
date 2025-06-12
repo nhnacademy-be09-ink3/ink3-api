@@ -128,7 +128,7 @@ public class CouponStoreService {
 
     @Transactional(readOnly = true)
     public Page<CouponStore> getStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserId(userId, pageable);
+        return couponStoreRepository.findStoresByUserId(userId, List.of(CouponStatus.READY, CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 
     /**
@@ -145,20 +145,19 @@ public class CouponStoreService {
      */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
-
         return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
     }
 
     // 미사용 쿠폰 페이징 조회
     @Transactional(readOnly = true)
     public Page<CouponStore> getUnusedStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY, pageable);
+        return couponStoreRepository.findStoresByUserId(userId, CouponStatus.READY, pageable);
     }
 
     // 사용 및 만료 쿠폰 페이징 조회
     @Transactional(readOnly = true)
     public Page<CouponStore> getUsedOrExpiredStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserIdAndStatusIn(userId,
+        return couponStoreRepository.findStoresByUserId(userId,
             List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 

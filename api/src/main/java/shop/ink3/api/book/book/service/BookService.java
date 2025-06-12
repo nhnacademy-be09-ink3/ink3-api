@@ -108,7 +108,6 @@ public class BookService {
         Page<Book> books = bookRepository.findAll(pageable);
         Page<BookResponse> bookResponses = books.map(book -> {
             String imageUrl = book.getThumbnailUrl();
-
             if (imageUrl != null && !imageUrl.startsWith("https")) {
                 imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
             }
@@ -120,7 +119,15 @@ public class BookService {
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5BestSellerBooks() {
         Page<Book> top5BestSellerBooks = bookRepository.findBestSellerBooks(Pageable.ofSize(5));
-        return PageResponse.from(top5BestSellerBooks.map(MainBookResponse::from));
+        Page<MainBookResponse> responses = top5BestSellerBooks.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return MainBookResponse.from(book, imageUrl);
+        });
+
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
@@ -129,24 +136,39 @@ public class BookService {
         Page<MainBookResponse> responses = bestSellerBooks.map(book -> {
             long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
             long likeCount = likeRepository.countByBookId(book.getId());
-            return MainBookResponse.from(book, reviewCount, likeCount);
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return MainBookResponse.from(book, reviewCount, likeCount, imageUrl);
         });
         return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5NewBooks() {
-        Page<Book> top5RecommendedBooks = bookRepository.findAllByOrderByPublishedAtDesc(Pageable.ofSize(5));
-        return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
+        Page<Book> top5NewBooks = bookRepository.findAllByOrderByPublishedAtDesc(Pageable.ofSize(5));
+        Page<MainBookResponse> responses = top5NewBooks.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return MainBookResponse.from(book, imageUrl);
+        });
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getAllNewBooks(SortType sortType, Pageable pageable) {
-        Page<Book> bestRecommendedBooks = bookRepository.findSortedNewBooks(sortType, pageable);
-        Page<MainBookResponse> responses = bestRecommendedBooks.map(book -> {
+        Page<Book> newBooks = bookRepository.findSortedNewBooks(sortType, pageable);
+        Page<MainBookResponse> responses = newBooks.map(book -> {
             long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
             long likeCount = likeRepository.countByBookId(book.getId());
-            return MainBookResponse.from(book, reviewCount, likeCount);
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return MainBookResponse.from(book, reviewCount, likeCount, imageUrl);
         });
         return PageResponse.from(responses);
     }
@@ -154,7 +176,14 @@ public class BookService {
     @Transactional(readOnly = true)
     public PageResponse<MainBookResponse> getTop5RecommendedBooks() {
         Page<Book> top5RecommendedBooks = bookRepository.findRecommendedBooks(Pageable.ofSize(5));
-        return PageResponse.from(top5RecommendedBooks.map(MainBookResponse::from));
+        Page<MainBookResponse> responses = top5RecommendedBooks.map(book -> {
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return MainBookResponse.from(book, imageUrl);
+        });
+        return PageResponse.from(responses);
     }
 
     @Transactional(readOnly = true)
@@ -163,7 +192,11 @@ public class BookService {
         Page<MainBookResponse> responses = bestRecommendedBooks.map(book -> {
             long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
             long likeCount = likeRepository.countByBookId(book.getId());
-            return MainBookResponse.from(book, reviewCount, likeCount);
+            String imageUrl = book.getThumbnailUrl();
+            if (imageUrl != null && !imageUrl.startsWith("https")) {
+                imageUrl = presignUrlPrefixUtil.addPrefixUrl(minioUploader.getPresignedUrl(book.getThumbnailUrl(), bucket));
+            }
+            return MainBookResponse.from(book, reviewCount, likeCount, imageUrl);
         });
         return PageResponse.from(responses);
     }
@@ -306,11 +339,7 @@ public class BookService {
 
         // 도서 삭제 로직 수정 필요 -> 실제 삭제를 하는 것이 아닌 도서의 상태를 "삭제"로 변경
 
-        book.getBookCategories().clear();
-        book.getBookAuthors().clear();
-        book.getBookTags().clear();
-
-        bookRepository.delete(book);
+         book.deleteBook();
     }
 
     // 알라딘 api + 자체적으로 조정할 내용 입력하여 도서 등록
@@ -364,15 +393,17 @@ public class BookService {
         return reviewRepository.findAverageRatingByBookId(bookId)
                 .orElse(0.0);
     }
+
     // 카테고리는 최소 2단계
 
     private void validateCategoryDepth(List<Category> categories) {
         for (Category category : categories) {
-            if (category.getParent() == null) {
+            if (category.getParent().getName().equals("ROOT")) {
                 throw new InvalidCategoryDepthException();
             }
         }
     }
+
     // 알라딘 API로 가져온 작가 이름 파싱
 
     public List<AuthorDto> parseAuthors(String authorString) {
@@ -387,23 +418,40 @@ public class BookService {
         for (int i = parts.size() - 1; i >= 0; i--) {
             String part = parts.get(i);
             Matcher matcher = pattern.matcher(part);
+
+            String name;
+            String role;
+
             if (matcher.matches()) {
-                String nameWithPossibleParens = matcher.group(1).trim();
+                name = matcher.group(1).trim();
                 currentRole = matcher.group(2).trim();
-                Author author = authorRepository.findByName(nameWithPossibleParens).orElseThrow(() -> new AuthorNotFoundException(nameWithPossibleParens));
-                result.set(i, new AuthorDto(author.getId(),nameWithPossibleParens, currentRole));
+                role = currentRole;
             } else {
-                Author author = authorRepository.findByName(part).orElseThrow(() -> new AuthorNotFoundException(part));
-                result.set(i, new AuthorDto(author.getId(), part, currentRole != null ? currentRole : "지은이"));
+                name = part;
+                role = (currentRole != null) ? currentRole : "지은이";
             }
+            Author author = authorRepository.findByName(name)
+                    .orElseGet(() -> {
+                        Author newAuthor = Author.builder()
+                                .name(name)
+                                .build();
+                        return authorRepository.save(newAuthor);
+                    });
+
+            result.set(i, new AuthorDto(author.getId(), name, role));
         }
         return result;
     }
+
     // 알라딘 api에서 가져온 카테고리 이름 분리 > 계층 구조 생성 (국내도서>소설/시/희곡/한국소설)
 
     public Category createCategoryHierarchy(String categoryPath) {
         String[] categoryNames = categoryPath.split(">");
-        Category parent = null;
+        Category parent = categoryRepository.findByName("ROOT")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("ROOT")
+                        .parent(null)
+                        .build()));
 
         for (String name : categoryNames) {
             name = name.trim();

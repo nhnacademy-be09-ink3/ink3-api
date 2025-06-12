@@ -73,14 +73,14 @@ public class AladinClientImpl implements AladinClient {
     public PageResponse<AladinBookResponse> fetchBookByKeyword(String keyword, Pageable pageable) {
         int pageSize = pageable.getPageSize();
         int pageNumber = pageable.getPageNumber();
-        int startIndex = pageNumber * pageSize + 1;
+        int start = pageNumber + 1;
 
         String url = SEARCH_URL +
                 "?ttbkey=" + ttbKey +
                 "&Query=" + keyword +
                 "&QueryType=Keyword" +
                 "&MaxResults=" + pageSize +
-                "&start=" + startIndex +
+                "&start=" + start +
                 "&SearchTarget=Book" +
                 "&output=JS" +
                 "&Version=20131101";
@@ -102,12 +102,12 @@ public class AladinClientImpl implements AladinClient {
                         item.path("pubDate").asText(null),
                         item.path("isbn13").asText(null),
                         item.path("priceStandard").asInt(),
-                        item.path("cover").asText(null),
+                        item.path("cover").asText(null).replace("coversum", "cover500"),
                         item.path("categoryName").asText(null)
                 ));
             }
-
-            int total = root.path("totalResults").asInt(200);
+            // 알라딘 api에서 가져오는 도서는 200개 제한
+            int total = Math.min(root.path("totalResults").asInt(200), 200);
             Page<AladinBookResponse> page = new PageImpl<>(books, PageRequest.of(pageNumber, pageSize), total);
 
             return PageResponse.from(page);
