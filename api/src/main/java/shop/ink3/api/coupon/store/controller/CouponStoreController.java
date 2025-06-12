@@ -22,8 +22,6 @@ import java.util.List;
 public class CouponStoreController {
 
     private final CouponStoreService couponStoreService;
-    private final BookCouponRepository bookCouponRepository;
-    private final CategoryCouponRepository categoryCouponRepository;
 
     // ✅ 유저의 전체 쿠폰 조회 → /users/{userId}/stores
     @GetMapping("/users/{userId}/coupon-stores")
