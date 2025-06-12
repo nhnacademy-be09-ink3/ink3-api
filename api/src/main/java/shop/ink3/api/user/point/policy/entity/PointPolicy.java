@@ -59,10 +59,11 @@ public class PointPolicy {
         this.createdAt = LocalDateTime.now();
     }
 
-    public void update(String name, int joinPoint, int reviewPoint, int defaultRate) {
+    public void update(String name, int joinPoint, int reviewPoint, int imageReviewPoint, int defaultRate) {
         this.name = name;
         this.joinPoint = joinPoint;
         this.reviewPoint = reviewPoint;
+        this.imageReviewPoint = imageReviewPoint;
         this.defaultRate = defaultRate;
     }
 
