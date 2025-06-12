@@ -243,5 +243,7 @@ jobs:
             export MINIO_HOST=${{ secrets.MINIO_HOST }}
             export MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
             export MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
+            export EUREKA_USERNAME = ${{ secrets.EUREKA_USER_NAME }}
+            export EUREKA_PASSWORD = ${{ secrets.EUREKA_USER_PASSWORD }}
             nohup ./deploy.sh "${{ steps.extract_version.outputs.version }}" > deploy.log 2>&1 &
             exit 0
