@@ -52,7 +52,7 @@ public class PointPolicyService {
     public PointPolicyResponse updatePointPolicy(long pointPolicyId, PointPolicyUpdateRequest request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(pointPolicyId)
                 .orElseThrow(() -> new PointPolicyNotFoundException(pointPolicyId));
-        pointPolicy.update(request.name(), request.joinPoint(), request.reviewPoint(), request.defaultRate());
+        pointPolicy.update(request.name(), request.joinPoint(), request.reviewPoint(), request.imageReviewPoint(), request.defaultRate());
         pointPolicyRepository.save(pointPolicy);
         return PointPolicyResponse.from(pointPolicy);
     }
