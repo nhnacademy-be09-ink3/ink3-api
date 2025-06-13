@@ -149,7 +149,7 @@ jobs:
         env:
           EUREKA_URL: ${{ secrets.DEV_EUREKA_URL }}
         run: |
-          nohup java -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
+          nohup java -DELASTIC_KEY="$ELASTIC_KEY" -jar api/target/api-${{ steps.extract_version.outputs.version }}.jar \
             --server.port=10270 \
             --spring.profiles.active=test \
             --TTB_KEY=$TTB_KEY > app.log 2>&1 &
