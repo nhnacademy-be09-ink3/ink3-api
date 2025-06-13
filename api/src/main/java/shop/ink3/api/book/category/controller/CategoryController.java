@@ -38,12 +38,12 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}/descendants")
-    public ResponseEntity<CommonResponse<CategoryTreeDto>> getAllCDescendant(@PathVariable Long id) {
+    public ResponseEntity<CommonResponse<CategoryTreeDto>> getAllDescendants(@PathVariable Long id) {
         return ResponseEntity.ok(CommonResponse.success(categoryService.getAllDescendants(id)));
     }
 
     @GetMapping("/{id}/ancestor")
-    public ResponseEntity<CommonResponse<List<CategoryFlatDto>>> getAllAncestor(@PathVariable Long id) {
+    public ResponseEntity<CommonResponse<List<CategoryFlatDto>>> getAllAncestors(@PathVariable Long id) {
         return ResponseEntity.ok(CommonResponse.success(categoryService.getAllAncestors(id)));
     }
 

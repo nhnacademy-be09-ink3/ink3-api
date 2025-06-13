@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import shop.ink3.api.book.category.repository.CategoryRepository;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
+    @Cacheable(value = "categories")
     @Transactional(readOnly = true)
     public List<CategoryTreeDto> getCategoriesTree() {
         List<Category> categories = categoryRepository.findAll(Sort.by(Direction.ASC, "path"));
@@ -79,6 +82,7 @@ public class CategoryService {
         return ancestors;
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public CategoryTreeDto createCategory(CategoryCreateRequest request) {
         if (categoryRepository.existsByName(request.name())) {
             throw new CategoryAlreadyExistsException(request.name());
@@ -99,11 +103,13 @@ public class CategoryService {
         return new CategoryTreeDto(category.getId(), category.getName(), new ArrayList<>());
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public void updateCategoryName(long id, CategoryUpdateNameRequest request) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
         category.updateName(request.name());
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public void changeParent(long id, CategoryChangeParentRequest request) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
         Category newParent = categoryRepository.findById(request.parentId())
@@ -122,6 +128,7 @@ public class CategoryService {
         });
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
 
