@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
-import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.bookCategory.entity.BookCategory;
+import shop.ink3.api.book.bookCategory.repository.BookCategoryRepository;
 import shop.ink3.api.book.category.repository.CategoryRepository;
+import shop.ink3.api.book.category.service.CategoryService;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
 import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponService;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
@@ -48,6 +50,8 @@ public class CouponStoreService {
     private final CouponStoreRepository couponStoreRepository;
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
+    private final BookCategoryRepository bookCategoryRepository;
+    private final CategoryService categoryService;
 
     /**
      * 1) 쿠폰 발급
@@ -159,7 +163,7 @@ public class CouponStoreService {
     @Transactional(readOnly = true)
     public Page<CouponStore> getUsedOrExpiredStoresPagingByUserId(Long userId, Pageable pageable) {
         return couponStoreRepository.findByUserIdAndStatusIn(userId,
-            List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
+                List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 
     /**
@@ -200,17 +204,14 @@ public class CouponStoreService {
                 .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
 
         // 직접 매핑된 카테고리 ID들
-        List<Long> directCategoryIds = book.getBookCategories().stream()
-                .map(bc -> bc.getCategory().getId())
+        List<Long> directCategoryIds = bookCategoryRepository.findAllByBookId(bookId).stream()
+                .map(BookCategory::getId)
                 .toList();
 
         // 조상 카테고리 포함해서 ID 수집
         Set<Long> allCategoryIds = new HashSet<>(directCategoryIds);
         for (Long catId : directCategoryIds) {
-            List<Category> ancestors = categoryRepository.findAllAncestors(catId);
-            for (Category parent : ancestors) {
-                allCategoryIds.add(parent.getId());
-            }
+            categoryService.getAllAncestors(catId).forEach(c -> allCategoryIds.add(c.id()));
         }
 
         // CategoryCoupon 엔티티를 fetch join 으로 가져오고 → ID만 뽑아 내기
