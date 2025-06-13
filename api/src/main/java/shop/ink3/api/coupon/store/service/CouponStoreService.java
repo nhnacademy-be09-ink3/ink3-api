@@ -132,7 +132,7 @@ public class CouponStoreService {
 
     @Transactional(readOnly = true)
     public Page<CouponStore> getStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserId(userId, pageable);
+        return couponStoreRepository.findStoresByUserId(userId, List.of(CouponStatus.READY, CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 
     /**
@@ -149,21 +149,20 @@ public class CouponStoreService {
      */
     @Transactional(readOnly = true)
     public List<CouponStore> getUnusedStoresByUserId(Long userId) {
-
         return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY);
     }
 
     // 미사용 쿠폰 페이징 조회
     @Transactional(readOnly = true)
     public Page<CouponStore> getUnusedStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserIdAndStatus(userId, CouponStatus.READY, pageable);
+        return couponStoreRepository.findStoresByUserId(userId, CouponStatus.READY, pageable);
     }
 
     // 사용 및 만료 쿠폰 페이징 조회
     @Transactional(readOnly = true)
     public Page<CouponStore> getUsedOrExpiredStoresPagingByUserId(Long userId, Pageable pageable) {
-        return couponStoreRepository.findByUserIdAndStatusIn(userId,
-                List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
+        return couponStoreRepository.findStoresByUserId(userId,
+            List.of(CouponStatus.USED, CouponStatus.EXPIRED), pageable);
     }
 
     /**
@@ -190,6 +189,12 @@ public class CouponStoreService {
                     String.format("CouponStore not found: %d", id));
         }
     }
+
+    @Transactional(readOnly = true)
+    public boolean existByOriginIdAndUserId(Long userId, Long originId) {
+        return couponStoreRepository.existsByOriginIdAndUserId(userId, originId);
+    }
+
 
     @Transactional(readOnly = true)
     public List<CouponStoreDto> getApplicableCouponStores(Long userId, Long bookId) {
@@ -238,6 +243,8 @@ public class CouponStoreService {
         // 5) 결합 후 기한 필터링, → 엔티티를 DTO로 매핑
         return Stream.of(bookStores, categoryStores, welcomeStores, birthdayStores)
                 .flatMap(List::stream)
+                .filter(cc -> cc.getCoupon().getIssuableFrom().isBefore(LocalDateTime.now())
+                        || cc.getCoupon().getIssuableFrom().isEqual(LocalDateTime.now()))
                 .filter(store -> store.getCoupon().getExpiresAt().isAfter(LocalDateTime.now()))
                 .map(this::toDto)
                 .toList();

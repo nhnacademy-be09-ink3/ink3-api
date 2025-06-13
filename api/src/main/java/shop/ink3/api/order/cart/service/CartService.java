@@ -106,6 +106,17 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
+    public List<CartCouponResponse> getSelectCartsWithCoupon(Long userId, List<Long> cartIds) {
+        List<Cart> carts = cartRepository.findAllByUserIdAndIdIn(userId, cartIds);
+        return carts.stream()
+            .map(cart -> {
+                List<CouponStoreDto> coupons = couponStoreService.getApplicableCouponStores(userId, cart.getBook().getId());
+                return CartCouponResponse.from(cart, coupons);
+            })
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<CartResponse> getCartItems(Long userId) {
         List<Cart> carts = cartRepository.findByUserId(userId);
         return carts.stream().map(CartResponse::from).toList();
@@ -139,4 +150,5 @@ public class CartService {
         hashOps().put(key, cart.getId().toString(), response);
         redisTemplate.expire(key, Duration.ofDays(3));
     }
+
 }

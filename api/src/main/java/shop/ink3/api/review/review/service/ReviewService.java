@@ -1,9 +1,5 @@
 package shop.ink3.api.review.review.service;
 
-import static shop.ink3.api.review.review.dto.ReviewPointType.REVIEW;
-import static shop.ink3.api.review.review.dto.ReviewPointType.REVIEW_IMAGE;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +18,6 @@ import shop.ink3.api.order.orderBook.exception.OrderBookNotFoundException;
 import shop.ink3.api.order.orderBook.repository.OrderBookRepository;
 import shop.ink3.api.review.review.dto.ReviewDefaultListResponse;
 import shop.ink3.api.review.review.dto.ReviewListResponse;
-import shop.ink3.api.review.review.dto.ReviewPointType;
 import shop.ink3.api.review.review.dto.ReviewRequest;
 import shop.ink3.api.review.review.dto.ReviewResponse;
 import shop.ink3.api.review.review.dto.ReviewUpdateRequest;
@@ -37,6 +32,8 @@ import shop.ink3.api.review.reviewImage.entity.ReviewImage;
 import shop.ink3.api.review.reviewImage.repository.ReviewImageRepository;
 import shop.ink3.api.user.point.history.entity.PointHistory;
 import shop.ink3.api.user.point.history.service.PointService;
+import shop.ink3.api.user.point.policy.dto.PointPolicyResponse;
+import shop.ink3.api.user.point.policy.service.PointPolicyService;
 import shop.ink3.api.user.user.dto.UserPointRequest;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.exception.UserNotFoundException;
@@ -47,10 +44,13 @@ import shop.ink3.api.user.user.repository.UserRepository;
 @RequiredArgsConstructor
 @Transactional
 public class ReviewService {
+    private static final String POINT_REVIEW = "리뷰 작성에 대한 적립";
+
     private final UserRepository userRepository;
     private final OrderBookRepository orderBookRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewImageRepository reviewImageRepository;
+    private final PointPolicyService pointPolicyService;
     private final PointService pointService;
     private final MinioService minioService;
 
@@ -80,7 +80,8 @@ public class ReviewService {
                 .build();
         Review savedReview = reviewRepository.save(review);
 
-        PointHistory pointHistory = getPointHistory(images, user);
+        PointPolicyResponse response = pointPolicyService.getPointPolicy(1);
+        PointHistory pointHistory = getPointHistory(images, user, response);
 
         List<String> imageUrls = saveImages(images, savedReview);
 
@@ -143,15 +144,15 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    private PointHistory getPointHistory(List<MultipartFile> images, User user) {
-        ReviewPointType pointType;
+    private PointHistory getPointHistory(List<MultipartFile> images, User user, PointPolicyResponse response) {
+        Integer point;
         if (images != null && !images.isEmpty()) {
-            pointType = REVIEW_IMAGE;
+            point = response.imageReviewPoint();
         } else {
-            pointType = REVIEW;
+            point = response.reviewPoint();
         }
         return pointService.earnPoint(user.getId(),
-                new UserPointRequest(pointType.getAmount(), "리뷰 작성에 따른 " + pointType.getAmount() + " 포인트 적립"));
+                new UserPointRequest(point, POINT_REVIEW));
     }
 
     private List<String> saveImages(List<MultipartFile> images, Review review) {
@@ -188,12 +189,9 @@ public class ReviewService {
         Page<ReviewListResponse> mappedPage = page.map(dto -> {
             List<ReviewImageResponse> images = imageMap.getOrDefault(dto.id(), List.of()).stream()
                     .map(url -> {
-                        String presignedUrl = minioService.getPresignedUrl(url, bucket);
-                        return new ReviewImageResponse(presignedUrl);
+                        return new ReviewImageResponse(minioService.getPresignedUrl(url, bucket));
                     })
                     .toList();
-
-            log.warn("PrefixUrl============{}", Arrays.toString(images.toArray()));
 
             return new ReviewListResponse(
                     dto.id(),

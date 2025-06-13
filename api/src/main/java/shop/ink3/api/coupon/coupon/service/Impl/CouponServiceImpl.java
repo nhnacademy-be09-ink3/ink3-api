@@ -26,6 +26,7 @@ import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.CategoryInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.coupon.exception.BusinessException;
 import shop.ink3.api.coupon.coupon.exception.CouponInUseException;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
@@ -51,6 +52,11 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     public CouponResponse createCoupon(CouponCreateRequest req) {
+
+        if (req.expiresAt().isBefore(req.issuableFrom())) {
+            throw new BusinessException("만료일(expiresAt)은 발행시작일(issuableFrom) 이후여야 합니다.");
+        }
+
         Coupon coupon = Coupon.builder()
                 .name(req.name())
                 .couponPolicy(policyRepository.findById(req.policyId()).orElseThrow(()->new PolicyNotFoundException("없는 정책입니다.")))
@@ -147,6 +153,8 @@ public class CouponServiceImpl implements CouponService {
         // 2) 만료되지 않은(coupon.expiresAt 이후) 것만 필터링
         LocalDateTime now = LocalDateTime.now();
         List<BookCoupon> validList = bookCoupons.stream()
+                .filter(bc -> bc.getCoupon().getIssuableFrom().isBefore(now)
+                        || bc.getCoupon().getIssuableFrom().isEqual(now))
                 .filter(bc -> bc.getCoupon().getExpiresAt().isAfter(now))
                 .toList();
 
@@ -182,6 +190,9 @@ public class CouponServiceImpl implements CouponService {
         // 2) 만료되지 않은 것만 필터링
         LocalDateTime now = LocalDateTime.now();
         List<CategoryCoupon> validList = categoryCoupons.stream()
+                .filter(cc -> cc.getCoupon().getIssuableFrom().isBefore(now)
+                        || cc.getCoupon().getIssuableFrom().isEqual(now))
+
                 .filter(cc -> cc.getCoupon().getExpiresAt().isAfter(now))
                 .toList();
 
