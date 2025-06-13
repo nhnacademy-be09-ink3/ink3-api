@@ -79,5 +79,13 @@ public class CouponStoreController {
         List<CouponStoreDto> stores = couponStoreService.getApplicableCouponStores(userId, bookId);
         return ResponseEntity.ok(CommonResponse.success(stores));
     }
+
+    @GetMapping("/coupon-stores/exists")
+    public ResponseEntity<Boolean> existStoreByOriginId(
+            @RequestParam Long userId,
+            @RequestParam Long originId) {
+        boolean exists = couponStoreService.existByOriginIdAndUserId(userId, originId);
+        return ResponseEntity.ok(exists);
+    }
 }
 

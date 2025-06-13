@@ -187,6 +187,12 @@ public class CouponStoreService {
     }
 
     @Transactional(readOnly = true)
+    public boolean existByOriginIdAndUserId(Long userId, Long originId) {
+        return couponStoreRepository.existsByOriginIdAndUserId(userId, originId);
+    }
+
+
+    @Transactional(readOnly = true)
     public List<CouponStoreDto> getApplicableCouponStores(Long userId, Long bookId) {
         // 1) BOOK 기반 쿠폰
         List<Long> bookCouponIds = bookCouponRepository.findIdsByBookId(bookId);
