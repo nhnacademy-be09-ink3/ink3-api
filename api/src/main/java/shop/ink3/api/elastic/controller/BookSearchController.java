@@ -2,17 +2,20 @@ package shop.ink3.api.elastic.controller;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import shop.ink3.api.common.config.ElasticsearchConfig;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.elastic.model.BookDocument;
 import shop.ink3.api.elastic.model.BookSortOption;
 import shop.ink3.api.elastic.service.BookSearchService;
 
+@ConditionalOnBean(ElasticsearchConfig.class)
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/search/books")

@@ -2,9 +2,12 @@ package shop.ink3.api.elastic.repository;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import shop.ink3.api.common.config.ElasticsearchConfig;
 
+@ConditionalOnBean(ElasticsearchConfig.class)
 @RequiredArgsConstructor
 @Repository
 public class BookSearchRedisRepository {

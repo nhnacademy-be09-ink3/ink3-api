@@ -13,15 +13,18 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import shop.ink3.api.common.config.ElasticsearchConfig;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.elastic.model.BookDocument;
 import shop.ink3.api.elastic.model.BookSortOption;
 import shop.ink3.api.elastic.repository.BookSearchRedisRepository;
 
+@ConditionalOnBean(ElasticsearchConfig.class)
 @Slf4j
 @RequiredArgsConstructor
 @Service
