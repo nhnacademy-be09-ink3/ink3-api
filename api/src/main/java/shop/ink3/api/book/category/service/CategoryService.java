@@ -32,8 +32,8 @@ import shop.ink3.api.book.category.repository.CategoryRepository;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    @Cacheable(value = "categories")
     @Transactional(readOnly = true)
+    @Cacheable(value = "categories")
     public List<CategoryTreeDto> getCategoriesTree() {
         List<Category> categories = categoryRepository.findAll(Sort.by(Direction.ASC, "path"));
         return buildTree(categories);

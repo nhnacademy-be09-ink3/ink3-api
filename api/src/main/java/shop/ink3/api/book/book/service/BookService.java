@@ -102,25 +102,25 @@ public class BookService {
         Page<Book> books = bookRepository.findAll(pageable);
         return PageResponse.from(books.map(b -> AdminBookResponse.from(b, getThumbnailUrl(b))));
     }
-
-    @Cacheable(value = "books:best-sellers", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
+    
     @Transactional(readOnly = true)
+    @Cacheable(value = "books:best-sellers", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
     public PageResponse<BookPreviewResponse> getBestSellerBooks(SortType sortType, Pageable pageable) {
         Page<Book> bestSellerBooks = bookRepository.findSortedBestSellerBooks(sortType, pageable);
         Page<BookPreviewResponse> response = mapToBookPreviewResponse(bestSellerBooks);
         return PageResponse.from(response);
     }
 
-    @Cacheable(value = "books:new", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
     @Transactional(readOnly = true)
+    @Cacheable(value = "books:new", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
     public PageResponse<BookPreviewResponse> getAllNewBooks(SortType sortType, Pageable pageable) {
         Page<Book> bestRecommendedBooks = bookRepository.findSortedNewBooks(sortType, pageable);
         Page<BookPreviewResponse> response = mapToBookPreviewResponse(bestRecommendedBooks);
         return PageResponse.from(response);
     }
 
-    @Cacheable(value = "books:recommended", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
     @Transactional(readOnly = true)
+    @Cacheable(value = "books:recommended", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
     public PageResponse<BookPreviewResponse> getAllRecommendedBooks(SortType sortType, Pageable pageable) {
         Page<Book> bestRecommendedBooks = bookRepository.findSortedRecommendedBooks(sortType, pageable);
         Page<BookPreviewResponse> response = mapToBookPreviewResponse(bestRecommendedBooks);
