@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -56,9 +55,7 @@ class CouponStoreControllerTest {
 
         // Controller에 mock 주입
         controller = new CouponStoreController(
-                couponStoreService,
-                bookCouponRepository,
-                categoryCouponRepository
+                couponStoreService
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
