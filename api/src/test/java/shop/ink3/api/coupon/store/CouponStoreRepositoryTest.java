@@ -126,4 +126,108 @@ public class CouponStoreRepositoryTest {
         // then
         assertThat(exists).isFalse();
     }
+
+    @Test
+    @DisplayName("status, userId, originType에 매핑된 CouponStore가 있으면 true를 반환한다")
+    void existsByStatusAndUserIdAndOriginType_returnsTrue_whenExists() {
+        // given: Membership, User, Coupon 저장
+        Membership membership = em.persistAndFlush(
+                Membership.builder()
+                        .name("Basic")
+                        .conditionAmount(0)
+                        .pointRate(0)
+                        .isActive(true)
+                        .isDefault(true)
+                        .createdAt(LocalDateTime.now())
+                        .build()
+        );
+
+        User user = em.persistAndFlush(
+                User.builder()
+                        .loginId("tester3")
+                        .password("pass1234")
+                        .name("테스터3")
+                        .email("tester3@example.com")
+                        .phone("010-0000-0000")
+                        .birthday(LocalDate.of(1992, 3, 3))
+                        .createdAt(LocalDateTime.now())
+                        .lastLoginAt(LocalDateTime.now())
+                        .membership(membership)
+                        .status(UserStatus.ACTIVE)
+                        .point(0)
+                        .build()
+        );
+
+        Coupon coupon = em.persistAndFlush(
+                Coupon.builder()
+                        .name("STATUS_TEST_COUPON")
+                        .expiresAt(LocalDateTime.now().plusDays(7))
+                        .build()
+        );
+
+        // and given: CouponStore(status=READY, originType=BIRTHDAY)
+        em.persistAndFlush(
+                CouponStore.builder()
+                        .user(user)
+                        .coupon(coupon)
+                        .status(CouponStatus.READY)
+                        .originType(OriginType.BIRTHDAY)
+                        .issuedAt(LocalDateTime.now())
+                        .build()
+        );
+
+        // when
+        boolean exists = couponStoreRepository
+                .existsByStatusAndUserIdAndOriginType(
+                        CouponStatus.READY,
+                        user.getId(),
+                        OriginType.BIRTHDAY
+                );
+
+        // then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("status, userId, originType에 매핑된 CouponStore가 없으면 false를 반환한다")
+    void existsByStatusAndUserIdAndOriginType_returnsFalse_whenNotExists() {
+        // given: Membership, User만 저장 (CouponStore는 저장하지 않음)
+        Membership membership = em.persistAndFlush(
+                Membership.builder()
+                        .name("Basic")
+                        .conditionAmount(0)
+                        .pointRate(0)
+                        .isActive(true)
+                        .isDefault(true)
+                        .createdAt(LocalDateTime.now())
+                        .build()
+        );
+
+        User user = em.persistAndFlush(
+                User.builder()
+                        .loginId("tester4")
+                        .password("pass1234")
+                        .name("테스터4")
+                        .email("tester4@example.com")
+                        .phone("010-1111-1111")
+                        .birthday(LocalDate.of(1993, 4, 4))
+                        .createdAt(LocalDateTime.now())
+                        .lastLoginAt(LocalDateTime.now())
+                        .membership(membership)
+                        .status(UserStatus.ACTIVE)
+                        .point(0)
+                        .build()
+        );
+
+        // when
+        boolean exists = couponStoreRepository
+                .existsByStatusAndUserIdAndOriginType(
+                        CouponStatus.USED,
+                        user.getId(),
+                        OriginType.WELCOME
+                );
+
+        // then
+        assertThat(exists).isFalse();
+    }
 }
