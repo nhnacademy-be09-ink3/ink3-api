@@ -183,6 +183,7 @@ jobs:
           -DMINIO_HOST=$MINIO_HOST \
           -DMINIO_ACCESS_KEY=$MINIO_ACCESS_KEY \
           -DMINIO_SECRET_KEY=$MINIO_SECRET_KEY \
+          -DELASTIC_KEY="$ELASTIC_KEY" \
           -B
 
       - name: Print app log if health check fails
