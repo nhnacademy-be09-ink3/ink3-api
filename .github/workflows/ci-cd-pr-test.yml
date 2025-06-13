@@ -21,7 +21,7 @@ env:
   MINIO_HOST: ${{ secrets.MINIO_HOST }}
   MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
   MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
-
+  ELASTIC_KEY: ${{ secrets.ELASTIC_KEY }}
 
 
 jobs:
