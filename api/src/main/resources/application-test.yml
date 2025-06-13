@@ -26,6 +26,8 @@ management:
   health:
     rabbit:
       enabled: false
+    elasticsearch:
+      enabled: false
 logging:
   level:
     org.hibernate.SQL: debug
