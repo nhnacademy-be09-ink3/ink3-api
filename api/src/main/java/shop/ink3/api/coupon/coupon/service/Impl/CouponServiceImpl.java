@@ -1,6 +1,8 @@
 package shop.ink3.api.coupon.coupon.service.Impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
 import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
@@ -219,6 +222,62 @@ public class CouponServiceImpl implements CouponService {
         return PageResponse.from(dtoPage);
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<CouponResponse> getCouponsByParentId(long bookId, Pageable pageable) {
+        // 1) Book 조회
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
+
+        // 2) 직접 매핑된 카테고리 ID 수집
+        List<Long> directCategoryIds = book.getBookCategories().stream()
+                .map(bc -> bc.getCategory().getId())
+                .toList();
+
+        // 3) 조상 카테고리 ID 포함
+        Set<Long> allCategoryIds = new HashSet<>(directCategoryIds);
+        for (Long catId : directCategoryIds) {
+            List<Category> ancestors = categoryRepository.findAllAncestors(catId);
+            for (Category parent : ancestors) {
+                allCategoryIds.add(parent.getId());
+            }
+        }
+
+        // 4) 부모 카테고리 기준 CategoryCoupon 엔티티 페이징 조회 (fetch join)
+        List<CategoryCoupon> page = categoryCouponRepository
+                .findAllByCategoryIdInWithFetch(allCategoryIds);
+
+        // 5) 만료 기준 적용
+        LocalDateTime now = LocalDateTime.now();
+        List<CategoryCoupon> validList = page.stream()
+                .filter(cc -> !cc.getCoupon().getIssuableFrom().isAfter(now))  // issuableFrom ≤ now
+                .filter(cc -> cc.getCoupon().getExpiresAt().isAfter(now))      // expiresAt > now
+                .toList();
+
+        if (validList.isEmpty()) {
+            throw new CouponNotFoundException(
+                    "상위 카테고리(" + allCategoryIds + ") 기반 쿠폰이 없습니다."
+            );
+        }
+
+        // 6) 필터된 리스트로 새 Page 생성
+        Page<CategoryCoupon> validPage =
+                new PageImpl<>(validList, pageable, validList.size());
+
+        // 7) DTO 매핑
+        Page<CouponResponse> dtoPage = validPage.map(cc -> {
+            CategoryInfo info = new CategoryInfo(
+                    cc.getId(),                             // CategoryCoupon PK
+                    cc.getCategory().getId(),               // 부모 카테고리 ID
+                    cc.getCategory().getName(),             // 부모 카테고리 이름
+                    "CATEGORY"                       // originType 표시
+            );
+            return CouponResponse.from(cc.getCoupon(),
+                    List.of(),     // book 기반 리스트 없음
+                    List.of(info)); // 부모 카테고리 정보만
+        });
+
+        return PageResponse.from(dtoPage);
+    }
 
     @Override
     public CouponResponse updateCoupon(Long couponId, CouponUpdateRequest req) {

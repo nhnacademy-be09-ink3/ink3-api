@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
@@ -81,6 +83,14 @@ public class CouponController {
             @PathVariable long categoryId,
             Pageable pageable) {
         PageResponse<CouponResponse> list = couponService.getCouponsByCategoryId(categoryId, pageable);
+        return ResponseEntity.ok(CommonResponse.success(list));
+    }
+    @GetMapping("/by-book/{bookId}/parent-categories")
+    public ResponseEntity<CommonResponse<PageResponse<CouponResponse>>> getParentCategoryCoupons(
+            @PathVariable Long bookId,
+            Pageable pageable
+    ) {
+        PageResponse<CouponResponse> list = couponService.getCouponsByParentId(bookId, pageable);
         return ResponseEntity.ok(CommonResponse.success(list));
     }
 
