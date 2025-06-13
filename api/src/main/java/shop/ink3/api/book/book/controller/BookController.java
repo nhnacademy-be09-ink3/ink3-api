@@ -26,8 +26,6 @@ import shop.ink3.api.book.book.enums.SortType;
 import shop.ink3.api.book.book.service.BookService;
 import shop.ink3.api.common.dto.CommonResponse;
 import shop.ink3.api.common.dto.PageResponse;
-import shop.ink3.api.elastic.model.BookDocument;
-import shop.ink3.api.elastic.service.BookSearchService;
 
 @RequestMapping("/books")
 @RequiredArgsConstructor
@@ -35,7 +33,7 @@ import shop.ink3.api.elastic.service.BookSearchService;
 public class BookController {
     private final BookService bookService;
     private final ObjectMapper objectMapper;
-    private final BookSearchService bookSearchService;
+    // private final BookSearchService bookSearchService;
 
     @GetMapping("/{bookId}")
     public ResponseEntity<CommonResponse<BookDetailResponse>> getBookByIdWithParentCategory(@PathVariable Long bookId) {
@@ -100,7 +98,7 @@ public class BookController {
                     BookCreateRequest.class
             );
             BookDetailResponse response = bookService.createBook(bookCreateRequest, coverImage);
-            bookSearchService.indexBook(new BookDocument(response));
+            // bookSearchService.indexBook(new BookDocument(response));
             return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.create(response));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage(), null));
@@ -117,7 +115,7 @@ public class BookController {
             BookUpdateRequest bookUpdateRequest = objectMapper.readValue(bookUpdateRequestJson,
                     BookUpdateRequest.class);
             BookDetailResponse response = bookService.updateBook(bookId, bookUpdateRequest, coverImage);
-            bookSearchService.indexBook(new BookDocument(response));
+            // bookSearchService.indexBook(new BookDocument(response));
             return ResponseEntity.ok(CommonResponse.update(response));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(CommonResponse.error(HttpStatus.BAD_REQUEST, e.getMessage(), null));
