@@ -41,7 +41,6 @@ public class MinioUploader {
                 .build();
 
             s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-            log.warn("upload======key={}", key);
 
             return key;
         } catch (IOException e) {
@@ -61,7 +60,6 @@ public class MinioUploader {
             .build();
 
         URL url = s3Presigner.presignGetObject(presignRequest).url();
-        log.warn("get==========url={}", url.toString());
         return url.toString();
     }
 
