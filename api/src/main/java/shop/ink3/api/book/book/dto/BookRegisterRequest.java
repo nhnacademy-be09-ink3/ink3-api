@@ -10,5 +10,6 @@ public record BookRegisterRequest(
         Integer quantity,
         BookStatus status,
         Boolean isPackable,
-        List<Long> tagIds
-) {}
+        List<String> tags
+) {
+}
