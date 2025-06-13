@@ -319,25 +319,30 @@ public class BookService {
                 .orElseGet(() -> publisherRepository.save(Publisher.builder().name(dto.publisher()).build()));
 
         Book book = Book.builder()
+                .isbn(dto.isbn13())
                 .title(dto.title())
-                .description(dto.description())
                 .contents(dto.toc())
+                .description(dto.description())
                 .publisher(publisher)
                 .publishedAt(LocalDate.parse(dto.pubDate()))
-                .isbn(dto.isbn13())
                 .originalPrice(dto.priceStandard())
                 .salePrice(request.priceSales())
                 .quantity(request.quantity())
-                .status(request.status())
                 .isPackable(request.isPackable())
+                .averageRating(0.0)
                 .thumbnailUrl(dto.cover())
+                .status(request.status())
                 .build();
+
         bookRepository.save(book); // 먼저 저장해서 ID 확보
 
         List<List<CategoryFlatDto>> categories = createCategoryHierarchy(dto.categoryName());
         List<BookAuthorDto> authors = parseAuthors(dto.author());
         authors.forEach(author -> addAuthorToBook(book.getId(), author));
-        request.tags().forEach(tag -> addTagToBook(book.getId(), tag));
+
+        if (request.tags() != null) {
+            request.tags().forEach(tag -> addTagToBook(book.getId(), tag));
+        }
 
         return BookDetailResponse.from(
                 book,
