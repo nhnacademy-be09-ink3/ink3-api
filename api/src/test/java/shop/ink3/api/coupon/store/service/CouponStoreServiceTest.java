@@ -1,9 +1,13 @@
-package shop.ink3.api.coupon.store.service;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-
-@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
-class CouponStoreServiceTest {
+//package shop.ink3.api.coupon.store.service;
+//
+//import java.util.List;
+//import org.junit.jupiter.api.extension.ExtendWith;
+//import shop.ink3.api.coupon.store.dto.CouponStoreDto;
+//import shop.ink3.api.coupon.store.entity.CouponStatus;
+//import shop.ink3.api.coupon.store.entity.OriginType;
+//
+//@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
+//class CouponStoreServiceTest {
 //
 //    @Mock private CouponRepository couponRepository;
 //    @Mock private UserRepository userRepository;
@@ -351,4 +355,4 @@ class CouponStoreServiceTest {
 //        assertEquals(15, dto.discountPercentage().intValue());
 //        assertEquals(500, dto.maximumDiscountAmount().intValue());
 //    }
-}
+//}

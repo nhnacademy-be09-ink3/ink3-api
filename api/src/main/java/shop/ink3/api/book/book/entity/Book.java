@@ -78,10 +78,6 @@ public class Book {
         return (int) Math.floor(100.0 * (originalPrice - salePrice) / originalPrice);
     }
 
-    public void deleteBook(){
-        this.status = BookStatus.DELETED;
-    }
-
     public void updateBook(
             String isbn,
             String title,
