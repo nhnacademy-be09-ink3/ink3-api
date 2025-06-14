@@ -42,27 +42,22 @@ import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
 import shop.ink3.api.book.category.service.CategoryService;
 import shop.ink3.api.book.publisher.entity.Publisher;
-import shop.ink3.api.book.publisher.exception.PublisherNotFoundException;
 import shop.ink3.api.book.publisher.repository.PublisherRepository;
 import shop.ink3.api.book.tag.entity.Tag;
 import shop.ink3.api.book.tag.repository.TagRepository;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.common.uploader.MinioService;
-import shop.ink3.api.review.review.repository.ReviewRepository;
-import shop.ink3.api.user.like.repository.LikeRepository;
 
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class BookService {
     private final BookRepository bookRepository;
-    private final ReviewRepository reviewRepository;
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final TagRepository tagRepository;
     private final BookTagRepository bookTagRepository;
-    private final LikeRepository likeRepository;
     private final MinioService minioService;
     private final BookAuthorRepository bookAuthorRepository;
     private final BookCategoryRepository bookCategoryRepository;
@@ -77,16 +72,12 @@ public class BookService {
         List<List<CategoryFlatDto>> categories = getBookCategories(bookId);
         List<BookAuthorDto> authors = getBookAuthors(bookId);
         List<String> tags = getBookTags(bookId);
-        long reviewCount = reviewRepository.countByOrderBookBookId(bookId);
-        long likeCount = likeRepository.countByBookId(bookId);
         return BookDetailResponse.from(
                 book,
                 getThumbnailUrl(book),
                 categories,
                 authors,
-                tags,
-                reviewCount,
-                likeCount
+                tags
         );
     }
 
@@ -102,7 +93,7 @@ public class BookService {
         Page<Book> books = bookRepository.findAll(pageable);
         return PageResponse.from(books.map(b -> AdminBookResponse.from(b, getThumbnailUrl(b))));
     }
-    
+
     @Transactional(readOnly = true)
     @Cacheable(value = "books:best-sellers", key = "#sortType.name()", condition = "#pageable.pageNumber == 0")
     public PageResponse<BookPreviewResponse> getBestSellerBooks(SortType sortType, Pageable pageable) {
@@ -155,7 +146,9 @@ public class BookService {
                 .salePrice(request.salePrice())
                 .quantity(request.quantity())
                 .isPackable(request.isPackable())
-                .averageRating(0.0)
+                .totalRating(0L)
+                .reviewCount(0L)
+                .likeCount(0L)
                 .thumbnailUrl(minioService.upload(coverImage, bucket))
                 .status(request.status())
                 .build();
@@ -175,17 +168,13 @@ public class BookService {
         }
 
         List<List<CategoryFlatDto>> categories = getBookCategories(book.getId());
-        List<BookAuthorDto> authors = getBookAuthors(book.getId());
-        List<String> tags = getBookTags(book.getId());
 
         return BookDetailResponse.from(
                 book,
                 minioService.getPresignedUrl(book.getThumbnailUrl(), bucket),
                 categories,
-                authors,
-                tags,
-                0,
-                0
+                request.authors(),
+                request.tags()
         );
     }
 
@@ -242,19 +231,13 @@ public class BookService {
         request.tags().forEach(tag -> addTagToBook(book.getId(), tag));
 
         List<List<CategoryFlatDto>> categories = getBookCategories(book.getId());
-        List<BookAuthorDto> authors = getBookAuthors(book.getId());
-        List<String> tags = getBookTags(book.getId());
-        long reviewCount = reviewRepository.countByOrderBookBookId(bookId);
-        long likeCount = likeRepository.countByBookId(bookId);
 
         return BookDetailResponse.from(
                 book,
                 getThumbnailUrl(book),
                 categories,
-                authors,
-                tags,
-                reviewCount,
-                likeCount
+                request.authors(),
+                request.tags()
         );
     }
 
@@ -333,7 +316,9 @@ public class BookService {
                 .salePrice(request.priceSales())
                 .quantity(request.quantity())
                 .isPackable(request.isPackable())
-                .averageRating(0.0)
+                .totalRating(0L)
+                .reviewCount(0L)
+                .likeCount(0L)
                 .thumbnailUrl(dto.cover())
                 .status(request.status())
                 .build();
@@ -358,9 +343,7 @@ public class BookService {
                 book.getThumbnailUrl(),
                 categories,
                 authors,
-                request.tags(),
-                0,
-                0
+                request.tags()
         );
     }
 
@@ -415,14 +398,10 @@ public class BookService {
             List<String> authors = bookAuthorRepository.findAllByBookId(book.getId()).stream()
                     .map(ba -> "%s (%s)".formatted(ba.getAuthor().getName(), ba.getRole()))
                     .toList();
-            long reviewCount = reviewRepository.countByOrderBookBookId(book.getId());
-            long likeCount = likeRepository.countByBookId(book.getId());
             return BookPreviewResponse.from(
                     book,
                     getThumbnailUrl(book),
-                    authors,
-                    reviewCount,
-                    likeCount
+                    authors
             );
         });
     }

@@ -18,9 +18,7 @@ public record BookPreviewResponse(
     public static BookPreviewResponse from(
             Book book,
             String thumbnailUrl,
-            List<String> authors,
-            long reviewCount,
-            long likeCount
+            List<String> authors
     ) {
         return new BookPreviewResponse(
                 book.getId(),
@@ -31,8 +29,8 @@ public record BookPreviewResponse(
                 thumbnailUrl,
                 authors,
                 book.getAverageRating(),
-                reviewCount,
-                likeCount
+                book.getReviewCount(),
+                book.getLikeCount()
         );
     }
 }

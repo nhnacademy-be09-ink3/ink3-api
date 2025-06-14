@@ -62,7 +62,13 @@ public class Book {
     private boolean isPackable;
 
     @Column(nullable = false)
-    private Double averageRating;
+    private Long totalRating;
+
+    @Column(nullable = false)
+    private Long reviewCount;
+
+    @Column(nullable = false)
+    private Long likeCount;
 
     @Column(nullable = false)
     private String thumbnailUrl;
@@ -76,6 +82,13 @@ public class Book {
             return 0;
         }
         return (int) Math.floor(100.0 * (originalPrice - salePrice) / originalPrice);
+    }
+
+    public Double getAverageRating() {
+        if (reviewCount == 0) {
+            return 0.0;
+        }
+        return totalRating / (double) reviewCount;
     }
 
     public void updateBook(
@@ -106,8 +119,23 @@ public class Book {
         this.publisher = publisher;
     }
 
-    public void updateAverageRating(Double averageRating) {
-        this.averageRating = averageRating;
+    public void addRating(int rating) {
+        this.totalRating += rating;
+        this.reviewCount++;
+    }
+
+    public void updateRating(int oldRating, int newRating) {
+        this.totalRating = this.totalRating - oldRating + newRating;
+    }
+
+    public void incrementLikeCount() {
+        this.likeCount = (this.likeCount == null) ? 1 : this.likeCount + 1;
+    }
+
+    public void decrementLikeCount() {
+        if (this.likeCount != null && this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 
     // 주문 시 재고 확인 및 재고 수량 감소
