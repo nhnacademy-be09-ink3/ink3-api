@@ -1,5 +1,6 @@
 package shop.ink3.api.coupon.coupon.controller;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -87,9 +88,9 @@ public class CouponControllerTest {
                 .andExpect(jsonPath("$.data.policyName").value("SPRING_POLICY"))
                 .andExpect(jsonPath("$.data.discountRate").value(10))
                 .andExpect(jsonPath("$.data.discountValue").value(0))
-                .andExpect(jsonPath("$.data.issuableFrom").value(now.toString() + ":00"))
-                .andExpect(jsonPath("$.data.expiresAt").value(expires.toString() + ":00"))
-                .andExpect(jsonPath("$.data.createdAt").value(now.toString() + ":00"))
+                .andExpect(jsonPath("$.data.issuableFrom").value(now+ ":00"))
+                .andExpect(jsonPath("$.data.expiresAt").value(expires + ":00"))
+                .andExpect(jsonPath("$.data.createdAt").value(now + ":00"))
                 .andExpect(jsonPath("$.data.books").isArray())
                 .andExpect(jsonPath("$.data.books").isEmpty())
                 .andExpect(jsonPath("$.data.categories").isArray())
@@ -218,7 +219,7 @@ public class CouponControllerTest {
         // given
         Long couponId = 5L;
         CouponUpdateRequest req = new CouponUpdateRequest(
-                30L, "updated-name", now, expires.plusDays(2),
+                30L, "updated-name", now, expires.plusDays(2), true,
                 List.of(100L), List.of(200L)
         );
         BookInfo bi = new BookInfo(11L, 100L, "BookTitle", "BOOK");
@@ -316,4 +317,51 @@ public class CouponControllerTest {
 
         verify(couponService).getCouponsByCategoryId(eq(categoryId), eq(pg));
     }
+
+    @Test
+    @DisplayName("GET /coupons/by-book/{bookId}/parent-categories - 부모 카테고리 쿠폰 조회")
+    void getParentCategoryCoupons_success() throws Exception {
+        // given
+        Long bookId = 150L;
+        CategoryInfo ci = new CategoryInfo(
+                55L,        // CategoryCoupon ID
+                300L,       // parent category ID
+                "Non-fiction", // parent category name
+                "PARENT_CATEGORY"
+        );
+        CouponResponse cr = new CouponResponse(
+                20L,                         // couponId
+                "parent-coupon",             // name
+                70L,                         // policyId
+                "PCP",                       // policyName
+                15,                          // discountRate
+                0,                           // discountValue
+                now,                         // issuableFrom
+                expires,                     // expiresAt
+                now,                         // createdAt
+                Collections.emptyList(),     // books
+                List.of(ci)                  // categories
+        );
+        PageRequest pg = PageRequest.of(1, 5);
+        PageResponse<CouponResponse> pr = PageResponse.from(
+                new PageImpl<>(List.of(cr), pg, 1)
+        );
+        when(couponService.getCouponsByParentId(eq(bookId), eq(pg)))
+                .thenReturn(pr);
+
+        // when / then
+        mockMvc.perform(get("/coupons/by-book/{bookId}/parent-categories", bookId)
+                        .param("page", "1")
+                        .param("size", "5")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.content", hasSize(1)))
+                .andExpect(jsonPath("$.data.content[0].couponId").value(20))
+                .andExpect(jsonPath("$.data.content[0].categories[0].id").value(300))
+                .andExpect(jsonPath("$.data.content[0].categories[0].name").value("Non-fiction"));
+
+        verify(couponService).getCouponsByParentId(eq(bookId), eq(pg));
+    }
+
 }

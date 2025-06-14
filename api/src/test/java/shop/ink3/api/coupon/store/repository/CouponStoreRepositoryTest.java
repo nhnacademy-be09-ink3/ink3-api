@@ -1,4 +1,4 @@
-package shop.ink3.api.coupon.store;
+package shop.ink3.api.coupon.store.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -15,7 +15,6 @@ import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.entity.OriginType;
-import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -70,17 +69,6 @@ public class CouponStoreRepositoryTest {
                         .build()
         );
 
-        // CouponStore 생성
-        CouponStore store = em.persistAndFlush(
-                CouponStore.builder()
-                        .user(user)
-                        .coupon(coupon)
-                        .originType(OriginType.BOOK)
-                        .originId(42L)
-                        .status(CouponStatus.READY)
-                        .issuedAt(LocalDateTime.now())
-                        .build()
-        );
         // when
         boolean exists = couponStoreRepository.existsByOriginIdAndUserId(42L, user.getId());
 

@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -43,7 +42,10 @@ import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
+import shop.ink3.api.coupon.store.entity.CouponStatus;
+import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
+import shop.ink3.api.coupon.store.service.CouponStoreService;
 
 @ExtendWith(MockitoExtension.class)
 class CouponServiceTest {
@@ -59,12 +61,14 @@ class CouponServiceTest {
     private BookRepository bookRepository;
     @Mock
     private CategoryRepository categoryRepository;
+
     @Mock
     private CouponStoreRepository couponStoreRepository;
 
     @InjectMocks
     private CouponServiceImpl couponService;
-
+    @InjectMocks
+    private CouponStoreService couponStoreService;
     @Test
     void createCoupon_success_withoutAssociations() {
         LocalDateTime now = LocalDateTime.now();
@@ -177,7 +181,7 @@ class CouponServiceTest {
         when(book.getTitle()).thenReturn("Java");
 
         CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
-        Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").issuableFrom(issuableFrom).expiresAt(expires).build();
+        Coupon coupon = Coupon.builder().id(99L).couponPolicy(policy).name("B1").issuableFrom(issuableFrom).expiresAt(expires).isActive(true).build();
         when(bc.getBook()).thenReturn(book);
         when(bc.getCoupon()).thenReturn(coupon);
         when(bc.getId()).thenReturn(5L);
@@ -218,7 +222,7 @@ class CouponServiceTest {
         when(cat.getName()).thenReturn("Fiction");
 
         CouponPolicy policy = CouponPolicy.builder().id(1L).name("P1").discountPercentage(10).discountValue(0).build();
-        Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").issuableFrom(issuableFrom).expiresAt(expires).build();
+        Coupon coupon = Coupon.builder().id(55L).couponPolicy(policy).name("C1").issuableFrom(issuableFrom).expiresAt(expires).isActive(true).build();
 
         when(cc.getCategory()).thenReturn(cat);
         when(cc.getCoupon()).thenReturn(coupon);
@@ -295,7 +299,7 @@ class CouponServiceTest {
         when(couponRepository.save(existing)).thenReturn(existing);
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                2L, "new-name", now, newExpires,
+                2L, "new-name", now, newExpires, true,
                 bookIds, catIds
         );
 
@@ -314,8 +318,8 @@ class CouponServiceTest {
                 .anyMatch(bi -> bi.id().equals(102L) && bi.title().equals("Spring Boot")));
 
         assertEquals(1, resp.categories().size());
-        assertEquals(201L, resp.categories().get(0).id());
-        assertEquals("Fiction", resp.categories().get(0).name());
+        assertEquals(201L, resp.categories().getFirst().id());
+        assertEquals("Fiction", resp.categories().getFirst().name());
     }
 
     @Test
@@ -327,7 +331,7 @@ class CouponServiceTest {
 
         CouponUpdateRequest req = new CouponUpdateRequest(
                 1L, "irrelevant",
-                LocalDateTime.now(), LocalDateTime.now().plusDays(1),
+                LocalDateTime.now(), LocalDateTime.now().plusDays(1), true,
                 Collections.emptyList(), Collections.emptyList()
         );
 
@@ -350,7 +354,7 @@ class CouponServiceTest {
         when(policyRepository.findById(2L)).thenReturn(Optional.empty());
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                2L, "name", now, now.plusDays(2),
+                2L, "name", now, now.plusDays(2), true,
                 Collections.emptyList(), Collections.emptyList()
         );
 
@@ -376,7 +380,7 @@ class CouponServiceTest {
         when(bookRepository.findAllById(badBooks)).thenReturn(Collections.emptyList());
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                1L, "name", now, now.plusDays(2),
+                1L, "name", now, now.plusDays(2), true,
                 badBooks, Collections.emptyList()
         );
 
@@ -403,13 +407,148 @@ class CouponServiceTest {
         when(categoryRepository.findAllById(badCats)).thenReturn(Collections.emptyList());
 
         CouponUpdateRequest req = new CouponUpdateRequest(
-                1L, "name", now, now.plusDays(2),
+                1L, "name", now, now.plusDays(2), true,
                 Collections.emptyList(), badCats
         );
 
         assertThrows(IllegalArgumentException.class,
                 () -> couponService.updateCoupon(couponId, req));
     }
+
+    @Test
+    @DisplayName("updateCoupon — isActive=false 일 때 CouponStoreService.disable 호출")
+    void updateCoupon_whenBecomesInactive_thenDisableStores() {
+        Long couponId = 5L;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime newExpires = now.plusDays(10);
+
+        // 기존 쿠폰 엔티티 준비
+        Coupon realCoupon = Coupon.builder()
+                .id(couponId)
+                .couponPolicy(CouponPolicy.builder().id(1L).build())
+                .name("old")
+                .issuableFrom(now)
+                .expiresAt(now.plusDays(5))
+                .isActive(true)
+                .build();
+        Coupon existing = spy(realCoupon);
+        when(couponRepository.findByIdWithFetch(couponId))
+                .thenReturn(Optional.of(existing));
+
+        // 새 정책 준비
+        CouponPolicy newPolicy = CouponPolicy.builder().id(2L).discountPercentage(10).discountValue(0)
+                .build();
+        when(policyRepository.findById(2L))
+                .thenReturn(Optional.of(newPolicy));
+
+        // save 후 isActive=false 반환
+        when(couponRepository.save(existing)).thenReturn(existing);
+        doReturn(false).when(existing).isActive();
+
+        // 비활성화 요청
+        CouponUpdateRequest req = new CouponUpdateRequest(
+                2L, "new", now, newExpires,
+                false,            // isActive=false!
+                List.of(), List.of()
+        );
+
+        couponService.updateCoupon(couponId, req);
+
+        // disableCouponStoresByCouponId가 1회 호출되어야 함
+        verify(couponStoreService, times(1))
+                .disableCouponStoresByCouponId(couponId);
+    }
+
+    @Test
+    @DisplayName("updateCoupon — isActive=true 일 때 CouponStoreService.disable 호출 안 됨")
+    void updateCoupon_whenStaysActive_thenDoNotDisableStores() {
+        // given
+        Long couponId = 5L;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime newExpires = now.plusDays(10);
+
+        // 기존 쿠폰 엔티티 준비 (isActive=true)
+        Coupon existingCoupon = Coupon.builder()
+                .id(couponId)
+                .couponPolicy(CouponPolicy.builder().id(1L).build())
+                .name("Active Coupon")
+                .issuableFrom(now)
+                .expiresAt(now.plusDays(5))
+                .isActive(true)
+                .build();
+
+        when(couponRepository.findByIdWithFetch(couponId))
+                .thenReturn(Optional.of(existingCoupon));
+
+        // 새 정책 준비
+        CouponPolicy newPolicy = CouponPolicy.builder().id(2L).discountPercentage(10).discountValue(0).build();
+        when(policyRepository.findById(2L))
+                .thenReturn(Optional.of(newPolicy));
+
+        // couponRepository.save(coupon)이 수정된 쿠폰을 그대로 반환하도록 설정
+        // 이 쿠폰의 isActive()는 true를 반환할 것임
+        when(couponRepository.save(any(Coupon.class))).thenReturn(existingCoupon);
+
+        // 활성 상태를 유지하는 요청
+        CouponUpdateRequest req = new CouponUpdateRequest(
+                2L, "Updated Active Coupon", now, newExpires,
+                true,            // isActive=true!
+                List.of(), List.of()
+        );
+
+        // when
+        couponService.updateCoupon(couponId, req);
+
+        // then
+        // disableCouponStoresByCouponId가 호출되지 않아야 함
+        verify(couponStoreService, never())
+                .disableCouponStoresByCouponId(anyLong());
+    }
+
+
+    @Test
+    @DisplayName("disableCouponStoresByCouponId — 조회된 각 Store의 상태를 업데이트하고 저장")
+    void disableCouponStoresByCouponId_callsUpdateOnEachStore() {
+        // given
+        Long couponId = 10L;
+
+        // READY 상태의 CouponStore 3개를 spy로 준비
+        CouponStore store1 = spy(CouponStore.builder()
+                .id(1L)
+                .status(CouponStatus.READY)
+                .build());
+        CouponStore store2 = spy(CouponStore.builder()
+                .id(2L)
+                .status(CouponStatus.READY)
+                .build());
+        CouponStore store3 = spy(CouponStore.builder()
+                .id(3L)
+                .status(CouponStatus.READY)
+                .build());
+        List<CouponStore> stores = List.of(store1, store2, store3);
+
+        // findAllBy... 리포지토리 stub
+        when(couponStoreRepository.findAllByCouponIdAndStatus(couponId, CouponStatus.READY))
+                .thenReturn(stores);
+        // saveAll은 단순히 인자를 그대로 리턴하도록
+        when(couponStoreRepository.saveAll(anyList()))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        // when
+        couponStoreService.disableCouponStoresByCouponId(couponId);
+
+        // then
+        // 1) 각 스토어에 대해 update(DISABLED, null)이 한 번씩 호출되었는지
+        stores.forEach(store ->
+                verify(store, times(1))
+                        .update(eq(CouponStatus.DISABLED), isNull())
+        );
+
+        // 2) 변경된 리스트가 한 번만 저장되었는지
+        verify(couponStoreRepository, times(1)).saveAll(stores);
+    }
+
+
 
     @Test
     void deleteCouponById_delegatesToRepository() {

@@ -10,12 +10,7 @@ import org.mockito.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
-import shop.ink3.api.coupon.categoryCoupon.entity.CategoryCouponRepository;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
-import shop.ink3.api.coupon.policy.entity.DiscountType;
-import shop.ink3.api.coupon.store.dto.CouponIssueRequest;
-import shop.ink3.api.coupon.store.dto.CouponStoreDto;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateRequest;
 import shop.ink3.api.coupon.store.dto.CouponStoreUpdateResponse;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
@@ -40,7 +35,6 @@ class CouponStoreControllerTest {
     @Mock
     private CouponStoreService couponStoreService;
 
-    private CouponStoreController controller;
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -48,7 +42,7 @@ class CouponStoreControllerTest {
         MockitoAnnotations.openMocks(this);
 
         // Controller에 mock 주입
-        controller = new CouponStoreController(
+        CouponStoreController controller = new CouponStoreController(
                 couponStoreService
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -195,15 +189,6 @@ class CouponStoreControllerTest {
         var updateRequest = new CouponStoreUpdateRequest(
                 CouponStatus.USED,
                 LocalDateTime.of(2025, 6, 4, 13, 0)
-        );
-
-        // CouponStoreUpdateResponse에 맞춰 필요한 필드만 포함하는 더미 응답 생성
-        // 실제 Controller 코드: CouponStoreUpdateResponse.of(updatedStore) 형태로 생성됨
-        CouponStoreUpdateResponse dummyResponse = new CouponStoreUpdateResponse(
-                storeId,
-                CouponStatus.USED,
-                LocalDateTime.of(2025, 6, 4, 13, 0),
-                String.format("CouponStore 엔트리 %d 업데이트 완료", storeId)
         );
 
         when(couponStoreService.updateStore(
