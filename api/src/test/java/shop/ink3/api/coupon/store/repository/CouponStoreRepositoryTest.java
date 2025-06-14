@@ -1,4 +1,4 @@
-package shop.ink3.api.coupon.store;
+package shop.ink3.api.coupon.store.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -11,11 +11,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import shop.ink3.api.book.book.entity.Book;
+import shop.ink3.api.book.book.entity.BookStatus;
+import shop.ink3.api.book.publisher.entity.Publisher;
+import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
 import shop.ink3.api.coupon.store.entity.CouponStatus;
 import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.entity.OriginType;
-import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 import shop.ink3.api.user.membership.entity.Membership;
 import shop.ink3.api.user.user.entity.User;
 import shop.ink3.api.user.user.entity.UserStatus;
@@ -66,23 +69,56 @@ public class CouponStoreRepositoryTest {
         Coupon coupon = em.persistAndFlush(
                 Coupon.builder()
                         .name("TEST_COUPON")
+                        .isActive(true)
                         .expiresAt(LocalDateTime.now().plusDays(7))
                         .build()
         );
-
-        // CouponStore 생성
-        CouponStore store = em.persistAndFlush(
-                CouponStore.builder()
-                        .user(user)
-                        .coupon(coupon)
-                        .originType(OriginType.BOOK)
-                        .originId(42L)
-                        .status(CouponStatus.READY)
-                        .issuedAt(LocalDateTime.now())
+        // 1) Publisher 준비
+        Publisher publisher = em.persistAndFlush(
+                Publisher.builder()
+                        .name("Test Publisher")
                         .build()
         );
+
+// 2) Book 엔티티 생성
+        Book book = em.persistAndFlush(
+                Book.builder()
+                        .isbn("1234567890123")
+                        .title("Test Book")
+                        .contents("This is the contents of the test book.")
+                        .description("A description for the test book.")
+                        .publisher(publisher)
+                        .publishedAt(LocalDate.now())
+                        .originalPrice(20000)
+                        .salePrice(15000)
+                        .quantity(5)
+                        .isPackable(true)
+                        .averageRating(0.0)
+                        .thumbnailUrl("http://example.com/thumbnail.jpg")
+                        .status(BookStatus.AVAILABLE)
+                        .build()
+        );
+        BookCoupon bookCoupon = BookCoupon.builder()
+                .coupon(coupon)   // 미리 저장된 Coupon 엔티티
+                .book(book)       // 미리 저장된 Book 엔티티
+                .build();
+
+        // 3) 영속화 및 즉시 flush
+        em.persistAndFlush(bookCoupon);
+
+        CouponStore cs = CouponStore.builder()
+                .user(user)                                // 앞에서 persist 해 둔 User
+                .coupon(coupon)                            // 앞에서 persist 해 둔 Coupon
+                .originType(OriginType.BOOK)               // BOOK 타입 쿠폰이라면
+                .originId(book.getId())                    // 조회할 originId
+                .status(CouponStatus.READY)                // READY 상태
+                .issuedAt(LocalDateTime.now())
+                .build();
+
+// 2) DB에 persist
+        em.persistAndFlush(cs);
         // when
-        boolean exists = couponStoreRepository.existsByOriginIdAndUserId(42L, user.getId());
+        boolean exists = couponStoreRepository.existsByOriginIdAndUserId(bookCoupon.getId(), user.getId());
 
         // then
         assertThat(exists).isTrue();
