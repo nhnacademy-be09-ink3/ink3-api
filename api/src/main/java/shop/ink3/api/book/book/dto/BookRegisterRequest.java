@@ -6,6 +6,7 @@ import shop.ink3.api.book.book.external.aladin.dto.AladinBookResponse;
 
 public record BookRegisterRequest(
         AladinBookResponse aladinBookResponse,
+        String contents,
         Integer priceSales,
         Integer quantity,
         BookStatus status,

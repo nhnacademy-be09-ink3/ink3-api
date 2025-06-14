@@ -137,8 +137,8 @@ public class BookService {
             throw new InvalidCategorySelectionException("카테고리는 최대 10개까지만 선택할 수 있습니다.");
         }
 
-        Publisher publisher = publisherRepository.findById(request.publisherId())
-                .orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
+        Publisher publisher = publisherRepository.findByName(request.publisher())
+                .orElseGet(() -> publisherRepository.save(Publisher.builder().name(request.publisher()).build()));
 
         Book book = Book.builder()
                 .isbn(request.isbn())
@@ -203,8 +203,8 @@ public class BookService {
             throw new DuplicateIsbnException(request.isbn());
         }
 
-        Publisher publisher = publisherRepository.findById(request.publisherId())
-                .orElseThrow(() -> new PublisherNotFoundException(request.publisherId()));
+        Publisher publisher = publisherRepository.findByName(request.publisher())
+                .orElseGet(() -> publisherRepository.save(Publisher.builder().name(request.publisher()).build()));
 
         // 입력받은 이미지 파일이 없으면 기존 imageUrl로 유지
         String imageUrl = book.getThumbnailUrl();
@@ -321,7 +321,7 @@ public class BookService {
         Book book = Book.builder()
                 .isbn(dto.isbn13())
                 .title(dto.title())
-                .contents(dto.toc())
+                .contents(request.contents())
                 .description(dto.description())
                 .publisher(publisher)
                 .publishedAt(LocalDate.parse(dto.pubDate()))
@@ -337,6 +337,11 @@ public class BookService {
         bookRepository.save(book); // 먼저 저장해서 ID 확보
 
         List<List<CategoryFlatDto>> categories = createCategoryHierarchy(dto.categoryName());
+        for (List<CategoryFlatDto> path : categories) {
+            CategoryFlatDto selectedCategory = path.getLast();
+            addCategoryToBook(book.getId(), selectedCategory.id());
+        }
+
         List<BookAuthorDto> authors = parseAuthors(dto.author());
         authors.forEach(author -> addAuthorToBook(book.getId(), author));
 
