@@ -33,9 +33,7 @@ public record BookDetailResponse(
             String thumbnailUrl,
             List<List<CategoryFlatDto>> categories,
             List<BookAuthorDto> authors,
-            List<String> tags,
-            long reviewCount,
-            long likeCount
+            List<String> tags
     ) {
         return new BookDetailResponse(
                 book.getId(),
@@ -55,8 +53,8 @@ public record BookDetailResponse(
                 authors,
                 tags,
                 book.getAverageRating(),
-                reviewCount,
-                likeCount,
+                book.getReviewCount(),
+                book.getLikeCount(),
                 book.getStatus()
         );
     }

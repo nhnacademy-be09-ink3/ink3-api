@@ -80,7 +80,7 @@ public class BookSearchService {
 
                                             if (safeSortOption == BookSortOption.RATING) {
                                                 b.filter(f -> f.range(r -> r.number(n -> n
-                                                        .field("ratingCount")
+                                                        .field("reviewCount")
                                                         .gte(100.0)
                                                 )));
                                             }
