@@ -74,7 +74,7 @@ public class CouponServiceImpl implements CouponService {
                 .issuableFrom(req.issuableFrom())
                 .expiresAt(req.expiresAt())
                 .createdAt(LocalDateTime.now())
-                .isActive(true)
+                .isActive(req.isActive())
                 .build();
 
         if (!req.bookIdList().isEmpty()) {
