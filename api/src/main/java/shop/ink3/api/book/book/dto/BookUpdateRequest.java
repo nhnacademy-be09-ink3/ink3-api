@@ -13,7 +13,7 @@ import shop.ink3.api.book.book.entity.BookStatus;
 public record BookUpdateRequest(
         @NotBlank @Size(max = 13) String isbn,
         @NotBlank String title,
-        @NotBlank String contents,
+        String contents,
         @NotBlank String description,
         @NotNull @PastOrPresent LocalDate publishedAt,
         @NotNull @PositiveOrZero Integer originalPrice,
@@ -22,7 +22,7 @@ public record BookUpdateRequest(
         @NotNull BookStatus status,
         Boolean isPackable,
         @NotBlank String thumbnailUrl,
-        @NotNull Long publisherId,
+        @NotNull String publisher,
 
         @NotEmpty(message = "카테고리는 최소 1개 이상이어야 합니다.")
         List<@NotNull Long> categoryIds,
