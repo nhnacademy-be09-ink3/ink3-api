@@ -40,6 +40,7 @@ import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
+import shop.ink3.api.coupon.store.service.CouponStoreService;
 
 
 @Transactional

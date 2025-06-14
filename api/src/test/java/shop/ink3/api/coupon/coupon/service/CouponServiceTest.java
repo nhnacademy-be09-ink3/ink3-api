@@ -1,5 +1,6 @@
 package shop.ink3.api.coupon.coupon.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -36,14 +37,13 @@ import shop.ink3.api.coupon.coupon.dto.CouponResponse.BookInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponResponse.CategoryInfo;
 import shop.ink3.api.coupon.coupon.dto.CouponUpdateRequest;
 import shop.ink3.api.coupon.coupon.entity.Coupon;
+import shop.ink3.api.coupon.coupon.exception.CouponInUseException;
 import shop.ink3.api.coupon.coupon.exception.CouponNotFoundException;
 import shop.ink3.api.coupon.coupon.repository.CouponRepository;
 import shop.ink3.api.coupon.coupon.service.Impl.CouponServiceImpl;
 import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
-import shop.ink3.api.coupon.store.entity.CouponStatus;
-import shop.ink3.api.coupon.store.entity.CouponStore;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
 import shop.ink3.api.coupon.store.service.CouponStoreService;
 
@@ -61,14 +61,12 @@ class CouponServiceTest {
     private BookRepository bookRepository;
     @Mock
     private CategoryRepository categoryRepository;
-
+    @Mock
+    private CouponStoreService couponStoreService;
     @Mock
     private CouponStoreRepository couponStoreRepository;
-
     @InjectMocks
     private CouponServiceImpl couponService;
-    @InjectMocks
-    private CouponStoreService couponStoreService;
     @Test
     void createCoupon_success_withoutAssociations() {
         LocalDateTime now = LocalDateTime.now();
@@ -505,54 +503,32 @@ class CouponServiceTest {
                 .disableCouponStoresByCouponId(anyLong());
     }
 
-
     @Test
-    @DisplayName("disableCouponStoresByCouponId — 조회된 각 Store의 상태를 업데이트하고 저장")
-    void disableCouponStoresByCouponId_callsUpdateOnEachStore() {
+    @DisplayName("deleteCouponById: when no stores issued, should delete coupon")
+    void deleteCouponById_whenNotIssued_delegatesToRepository() {
         // given
-        Long couponId = 10L;
-
-        // READY 상태의 CouponStore 3개를 spy로 준비
-        CouponStore store1 = spy(CouponStore.builder()
-                .id(1L)
-                .status(CouponStatus.READY)
-                .build());
-        CouponStore store2 = spy(CouponStore.builder()
-                .id(2L)
-                .status(CouponStatus.READY)
-                .build());
-        CouponStore store3 = spy(CouponStore.builder()
-                .id(3L)
-                .status(CouponStatus.READY)
-                .build());
-        List<CouponStore> stores = List.of(store1, store2, store3);
-
-        // findAllBy... 리포지토리 stub
-        when(couponStoreRepository.findAllByCouponIdAndStatus(couponId, CouponStatus.READY))
-                .thenReturn(stores);
-        // saveAll은 단순히 인자를 그대로 리턴하도록
-        when(couponStoreRepository.saveAll(anyList()))
-                .thenAnswer(inv -> inv.getArgument(0));
+        long couponId = 42L;
+        when(couponStoreRepository.existsByCouponId(couponId)).thenReturn(false);
 
         // when
-        couponStoreService.disableCouponStoresByCouponId(couponId);
+        couponService.deleteCouponById(couponId);
 
         // then
-        // 1) 각 스토어에 대해 update(DISABLED, null)이 한 번씩 호출되었는지
-        stores.forEach(store ->
-                verify(store, times(1))
-                        .update(eq(CouponStatus.DISABLED), isNull())
-        );
-
-        // 2) 변경된 리스트가 한 번만 저장되었는지
-        verify(couponStoreRepository, times(1)).saveAll(stores);
+        verify(couponRepository, times(1)).deleteById(couponId);
     }
 
-
-
     @Test
-    void deleteCouponById_delegatesToRepository() {
-        couponService.deleteCouponById(100L);
-        verify(couponRepository).deleteById(100L);
+    @DisplayName("deleteCouponById: when stores already issued, should throw and not delete")
+    void deleteCouponById_whenIssued_throwsAndDoesNotDelete() {
+        // given
+        long couponId = 99L;
+        when(couponStoreRepository.existsByCouponId(couponId)).thenReturn(true);
+
+        // when / then
+        assertThatThrownBy(() -> couponService.deleteCouponById(couponId))
+                .isInstanceOf(CouponInUseException.class)
+                .hasMessageContaining("이미 사용자에게 발급된 쿠폰");
+
+        verify(couponRepository, never()).deleteById(anyLong());
     }
 }
