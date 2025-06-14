@@ -72,7 +72,7 @@ class CouponServiceTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expires = now.plusDays(5);
         CouponCreateRequest req = new CouponCreateRequest(
-                1L, "test", now, expires,
+                1L, "test", now, expires, true,
                 List.of(), List.of()
         );
 
@@ -109,7 +109,7 @@ class CouponServiceTest {
         CouponCreateRequest req = new CouponCreateRequest(
                 99L, "no-policy",
                 LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(1), true,
                 List.of(), List.of()
         );
 

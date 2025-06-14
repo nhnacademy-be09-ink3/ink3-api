@@ -46,12 +46,13 @@ public class Coupon {
 
     private LocalDateTime issuableFrom;
 
+    private boolean isActive;
+
     @Setter
     private LocalDateTime expiresAt;
 
     private LocalDateTime createdAt;
 
-    private boolean isActive;
 
     @Builder.Default
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)

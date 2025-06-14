@@ -55,7 +55,7 @@ public class CouponControllerTest {
     void create() throws Exception {
         // given
         CouponCreateRequest req = new CouponCreateRequest(
-                1L, "test",now, expires,
+                1L, "test",now, expires, true,
                 Collections.emptyList(),
                 Collections.emptyList()
         );
@@ -68,6 +68,7 @@ public class CouponControllerTest {
                 0,
                 now,
                 expires,
+                true,
                 now,
                 Collections.emptyList(),
                 Collections.emptyList()
@@ -104,7 +105,7 @@ public class CouponControllerTest {
     void createBooksAndCategories() throws Exception {
         // given
         CouponCreateRequest req = new CouponCreateRequest(
-                1L, "test-coupon", now, expires,
+                1L, "test-coupon", now, expires, true,
                 List.of(100L),
                 List.of(200L)
         );
@@ -119,6 +120,7 @@ public class CouponControllerTest {
                 0,
                 now,
                 expires,
+                true,
                 now,
                 List.of(bi),
                 List.of(ci)
@@ -162,6 +164,7 @@ public class CouponControllerTest {
                 0,
                 now,
                 expires,
+                true,
                 now,
                 Collections.emptyList(),
                 Collections.emptyList()
@@ -188,11 +191,11 @@ public class CouponControllerTest {
     void getAll_success_withPageable() throws Exception {
         // given
         CouponResponse c1 = new CouponResponse(
-                1L, "coup1", 10L, "P1", 10, 0, now, expires, now,
+                1L, "coup1", 10L, "P1", 10, 0, now, expires, true, now,
                 Collections.emptyList(), Collections.emptyList()
         );
         CouponResponse c2 = new CouponResponse(
-                2L, "coup2", 20L, "P2", 10, 0, now, expires, now,
+                2L, "coup2", 20L, "P2", 10, 0, now, expires, true, now,
                 Collections.emptyList(), Collections.emptyList()
         );
         PageRequest pg = PageRequest.of(0, 2);
@@ -226,7 +229,7 @@ public class CouponControllerTest {
         CategoryInfo ci = new CategoryInfo(22L, 200L, "CatName", "CATEGORY");
         CouponResponse resp = new CouponResponse(
                 couponId, "updated-name", 30L, "P30", 10, 0,
-                now, expires.plusDays(2), now,
+                now, expires.plusDays(2), true, now,
                 List.of(bi), List.of(ci)
         );
         when(couponService.updateCoupon(eq(couponId), any(CouponUpdateRequest.class)))
@@ -268,7 +271,7 @@ public class CouponControllerTest {
         BookInfo bi = new BookInfo(11L, 100L, "BookTitle", "BOOK");
         CouponResponse cr = new CouponResponse(
                 9L, "from-book", 40L, "PB", 10, 0,
-                now, expires, now,
+                now, expires, true, now,
                 List.of(bi), Collections.emptyList()
         );
         PageRequest pg = PageRequest.of(0, 2);
@@ -297,7 +300,7 @@ public class CouponControllerTest {
         CategoryInfo ci = new CategoryInfo(22L, 200L, "CatName", "CATEGORY");
         CouponResponse cr = new CouponResponse(
                 15L, "from-cat", 50L, "PC", 10, 0,
-                now, expires, now,
+                now, expires, true, now,
                 Collections.emptyList(), List.of(ci)
         );
         PageRequest pg = PageRequest.of(0, 2);
@@ -337,7 +340,8 @@ public class CouponControllerTest {
                 15,                          // discountRate
                 0,                           // discountValue
                 now,                         // issuableFrom
-                expires,                     // expiresAt
+                expires,
+                true,
                 now,                         // createdAt
                 Collections.emptyList(),     // books
                 List.of(ci)                  // categories
