@@ -15,8 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.ink3.api.book.book.entity.Book;
 import shop.ink3.api.book.book.repository.BookRepository;
+import shop.ink3.api.book.bookCategory.repository.BookCategoryRepository;
 import shop.ink3.api.book.category.entity.Category;
+import shop.ink3.api.book.category.exception.CategoryNotFoundException;
 import shop.ink3.api.book.category.repository.CategoryRepository;
+import shop.ink3.api.book.category.service.CategoryService;
 import shop.ink3.api.common.dto.PageResponse;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCoupon;
 import shop.ink3.api.coupon.bookCoupon.entity.BookCouponRepository;
@@ -37,7 +40,6 @@ import shop.ink3.api.coupon.policy.entity.CouponPolicy;
 import shop.ink3.api.coupon.policy.exception.PolicyNotFoundException;
 import shop.ink3.api.coupon.policy.repository.PolicyRepository;
 import shop.ink3.api.coupon.store.repository.CouponStoreRepository;
-import shop.ink3.api.coupon.store.service.CouponStoreService;
 
 
 @Transactional
@@ -52,6 +54,8 @@ public class CouponServiceImpl implements CouponService {
     private final BookCouponRepository bookCouponRepository;
     private final CategoryCouponRepository categoryCouponRepository;
     private final CouponStoreRepository couponStoreRepository;
+    private final BookCategoryRepository bookCategoryRepository;
+    private final CategoryService categoryService;
     private final CouponStoreService couponStoreService;
 
 
@@ -64,7 +68,8 @@ public class CouponServiceImpl implements CouponService {
 
         Coupon coupon = Coupon.builder()
                 .name(req.name())
-                .couponPolicy(policyRepository.findById(req.policyId()).orElseThrow(()->new PolicyNotFoundException("없는 정책입니다.")))
+                .couponPolicy(policyRepository.findById(req.policyId())
+                        .orElseThrow(() -> new PolicyNotFoundException("없는 정책입니다.")))
                 .issuableFrom(req.issuableFrom())
                 .expiresAt(req.expiresAt())
                 .createdAt(LocalDateTime.now())
@@ -75,7 +80,7 @@ public class CouponServiceImpl implements CouponService {
             List<Book> books = bookRepository.findAllById(req.bookIdList());
             if (books.size() != req.bookIdList().size()) {
                 log.info("넘어온 bookIdList = {}", req.bookIdList());
-                log.info("Book: {}",books);
+                log.info("Book: {}", books);
                 throw new IllegalArgumentException("존재하지 않는 book ID가 포함되어 있습니다.");
             }
             coupon.addBookCoupon(books);
@@ -98,6 +103,12 @@ public class CouponServiceImpl implements CouponService {
                 .toList();
 
         return CouponResponse.from(coupon, books, categories);
+    }
+
+    private List<CouponResponse> getCouponResponses(List<Coupon> coupons) {
+        return coupons.stream()
+                .map(this::getCouponResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -157,6 +168,7 @@ public class CouponServiceImpl implements CouponService {
                 .filter(bc -> bc.getCoupon().getExpiresAt().isAfter(now))
                 .toList();
 
+        // 3) 유효 쿠폰이 하나도 없으면 예외
         if (validList.isEmpty()) {
             throw new CouponNotFoundException(bookId + " 북 쿠폰이 존재하지 않습니다.");
         }
@@ -256,19 +268,11 @@ public class CouponServiceImpl implements CouponService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found: " + bookId));
 
-        // 2) 직접 매핑된 카테고리 ID 수집
-        List<Long> directCategoryIds = book.getBookCategories().stream()
-                .map(bc -> bc.getCategory().getId())
-                .toList();
+        Set<Long> allCategoryIds = new HashSet<>();
 
-        // 3) 조상 카테고리 ID 포함
-        Set<Long> allCategoryIds = new HashSet<>(directCategoryIds);
-        for (Long catId : directCategoryIds) {
-            List<Category> ancestors = categoryRepository.findAllAncestors(catId);
-            for (Category parent : ancestors) {
-                allCategoryIds.add(parent.getId());
-            }
-        }
+        bookCategoryRepository.findAllByBookId(book.getId()).forEach(bc ->
+                categoryService.getAllAncestors(bc.getId()).forEach(c -> allCategoryIds.add(c.id()))
+        );
 
         // 4) 부모 카테고리 기준 CategoryCoupon 엔티티 페이징 조회 (fetch join)
         List<CategoryCoupon> page = categoryCouponRepository
